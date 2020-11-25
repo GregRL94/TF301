@@ -15,7 +15,7 @@ from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QGraphicsView
 
-from library import MainClock, GameScene, Battleship, Target, InGameData
+from library import MainClock, GameScene, Battleship, Target, InGameData, MapGenerator
 
 
 class Ui_TSKF301MainWindow(object):
@@ -79,12 +79,13 @@ class Ui_TSKF301MainWindow(object):
         self.actionStart_Pause_Game.setShortcut(_translate("TSKF301MainWindow", "Space"))
 
     def newGame(self):
-        self.graphicsScene.setSceneRect(0, 0, 17500, 17500)
+        self.graphicsScene.setSceneRect(0, 0, 18000, 18000)
         self.graphicsView.fitInView(QtCore.QRectF(0, 0,
                                                   self.graphicsScene.width(),
                                                   self.graphicsScene.height()),
                                     Qt.KeepAspectRatio)
-        self.graphicsScene.dispGrid(500)
+        self.graphicsScene.dispGrid(1000)
+        self.mapGen = MapGenerator.MapGenerator(18000, 18000, 1000, 25, 1, 1, 1)
         self.gameState = False
 
         self.rComs = InGameData.RadioCommunications(self.mainClock,
