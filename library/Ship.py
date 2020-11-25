@@ -5,7 +5,7 @@
     Author: Grégory LARGANGE
     Date created: 09/10/2020
     Last modified by: Grégory LARGANGE
-    Date last modified: 14/10/2020
+    Date last modified: 25/11/2020
     Python version: 3.8.1
 '''
 
@@ -97,7 +97,7 @@ class Ship(QGraphicsRectItem):
         self.next_point_print = 0  # TO DELETE ONLY FOR VISUALISATION
 
         self.speed_user_override = None
-        self.default_speed = "AHEAD_FULL"
+        self.default_speed = "FASt"
         self.speed_options = {
             "AHEAD_FULL": 0,
             "FAST": 0,
