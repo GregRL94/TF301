@@ -97,7 +97,7 @@ class Ship(QGraphicsRectItem):
         self.next_point_print = 0  # TO DELETE ONLY FOR VISUALISATION
 
         self.speed_user_override = None
-        self.default_speed = "FASt"
+        self.default_speed = "FAST"
         self.speed_options = {
             "AHEAD_FULL": 0,
             "FAST": 0,
