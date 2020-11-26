@@ -103,13 +103,13 @@ class Ui_TSKF301MainWindow(object):
         self.mapGen.generateMap()
         self.gameState = False
 
-        # self.rComs = InGameData.RadioCommunications(self.mainClock,
-        #                                             self.graphicsScene)
+        self.rComs = InGameData.RadioCommunications(self.mainClock,
+                                                    self.graphicsScene)
 
-        # ship1 = Battleship.Battleship(self.mainClock, self.graphicsScene,
-        #                               QtCore.QPointF(0, 0), 1, 1, 1, 0)
-        # ship1.setTag("ALLY")
-        # self.graphicsScene.addShip(ship1)
+        ship1 = Battleship.Battleship(self.mainClock, self.graphicsScene,
+                                      QtCore.QPointF(0, 0), 1, 1, 1, 0)
+        ship1.setTag("ALLY")
+        self.graphicsScene.addShip(ship1)
 
         # ship2 = Battleship.Battleship(self.mainClock, self.graphicsScene,
         #                               QtCore.QPointF(10000, 15000), 1, 1, 1, 0)
@@ -121,7 +121,7 @@ class Ui_TSKF301MainWindow(object):
         # ship3.setTag("ENNEMY")
         # self.graphicsScene.addShip(ship3)
 
-        # self.rComs.updateShipLists()
+        self.rComs.updateShipLists()
 
     def start_Pause_Game(self):
         if self.gameState:
