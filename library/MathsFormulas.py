@@ -45,6 +45,55 @@ class Geometrics():
         diff = diff1 if abs(diff1) < abs(diff2) else diff2
         return diff
 
+    def checkSegmentsIntersect(self, segmentAB, segmentCD):
+        XA = segmentAB[0].x()
+        YA = segmentAB[0].y()
+        XB = segmentAB[1].x()
+        YB = segmentAB[1].y()
+
+        XC = segmentCD[0].x()
+        YC = segmentCD[0].y()
+        XD = segmentCD[1].x()
+        YD = segmentCD[1].y()
+
+        IintX = [max(min(XA, XB), min(XC, XD)),
+                 min(max(XA, XB), max(XC, XD))]
+
+        if max(XA, XB) < min(XC, XD):
+            return False
+
+        if ((XA - XB) == 0) | ((XC - XD) == 0):
+            if (XA - XB) == 0:
+                if max(YC, YD) < min(YA, YB):
+                    return False
+                else:
+                    return True
+            else:
+                if max(YA, YB) < min(YC, YD):
+                    return False
+                else:
+                    return True
+
+        # Following calculations based on line equation Y = AX + B
+        AsegAB = (YA - YB) / (XA - XB)
+        BsegAB = YB - AsegAB * XB
+
+        AsegCD = (YC - YD) / (XC - XD)
+        BsegCD = YD - AsegCD * XD
+
+        # If both segment have same coef A then they are parallel
+        if (AsegAB == AsegCD):
+            return False
+
+        # Following calculation based on fact that if I is intersection point
+        # then YI = AsegAB * Xi + BsegAB = AsegCD * Xi + BsegCD
+        XI = (BsegCD - BsegAB) / (AsegAB - AsegCD)
+
+        if (XI >= IintX[0]) & (XI <= IintX[1]):
+            return True
+        else:
+            return False
+
 
 class Cinematics():
 

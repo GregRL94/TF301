@@ -5,7 +5,7 @@
     Author: Grégory LARGANGE
     Date created: 07/10/2020
     Last modified by: Grégory LARGANGE
-    Date last modified: 26/11/2020
+    Date last modified: 27/11/2020
     Python version: 3.8.1
 '''
 
@@ -145,4 +145,3 @@ if __name__ == "__main__":
     ui.setupUi(TSKF301MainWindow)
     TSKF301MainWindow.show()
     sys.exit(app.exec_())
-

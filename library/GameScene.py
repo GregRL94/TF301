@@ -18,7 +18,7 @@ from library import MathsFormulas
 class GameScene(QGraphicsScene):
 
     nextShipID = 0
-    islandCount = 0
+    nextIslandID = 0
     shipList = {}
     islandList = []
 
@@ -61,6 +61,14 @@ class GameScene(QGraphicsScene):
         self.shipList[thisShipId] = shipObject
         self.nextShipID += 1
         self.addItem(shipObject)
+
+    def addIsland(self, islandObject):
+        thisIslandId = self.nextIslandID
+        islandObject.setData(0, thisIslandId)
+        islandObject.setData(1, "ISLAND")
+        self.islandList.append(islandObject)
+        self.nextIslandID += 1
+        self.addItem(islandObject)
 
     def destroyObject(self, _object):
         self.removeItem(_object)
