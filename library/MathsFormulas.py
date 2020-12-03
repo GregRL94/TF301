@@ -50,6 +50,8 @@ class Geometrics():
         YA = segmentAB[0].y()
         XB = segmentAB[1].x()
         YB = segmentAB[1].y()
+        print("SEGMENT AB:","A" + "(" + str(XA) + ", " + str(YA) + ")",
+              "B" + "(" + str(XB) + ", " + str(YB) + ")")
 
         XC = segmentCD[0].x()
         YC = segmentCD[0].y()
@@ -60,6 +62,7 @@ class Geometrics():
                  min(max(XA, XB), max(XC, XD))]
 
         if max(XA, XB) < min(XC, XD):
+            print("No common intervals on X. No Intersection possible")
             return False
 
         if ((XA - XB) == 0) | ((XC - XD) == 0):

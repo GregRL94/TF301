@@ -33,6 +33,6 @@ class Island(QGraphicsPolygonItem):
 
     def paint(self, painter, option, widget=None):
         # Always draw the polygon core polygon
-        painter.setBrush(QBrush(self.colorIsland))
+        painter.setBrush(QBrush(self.colorInner))
         painter.setPen(QPen(self.colorBorder, self.thickness, Qt.SolidLine))
         painter.drawPolygon(self.polygon())

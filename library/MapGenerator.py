@@ -5,15 +5,15 @@
     Author: Grégory LARGANGE
     Date created: 25/11/2020
     Last modified by: Grégory LARGANGE
-    Date last modified: 27/11/2020
+    Date last modified: 03/12/2020
     Python version: 3.8.1
 '''
 
 import random
 
 from PyQt5.QtCore import QPoint
-from PyQt5.QtGui import QPolygon
-from library import MathsFormulas, Island
+from PyQt5.QtGui import QPolygonF
+from library import MathsFormulas
 
 
 class MapGenerator():
@@ -41,10 +41,12 @@ class MapGenerator():
         self.minPoints = 4
         self.maxPoints = 10
 
+        self.polygonsList = []
+
         c = 0
-        for i in range(int((self.mapW / self.mapS) + 1)):
+        for i in range(int((self.mapW / self.mapS))):
             self.gameMap.append([])
-            for j in range(int((self.mapH / self. mapS) + 1)):
+            for j in range(int((self.mapH / self. mapS))):
                 self.gameMap[c].append(0)
             c += 1
 
@@ -70,6 +72,7 @@ class MapGenerator():
 
         self.curO = 0
         self.nObstacles = 0
+        self.polygonsList.clear()
 
     def checkAvailableSpace(self, coordList):
         x = coordList[0]
@@ -133,37 +136,42 @@ class MapGenerator():
         y = ObsAsList[1]
         w = ObsAsList[2]
         h = ObsAsList[3]
-        poly = QPolygon()
+        poly = QPolygonF()
 
         for i in range(x, x + w + 1):
             for j in range(y, y + h + 1):
                 self.gameMap[i][j] = 1
 
-        # The randomized number of points the polygon of the obstacle will be made of.
-        nPoints = random.randint(self.minPoints, self.maxPoints)
-        c = -1
-        # Construction of the polygon
-        for n in range(nPoints):
-            c += 1
-            point = self.randomPoint(x, y, w, h)
-            poly<<point
-            if c > 2:
-                thisSegment = [poly.at(c - 1), poly.at(c)]
-                segments  = []
-                for p in range(c - 2):
-                    q = p + 1
-                    if q > poly.count() - 1:
-                        break
-                    segments.append([poly.at(p), poly.at(q)])
-                for segment in segments:
-                    intersect = self.geometrics.checkSegmentsIntersect(thisSegment, segment)
-                    if intersect is True:
-                        point = self.randomPoint(x, y, w, h)
-                        poly.replace(c, point)
+        polyTL = QPoint(y * 1000, x * 1000)
+        polyBL = QPoint(y * 1000, (x + w + 1) * 1000)
+        polyBR = QPoint((y + h + 1) * 1000, (x + w + 1) * 1000)
+        polyTR = QPoint((y + h + 1) * 1000, x * 1000)
 
-        for point in poly:
-            print(point)
-        print("")
+        poly<<polyTL<<polyBL<<polyBR<<polyTR
+
+        # The randomized number of points the polygon of the obstacle will be made of.
+        #nPoints = random.randint(self.minPoints, self.maxPoints)
+        #c = -1
+        # Construction of the polygon
+        # for n in range(nPoints):
+        #     c += 1
+        #     point = self.randomPoint(x, y, w, h)
+        #     poly<<point
+        #     if c > 2:
+        #         thisSegment = [poly.at(c - 1), poly.at(c)]
+        #         segments  = []
+        #         for p in range(c - 2):
+        #             q = p + 1
+        #             if q > poly.count() - 1:
+        #                 break
+        #             segments.append([poly.at(p), poly.at(q)])
+        #         for segment in segments:
+        #             intersect = self.geometrics.checkSegmentsIntersect(thisSegment, segment)
+        #             if intersect is True:
+        #                 point = self.randomPoint(x, y, w, h)
+        #                 poly.replace(c, point)
+
+        self.polygonsList.append(poly)
 
         oA = w * h
         oP = oA / self.mapA
@@ -175,10 +183,10 @@ class MapGenerator():
         safeCounter = 0
 
         while self.curO < self.maxO:
-            curO = self.randomObstacle()
-            okO = self.checkAvailableSpace(curO)
-            if okO is not None:
-                self.generateObstacle(okO)
+            curObs = self.randomObstacle()
+            okObs = self.checkAvailableSpace(curObs)
+            if okObs is not None:
+                self.generateObstacle(okObs)
                 self.nObstacles += 1
             safeCounter += 1
             if safeCounter > self.emergencyBreak:
@@ -189,3 +197,5 @@ class MapGenerator():
         for element in self.gameMap:
             print(element)
         print("###############################")
+
+        return self.polygonsList
