@@ -5,7 +5,7 @@
     Author: Grégory LARGANGE
     Date created: 07/10/2020
     Last modified by: Grégory LARGANGE
-    Date last modified: 26/11/2020
+    Date last modified: 27/11/2020
     Python version: 3.8.1
 '''
 
@@ -15,7 +15,7 @@ from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QGraphicsView
 
-from library import MainClock, GameScene, Battleship, Target, InGameData, MapGenerator
+from library import MainClock, GameScene, Battleship, InGameData, MapGenerator
 
 
 class Ui_TSKF301MainWindow(object):
@@ -85,12 +85,8 @@ class Ui_TSKF301MainWindow(object):
         self.actionStart_Pause_Game.setText(_translate("TSKF301MainWindow", "Start Game"))
         self.actionStart_Pause_Game.setShortcut(_translate("TSKF301MainWindow", "Space"))
 
-    def newGameMap(self):
-        self.mapGen.resetMap()
-        self.mapGen.generateMap()
-
     def newGame(self):
-        self.graphicsScene.setSceneRect(0, 0, 19000, 19000)
+        self.graphicsScene.setSceneRect(0, 0, 20000, 20000)
         self.graphicsView.fitInView(QtCore.QRectF(0, 0,
                                                   self.graphicsScene.width(),
                                                   self.graphicsScene.height()),
@@ -99,8 +95,8 @@ class Ui_TSKF301MainWindow(object):
         self.mapGen = MapGenerator.MapGenerator(int(self.graphicsScene.width() / 1000),
                                                 int(self.graphicsScene.height() / 1000),
                                                 1)
-        self.mapGen.setMapParameters(0.15, 2, 5, 2, 5, 2)
-        self.mapGen.generateMap()
+        self.mapGen.setMapParameters(0.1, 2, 5, 2, 5, 2)
+        self.genRandomMap()
         self.gameState = False
 
         self.rComs = InGameData.RadioCommunications(self.mainClock,
@@ -122,6 +118,15 @@ class Ui_TSKF301MainWindow(object):
         # self.graphicsScene.addShip(ship3)
 
         self.rComs.updateShipLists()
+
+    def newGameMap(self):
+        self.graphicsScene.clearMap()
+        self.mapGen.resetMap()
+        self.genRandomMap()
+
+    def genRandomMap(self):
+        genObs = self.mapGen.generateMap()
+        self.graphicsScene.displayMap(genObs)
 
     def start_Pause_Game(self):
         if self.gameState:
@@ -145,4 +150,3 @@ if __name__ == "__main__":
     ui.setupUi(TSKF301MainWindow)
     TSKF301MainWindow.show()
     sys.exit(app.exec_())
-

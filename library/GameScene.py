@@ -12,19 +12,32 @@
 from PyQt5.QtGui import QPen, QBrush, QColor
 from PyQt5.QtWidgets import QGraphicsScene
 
-from library import MathsFormulas
+from library import MathsFormulas, Island
 
 
 class GameScene(QGraphicsScene):
 
     nextShipID = 0
-    islandCount = 0
-    shipList = {}
-    islandList = []
+    nextIslandID = 0
+    currentItem = None
 
     def __init__(self, parent=None):
         super(GameScene, self).__init__(parent)
         self.geometrics = MathsFormulas.Geometrics()
+
+        self.shipList = {}
+        self.islandsList = []
+
+    def displayMap(self, obstaclesList):
+        for obstacle in obstaclesList:
+            self.currentItem = Island.Island(self, obstacle)
+            thisIslandId = self.nextIslandID
+            self.currentItem.setData(0, thisIslandId)
+            self.currentItem.setData(1, "ISLAND")
+            self.nextIslandID += 1
+            self.addItem(self.currentItem)
+            self.islandsList.append(self.currentItem)
+            self.currentItem = None
 
     def shipsInDetectionRange(self, ship0ID, ship0Tag, ship0CenterSPos, ship0ScanRange):
         shipsInDRange = []
@@ -47,7 +60,7 @@ class GameScene(QGraphicsScene):
         for i in range(0, int(self.width() + steps), steps):
             self.addLine(i, 0, i, self.height(), QPen(QColor("black"), 4))
 
-        self.addEllipse(4750, 4750, 500, 500, QPen(QColor("darkRed"), 12))  # QBrush(QColor("red"))
+        self.addEllipse(4750, 4750, 500, 500, QPen(QColor("darkRed"), 12))
         self.addEllipse(9750, 2250, 500, 500, QPen(QColor("darkRed"), 12))
         self.addEllipse(12250, 12250, 500, 500, QPen(QColor("darkRed"), 12))
 
@@ -61,6 +74,13 @@ class GameScene(QGraphicsScene):
         self.shipList[thisShipId] = shipObject
         self.nextShipID += 1
         self.addItem(shipObject)
+
+    def clearMap(self):
+        for item in self.islandsList:
+            self.removeItem(item)
+        self.nextIslandID = 0
+        self.islandsList.clear()
+        self.update()
 
     def destroyObject(self, _object):
         self.removeItem(_object)

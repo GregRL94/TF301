@@ -5,13 +5,13 @@
     Author: Grégory LARGANGE
     Date created: 09/10/2020
     Last modified by: Grégory LARGANGE
-    Date last modified: 25/11/2020
+    Date last modified: 03/12/2020
     Python version: 3.8.1
 '''
 
 import math
 
-from PyQt5.QtCore import Qt, QRectF, QPointF
+from PyQt5.QtCore import QRectF, QPointF
 from PyQt5.QtGui import QColor, QPen, QBrush
 from PyQt5.QtWidgets import QGraphicsRectItem
 
