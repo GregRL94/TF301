@@ -12,7 +12,8 @@
 import sys
 
 from PyQt5 import QtCore, QtWidgets
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QPointF
+from PyQt5.QtGui import QPen, QBrush, QColor
 from PyQt5.QtWidgets import QGraphicsView
 
 from library import MainClock, GameScene, Battleship, InGameData, Mapping
@@ -61,9 +62,12 @@ class Ui_TSKF301MainWindow(object):
         self.actionNew_GameMap.setObjectName("actionNew_GameMap")
         self.actionStart_Pause_Game = QtWidgets.QAction(TSKF301MainWindow)
         self.actionStart_Pause_Game.setObjectName("actionStart_Pause_Game")
+        self.actionAstar = QtWidgets.QAction(TSKF301MainWindow)
+        self.actionAstar.setObjectName("actionAstar")
         self.menuGame.addAction(self.actionNew_Game)
         self.menuGame.addAction(self.actionNew_GameMap)
         self.menuGame.addAction(self.actionStart_Pause_Game)
+        self.menuGame.addAction(self.actionAstar)
         self.menubar.addAction(self.menuGame.menuAction())
 
         self.retranslateUi(TSKF301MainWindow)
@@ -72,6 +76,7 @@ class Ui_TSKF301MainWindow(object):
         self.actionNew_Game.triggered.connect(self.newGame)
         self.actionNew_GameMap.triggered.connect(self.newGameMap)
         self.actionStart_Pause_Game.triggered.connect(self.start_Pause_Game)
+        self.actionAstar.triggered.connect(self.launchAstar)
 
     def retranslateUi(self, TSKF301MainWindow):
         _translate = QtCore.QCoreApplication.translate
@@ -84,6 +89,8 @@ class Ui_TSKF301MainWindow(object):
         self.actionNew_GameMap.setShortcut(_translate("TSKF301MainWindow", "M"))
         self.actionStart_Pause_Game.setText(_translate("TSKF301MainWindow", "Start Game"))
         self.actionStart_Pause_Game.setShortcut(_translate("TSKF301MainWindow", "Space"))
+        self.actionAstar.setText(_translate("TSKF301MainWindow", "PathFinder"))
+        self.actionAstar.setShortcut(_translate("TSKF301MainWindow", "A"))
 
     def newGame(self):
         self.graphicsScene.setSceneRect(0, 0, 20000, 20000)
@@ -127,6 +134,13 @@ class Ui_TSKF301MainWindow(object):
     def genRandomMap(self):
         genObs = self.mapGen.generateMap()
         self.graphicsScene.displayMap(genObs)
+
+    def launchAstar(self):
+        aStar = Mapping.Astar(self.mapGen.gameMap)
+        nodesPath = aStar.findPath(QPointF(0, 0), QPointF(10000, 10000))
+        for node in nodesPath:
+            self.graphicsScene.addRect(node.retScenePos.x(), node.retScenePos.y(), 500, 500,
+                                       QPen(QColor("blue")), QBrush(QColor("blue")))
 
     def start_Pause_Game(self):
         if self.gameState:

@@ -198,6 +198,9 @@ class MapGenerator():
 
         return self.polygonsList
 
+    def getGrid(self):
+        return self.self.gameMap
+
 
 class Node():
 
@@ -206,19 +209,15 @@ class Node():
     traversible = True
     gCost = 0
     hCost = 0
+    fCost = 0
+    parent = None
 
     def __init__(self, iGrid, jGrid, traversible):
         self.iGrid = iGrid
         self.jGrid = jGrid
         self.traversible = traversible
 
-    def setGcost(self, gCostValue):
-        self.gCost = gCostValue
-
-    def setHcost(self, hCostValue):
-        self.hCost = hCostValue
-
-    def fCost(self):
+    def computeFCost(self):
         return self.gCost + self.hCost
 
     def retScenePos(self):
@@ -237,8 +236,14 @@ class Astar():
         for i in range(len(gameMap)):
             self.allNodes.append([])
             for j in range(len(gameMap[0])):
-                traversible = True if (gameMap[i][j] == 0) else False
-                self.allNodes[i].append(Node(i, j, traversible))
+                # traversible = True if (gameMap[i][j] == 0) else False
+                self.allNodes[i].append(0) if gameMap[i][j] == 0 else self.allNodes[i].append(1)   # Node(i, j, traversible)
+        for element in self.allNodes:
+            print(element)
+        # for element in self.allNodes:
+        #     for node in element:
+        #         a = 1 if node.traversible else 0
+        #         print(a, end = " ")
 
     def getNode(self, i, j):
         return self.allNodes[i][j]
@@ -268,10 +273,52 @@ class Astar():
 
         return neighbours
 
+    def distanceB2Nodes(self, nodeA, nodeB):
+        distJ = abs(nodeB.jGrid - nodeA.jGrid)  # distance on X
+        distI = abs(nodeB.iGrid - nodeA.iGrid)  # distance on Y
+
+        if distJ > distI:
+            return 14 * distI + 10 * (distJ - distI)
+        return 14 * distJ + 10 * (distI - distJ)
+
+    def retracePath(self, startNode, endNode):
+        path = []
+        currentNode = endNode
+
+        while currentNode != startNode:
+            path.append(currentNode)
+            currentNode = currentNode.parent
+
+        return path[::-1]
+
     def findPath(self, startPos, targetPos):
-        startNode = self.getNode(int(startPos.y() / 1000),
-                                 int(startPos.x() / 1000))
-        targetNode = self.getNode(int(targetPos.y() / 1000),
-                                  int(targetPos.x() / 1000))
+        startNode = self.getNode(int(startPos.y() / 1000), int(startPos.x() / 1000))
+        targetNode = self.getNode(int(targetPos.y() / 1000), int(targetPos.x() / 1000))
 
         self.openList.append(startNode)
+
+        while len(self.openList) > 0:
+            self.currentNode = self.openList[0]
+            for i in range(1, len(self.openList)):
+                if (self.openList[i].fCost < self.currentNode.fCost) |\
+                    ((self.openList[i].fCost == self.currentNode.fCost) &\
+                     (self.openList[i].hCost < self.currentNode.hCost)):
+                    self.currentNode = self.openList[i]
+
+            self.openList.remove(self.currentNode)
+            self.closedList.append(self.currentNode)
+
+            if self.currentNode == targetNode:
+                return self.retracePath(startNode, targetNode)
+            else:
+                for node in self.getNeighbours(self.currentNode):
+                    if (node.traversible is False) | (self.currentNode in self.closedList):
+                        continue
+
+                    newMoveCost = self.currentNode.gCost + self.distanceB2Nodes(self.currentNode, node)
+                    if (newMoveCost < node.gCost) | (node not in self.openList):
+                        node.gCost = newMoveCost
+                        node.hCost = self.distanceB2Nodes(node, targetNode)
+                        node.parent = self.currentNode
+                        if node not in self.openList:
+                            self.openList.append(node)
