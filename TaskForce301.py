@@ -15,7 +15,7 @@ from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QGraphicsView
 
-from library import MainClock, GameScene, Battleship, InGameData, MapGenerator
+from library import MainClock, GameScene, Battleship, InGameData, Mapping
 
 
 class Ui_TSKF301MainWindow(object):
@@ -92,9 +92,9 @@ class Ui_TSKF301MainWindow(object):
                                                   self.graphicsScene.height()),
                                     Qt.KeepAspectRatio)
         self.graphicsScene.dispGrid(1000)
-        self.mapGen = MapGenerator.MapGenerator(int(self.graphicsScene.width() / 1000),
-                                                int(self.graphicsScene.height() / 1000),
-                                                1)
+        self.mapGen = Mapping.MapGenerator(int(self.graphicsScene.width() / 1000),
+                                           int(self.graphicsScene.height() / 1000),
+                                           1)
         self.mapGen.setMapParameters(0.1, 2, 5, 2, 5, 2)
         self.genRandomMap()
         self.gameState = False
