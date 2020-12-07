@@ -137,10 +137,10 @@ class Ui_TSKF301MainWindow(object):
 
     def launchAstar(self):
         aStar = Mapping.Astar(self.mapGen.gameMap)
-        nodesPath = aStar.findPath(QPointF(0, 0), QPointF(10000, 10000))
+        nodesPath = aStar.findPath(QPointF(0, 0), QPointF(19000, 19000))
         for node in nodesPath:
-            self.graphicsScene.addRect(node.retScenePos.x(), node.retScenePos.y(), 500, 500,
-                                       QPen(QColor("blue")), QBrush(QColor("blue")))
+            self.graphicsScene.addRect(node.xPos, node.yPos, 1000, 1000,
+                                        QPen(QColor("blue")), QBrush(QColor("blue")))
 
     def start_Pause_Game(self):
         if self.gameState:

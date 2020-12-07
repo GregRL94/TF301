@@ -108,8 +108,8 @@ class MapGenerator():
     def randomObstacle(self):
         tlx = random.randint(0, len(self.gameMap) - 1 - self.minObsW)
         tly = random.randint(0, len(self.gameMap[0]) - 1 - self.minObsH)
-        w = random.randint(self.minObsW, self.maxObsW) - 1 # we account for the existing line x
-        h = random.randint(self.minObsH, self.maxObsH) - 1 # we account for the existing column y
+        w = random.randint(self.minObsW, self.maxObsW)
+        h = random.randint(self.minObsH, self.maxObsH)
 
         brx = tlx + w
         if brx > len(self.gameMap) - 1:
@@ -206,22 +206,22 @@ class Node():
 
     iGrid = 0
     jGrid = 0
+    xPos = 0
+    yPos = 0
     traversible = True
     gCost = 0
     hCost = 0
-    fCost = 0
     parent = None
 
     def __init__(self, iGrid, jGrid, traversible):
         self.iGrid = iGrid
         self.jGrid = jGrid
+        self.xPos = self.jGrid * 1000
+        self.yPos = self.iGrid * 1000
         self.traversible = traversible
 
-    def computeFCost(self):
-        return self.gCost + self.hCost
-
-    def retScenePos(self):
-        return QPointF(self.jGrid * 1000, self.iGrid * 1000)
+    def fCost(self):
+        return int(self.gCost + self.hCost)
 
 
 class Astar():
@@ -230,20 +230,15 @@ class Astar():
         self.allNodes = []
         self.openList = []
         self.closedList = []
+        self.finalPath = []
         self.currentNode = None
         self.currentNodeParent = None
 
         for i in range(len(gameMap)):
             self.allNodes.append([])
             for j in range(len(gameMap[0])):
-                # traversible = True if (gameMap[i][j] == 0) else False
-                self.allNodes[i].append(0) if gameMap[i][j] == 0 else self.allNodes[i].append(1)   # Node(i, j, traversible)
-        for element in self.allNodes:
-            print(element)
-        # for element in self.allNodes:
-        #     for node in element:
-        #         a = 1 if node.traversible else 0
-        #         print(a, end = " ")
+                traversible = True if (gameMap[i][j] == 0) else False
+                self.allNodes[i].append(Node(i, j, traversible))
 
     def getNode(self, i, j):
         return self.allNodes[i][j]
@@ -264,61 +259,117 @@ class Astar():
         if node.jGrid == (len(self.allNodes[0]) - 1):
             jMax = node.jGrid
 
+        print("Looking for the neighbours of node:", node.iGrid, node.jGrid)
+        print("Neighbours are in interval:", "(" + str(iMin) + "," + str(iMax) + ")", "on I",
+              "(" + str(jMin) + "," + str(jMax) + ")", "on J")
+
         for i in range(iMin, iMax + 1):
             for j in range(jMin, jMax + 1):
                 if (i == node.iGrid) & (j == node.jGrid):
+                    print("Hit the node position, skipping...")
                     continue
                 else:
+                    print("Adding neighbour:", "neigh" + "(" + str(i) + "," + str(j) + ")")
                     neighbours.append(self.allNodes[i][j])
-
+        for neighnode in neighbours:
+            print(neighnode.iGrid, neighnode.jGrid, neighnode.traversible)
+        print("")
         return neighbours
 
     def distanceB2Nodes(self, nodeA, nodeB):
-        distJ = abs(nodeB.jGrid - nodeA.jGrid)  # distance on X
-        distI = abs(nodeB.iGrid - nodeA.iGrid)  # distance on Y
+        distJ = int(abs(nodeB.jGrid - nodeA.jGrid))  # distance on X
+        distI = int(abs(nodeB.iGrid - nodeA.iGrid))  # distance on Y
 
         if distJ > distI:
-            return 14 * distI + 10 * (distJ - distI)
-        return 14 * distJ + 10 * (distI - distJ)
+            a = int(14 * distI + 10 * (distJ - distI))
+        else:
+            a = int(14 * distJ + 10 * (distI - distJ))
+        print("Distance between node" + "(" + str(nodeA.iGrid) + "," + str(nodeA.jGrid) + ")",
+              "and node" + "(" + str(nodeB.iGrid) + "," + str(nodeB.jGrid) + "):", a)
+        return a
 
     def retracePath(self, startNode, endNode):
-        path = []
+        print("Retracing path...")
         currentNode = endNode
 
         while currentNode != startNode:
-            path.append(currentNode)
+            self.finalPath.append(currentNode)
             currentNode = currentNode.parent
 
-        return path[::-1]
+        self.finalPath.reverse()
+        print("<<< FINAL PATH >>>")
+        for node in self.finalPath:
+            print(node.iGrid, node.jGrid)
+        print("<<<>>>")
 
     def findPath(self, startPos, targetPos):
         startNode = self.getNode(int(startPos.y() / 1000), int(startPos.x() / 1000))
         targetNode = self.getNode(int(targetPos.y() / 1000), int(targetPos.x() / 1000))
+        print("======== STARTING PATHFINDING ========")
+        print("Start node:", "node" + "(" + str(startNode.iGrid) + "," + str(startNode.jGrid) + ")")
+        print("Target node:", "node" + "(" + str(targetNode.iGrid) + "," + str(targetNode.jGrid) + ")")
+        print("...")
 
         self.openList.append(startNode)
+        print("Added start node to openList")
+        print("New openList length:", len(self.openList))
+        print("")
 
+        print("******* Pathfinding loop *******")
         while len(self.openList) > 0:
             self.currentNode = self.openList[0]
+            print("1st node of open list:", "node" + "(" + str(self.currentNode.iGrid) + "," + str(self.currentNode.jGrid) + ")")
+            print("Going through openList.", len(self.openList), "nodes in openList.")
             for i in range(1, len(self.openList)):
-                if (self.openList[i].fCost < self.currentNode.fCost) |\
-                    ((self.openList[i].fCost == self.currentNode.fCost) &\
+                print("Node", str(i + 1), "of", len(self.openList))
+                if (self.openList[i].fCost() < self.currentNode.fCost()) |\
+                    ((self.openList[i].fCost() == self.currentNode.fCost()) &\
                      (self.openList[i].hCost < self.currentNode.hCost)):
+                    print("Found closer node. Updating current node.")
                     self.currentNode = self.openList[i]
+            print("Finished going through openList.")
+            print("NODE" + "(" + str(self.currentNode.iGrid) + "," + str(self.currentNode.jGrid) + ")", "IS GOING TO BE EVALUATED.")
+            print("")
 
+            print("Removing evaluated", "node" + "(" + str(self.currentNode.iGrid) + "," + str(self.currentNode.jGrid) + ")", "from openList...")
             self.openList.remove(self.currentNode)
+            print("New openList length:", len(self.openList))
+
+            print("Adding evaluated", "node" + "(" + str(self.currentNode.iGrid) + "," + str(self.currentNode.jGrid) + ")", "to closedList...")
             self.closedList.append(self.currentNode)
+            print("New closedList length:", len(self.closedList))
+            print("")
 
             if self.currentNode == targetNode:
-                return self.retracePath(startNode, targetNode)
+                print("Reached target node!!!")
+                self.retracePath(startNode, targetNode)
+                return self.finalPath
             else:
-                for node in self.getNeighbours(self.currentNode):
-                    if (node.traversible is False) | (self.currentNode in self.closedList):
+                print("--- Neighbours evaluation loop ---")
+                neighboursList = self.getNeighbours(self.currentNode)
+                for node in neighboursList:
+                    if (node.traversible is False) | (node in self.closedList):
+                        stra = "Node" + "(" + str(node.iGrid) + "," + str(node.jGrid) + ") " + str(node.traversible) + " is skipped because not traversible."
+                        strb = "Node" + "(" + str(node.iGrid) + "," + str(node.jGrid) + ") " + str(node.traversible) + " is skipped because already in closedList."
+                        if node.traversible is False:
+                            print(stra)
+                        if node in self.closedList:
+                            print(strb)
                         continue
 
                     newMoveCost = self.currentNode.gCost + self.distanceB2Nodes(self.currentNode, node)
+                    print("New move cost for node" + "(" + str(node.iGrid) + "," + str(node.jGrid) + "):", newMoveCost)
                     if (newMoveCost < node.gCost) | (node not in self.openList):
+                        print("New move cost is lower or node is not in openList.")
+                        print("Computing new data for node" + "(" + str(node.iGrid) + "," + str(node.jGrid) + ")")
                         node.gCost = newMoveCost
                         node.hCost = self.distanceB2Nodes(node, targetNode)
                         node.parent = self.currentNode
+                        print("Node" + "(" + str(node.iGrid) + "," + str(node.jGrid) + ")", "parent:",
+                              "Node" + "(" + str(self.currentNode.iGrid) + "," + str(self.currentNode.jGrid) + ")")
                         if node not in self.openList:
+                            print("Node" + "(" + str(node.iGrid) + "," + str(node.jGrid) + ")" , node.traversible, "is added to openList.")
                             self.openList.append(node)
+                            print("New openList length:", len(self.openList))
+                print("-----------------------------------")
+                print("")
