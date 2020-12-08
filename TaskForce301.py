@@ -102,7 +102,7 @@ class Ui_TSKF301MainWindow(object):
         self.mapGen = Mapping.MapGenerator(int(self.graphicsScene.width() / 1000),
                                            int(self.graphicsScene.height() / 1000),
                                            1)
-        self.mapGen.setMapParameters(0.1, 2, 5, 2, 5, 2)
+        self.mapGen.setMapParameters(0.25, 2, 5, 2, 5, 2)
         self.genRandomMap()
         self.gameState = False
 
