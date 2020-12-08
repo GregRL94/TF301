@@ -258,7 +258,6 @@ class Astar():
             self.openList.remove(self.currentNode)
             self.closedList.append(self.currentNode)
 
-
             if self.currentNode == targetNode:
                 self.retracePath(startNode, targetNode)
                 return self.finalPath
@@ -275,3 +274,48 @@ class Astar():
                         node.parent = self.currentNode
                         if node not in self.openList:
                             self.openList.append(node)
+
+
+class HEAPItem():
+
+    def __init__(self):
+        self.heapIndex = 0
+        self.sFCost = 0
+
+    def compareTo(self, otherHEAPItem):
+        if otherHEAPItem.sFCost < self.sFCost:
+            return 1
+        elif otherHEAPItem.sFCost == self.sFCost:
+            return 0
+        else:
+            return -1
+
+
+class HEAP():
+
+    def __init__(self, maxHeapSize):
+        self.items = []
+        self.itemCount = 0
+
+    def addItem(self, _heapItem):
+        _heapItem.heapIndex = self.itemCount
+        self.items.append(_heapItem)
+        self.sortUp(_heapItem)
+        self.itemCount += 1
+
+    def sortUp(self, _heapItem):
+        parentIndex = int((_heapItem.heapIndex - 1 ) / 2)
+
+        while True:
+            parentItem = self.items[parentIndex]
+            if _heapItem.compareTo(parentItem) > 0:
+                self.swap(_heapItem, parentItem)
+            else:
+                break
+
+    def swap(self, _heapItemA, _heapItemB):
+        self.items[_heapItemA.heapIndex] = _heapItemB
+        self.items[_heapItemB.heapIndex] = _heapItemA
+        tmp_itemAIndex = _heapItemA.heapIndex
+        _heapItemA.heapIndex = _heapItemB.heapIndex
+        _heapItemB.heapIndex = tmp_itemAIndex
