@@ -5,15 +5,15 @@
     Author: Grégory LARGANGE
     Date created: 25/11/2020
     Last modified by: Grégory LARGANGE
-    Date last modified: 03/12/2020
+    Date last modified: 09/12/2020
     Python version: 3.8.1
 '''
 
-import random
+import random, time
 
 from PyQt5.QtCore import QPoint
 from PyQt5.QtGui import QPolygonF
-from library import MathsFormulas
+from library import MathsFormulas, HEAP
 
 
 class MapGenerator():
@@ -139,6 +139,7 @@ class MapGenerator():
         self.curO += oP
 
     def generateMap(self):
+        sTime = time.time()
         safeCounter = 0
 
         while self.curO < self.maxO:
@@ -150,16 +151,11 @@ class MapGenerator():
             safeCounter += 1
             if safeCounter > self.emergencyBreak:
                 break
-
-        print("Finished map generation. Map obstruction:", self.curO)
-        print("######## FINAL MAP ############")
-        for element in self.gameMap:
-            print(element)
-        print("###############################")
+        print("** GENERATED GAME MAP IN %s SECONDS **" % (time.time() - sTime))
         return self.polygonsList
 
 
-class Node():
+class Node(HEAP.HEAPItem):
 
     iGrid = 0
     jGrid = 0
@@ -171,6 +167,8 @@ class Node():
     parent = None
 
     def __init__(self, iGrid, jGrid, traversible):
+        super(Node, self).__init__()
+
         self.iGrid = iGrid
         self.jGrid = jGrid
         self.xPos = self.jGrid * 1000
@@ -179,6 +177,25 @@ class Node():
 
     def fCost(self):
         return int(self.gCost + self.hCost)
+
+    def clearCosts(self):
+        self.gCost = 0
+        self.hCost = 0
+
+    def compareTo(self, otherNode):
+        # If the current node has a lower Fcost than the node's Fcost it is compared to.
+        if self.fCost() < otherNode.fCost():
+            return 1
+        # If the current node has the same Fcost as the node's Fcost it is compared to.
+        elif self.fCost() == otherNode.fCost():
+            if self.hCost < otherNode.hCost:
+                return 1
+            else:
+                return -1
+            return 0
+        # If the current node has a higher Fcost than the node's Fcost it is compared to.
+        else:
+            return -1
 
 
 class Astar():
@@ -189,7 +206,6 @@ class Astar():
         self.closedList = []
         self.finalPath = []
         self.currentNode = None
-        self.currentNodeParent = None
 
         for i in range(len(gameMap)):
             self.allNodes.append([])
@@ -242,6 +258,7 @@ class Astar():
         self.finalPath.reverse()
 
     def findPath(self, startPos, targetPos):
+        sTime = time.time()
         startNode = self.getNode(int(startPos.y() / 1000), int(startPos.x() / 1000))
         targetNode = self.getNode(int(targetPos.y() / 1000), int(targetPos.x() / 1000))
 
@@ -260,6 +277,7 @@ class Astar():
 
             if self.currentNode == targetNode:
                 self.retracePath(startNode, targetNode)
+                print("***** FOUND PATH IN %s SECONDS *****" % (time.time() - sTime))
                 return self.finalPath
             else:
                 neighboursList = self.getNeighbours(self.currentNode)
@@ -274,48 +292,3 @@ class Astar():
                         node.parent = self.currentNode
                         if node not in self.openList:
                             self.openList.append(node)
-
-
-class HEAPItem():
-
-    def __init__(self):
-        self.heapIndex = 0
-        self.sFCost = 0
-
-    def compareTo(self, otherHEAPItem):
-        if otherHEAPItem.sFCost < self.sFCost:
-            return 1
-        elif otherHEAPItem.sFCost == self.sFCost:
-            return 0
-        else:
-            return -1
-
-
-class HEAP():
-
-    def __init__(self, maxHeapSize):
-        self.items = []
-        self.itemCount = 0
-
-    def addItem(self, _heapItem):
-        _heapItem.heapIndex = self.itemCount
-        self.items.append(_heapItem)
-        self.sortUp(_heapItem)
-        self.itemCount += 1
-
-    def sortUp(self, _heapItem):
-        parentIndex = int((_heapItem.heapIndex - 1 ) / 2)
-
-        while True:
-            parentItem = self.items[parentIndex]
-            if _heapItem.compareTo(parentItem) > 0:
-                self.swap(_heapItem, parentItem)
-            else:
-                break
-
-    def swap(self, _heapItemA, _heapItemB):
-        self.items[_heapItemA.heapIndex] = _heapItemB
-        self.items[_heapItemB.heapIndex] = _heapItemA
-        tmp_itemAIndex = _heapItemA.heapIndex
-        _heapItemA.heapIndex = _heapItemB.heapIndex
-        _heapItemB.heapIndex = tmp_itemAIndex
