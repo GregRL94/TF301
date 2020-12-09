@@ -15,21 +15,16 @@ class HEAPItem():
     def __init__(self):
         self.heapIndex = 0
 
-    def index(self):
-        return self.heapIndex
-
 
 class HEAP():
 
     def __init__(self):
         self.items = []
-        self.itemCount = 0
 
     def addItem(self, _heapItem):
-        _heapItem.heapIndex = self.itemCount
         self.items.append(_heapItem)
+        _heapItem.heapIndex = len(self.items) - 1
         self.sortUp(_heapItem)
-        self.itemCount += 1
 
     def updateItem(self, _heapItem):
         self.sortUp(_heapItem)
@@ -37,15 +32,15 @@ class HEAP():
     def contains(self, _heapItem):
         return self.items[_heapItem.heapIndex] == _heapItem
 
-    def count(self):
-        return self.itemCount
+    def size(self):
+        return len(self.items)
 
     def removeFirst(self):
         firstHeapItem = self.items[0]
         self.items[0] = self.items[-1]
         self.items[0].heapIndex = 0
-        del self.items[-1]
-        self.itemCount -= 1
+        if len(self.items) > 1:
+            del self.items[-1]
         self.sortDown(self.items[0])
         return firstHeapItem
 
@@ -68,14 +63,14 @@ class HEAP():
 
     def sortDown(self, _heapItem):
         while True:
-            childIndexLeft = _heapItem.heapIndex * 2 + 1
-            childIndexRight = _heapItem.heapIndex * 2 + 2
+            childIndexLeft = int(_heapItem.heapIndex * 2 + 1)
+            childIndexRight = int(_heapItem.heapIndex * 2 + 2)
             swapIndex = 0
 
-            if childIndexLeft < self.itemCount:
+            if childIndexLeft < len(self.items):
                 swapIndex = childIndexLeft
 
-                if childIndexRight < self.itemCount:
+                if childIndexRight < len(self.items):
                     if self.items[childIndexLeft].compareTo(self.items[childIndexRight]) < 0:
                         swapIndex = childIndexRight
                 if _heapItem.compareTo(self.items[swapIndex]) < 0:

@@ -5,7 +5,7 @@
     Author: Grégory LARGANGE
     Date created: 07/10/2020
     Last modified by: Grégory LARGANGE
-    Date last modified: 27/11/2020
+    Date last modified: 09/12/2020
     Python version: 3.8.1
 '''
 
@@ -93,7 +93,7 @@ class Ui_TSKF301MainWindow(object):
         self.actionAstar.setShortcut(_translate("TSKF301MainWindow", "A"))
 
     def newGame(self):
-        self.graphicsScene.setSceneRect(0, 0, 20000, 20000)
+        self.graphicsScene.setSceneRect(0, 0, 100000, 100000)
         self.graphicsView.fitInView(QtCore.QRectF(0, 0,
                                                   self.graphicsScene.width(),
                                                   self.graphicsScene.height()),
@@ -137,7 +137,7 @@ class Ui_TSKF301MainWindow(object):
 
     def launchAstar(self):
         aStar = Mapping.Astar(self.mapGen.gameMap)
-        nodesPath = aStar.findPath(QPointF(0, 0), QPointF(19000, 19000))
+        nodesPath = aStar.findPath(QPointF(0, 0), QPointF(99000, 99000))
         for node in nodesPath:
             self.graphicsScene.addRect(node.xPos, node.yPos, 1000, 1000,
                                         QPen(QColor("blue")), QBrush(QColor("blue")))

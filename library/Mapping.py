@@ -28,21 +28,19 @@ class MapGenerator():
 
         self.mapW = mapWidth
         self.mapH = mapHeight
-        self.mapA = self.mapW * self.mapH
-        self.mapS = mapSlicing
+        self.mapA = self.mapW * self.mapH  # Map area
+        self.mapS = mapSlicing  # The "resolution" of the map."
 
-        self.maxO = 0.0
-        self.minObsW = 0
-        self.maxObsW = 0
-        self.minObsH = 0
-        self.maxObsH = 0
-        self.minD2O = 0
+        self.maxO = 0.0  # The maximum percentage of the map area that can be obstacles.
+        self.minObsW = 0  # The minimun width of an obstacle.
+        self.maxObsW = 0  # The maximum width of an obstacle.
+        self.minObsH = 0  # The minimun height of an obstacle.
+        self.maxObsH = 0  # The maximum height of an obstacle.
+        self.minD2O = 0  # The minimum distance between two distinct obstacles.
 
-        self.minPoints = 4
-        self.maxPoints = 10
+        self.polygonsList = []  # All obstacles defining polygons.
 
-        self.polygonsList = []
-
+        # Creation of the map.
         for i in range(int((self.mapW / self.mapS))):
             self.gameMap.append([])
             for j in range(int((self.mapH / self. mapS))):
@@ -65,7 +63,7 @@ class MapGenerator():
 
         self.curO = 0
         self.nObstacles = 0
-        self.polygonsList.clear()
+        self.polygonsList.clear()  # Clear all obstacles polygons.
 
     def checkAvailableSpace(self, coordList):
         x = coordList[0]
@@ -73,6 +71,7 @@ class MapGenerator():
         w = coordList[2]
         h = coordList[3]
 
+        # Left boundary
         c_tlx = x - self.minD2O
         if c_tlx < 0:
             c_tlx = 0
@@ -98,8 +97,8 @@ class MapGenerator():
         return [x, y, w, h]
 
     def randomObstacle(self):
-        tlx = random.randint(0, len(self.gameMap) - 1 - self.minObsW)
-        tly = random.randint(0, len(self.gameMap[0]) - 1 - self.minObsH)
+        tlx = random.randint(0, len(self.gameMap) - 1 - self.minObsW)  # Ensures that obstacle is inside the map
+        tly = random.randint(0, len(self.gameMap[0]) - 1 - self.minObsH)  # Ensures that obstacle is inside the map
         w = random.randint(self.minObsW, self.maxObsW)
         h = random.randint(self.minObsH, self.maxObsH)
 
@@ -201,8 +200,9 @@ class Node(HEAP.HEAPItem):
 class Astar():
 
     def __init__(self, gameMap):
+        sTime = 0
         self.allNodes = []
-        self.openList = []
+        self.openList = HEAP.HEAP()
         self.closedList = []
         self.finalPath = []
         self.currentNode = None
@@ -212,6 +212,8 @@ class Astar():
             for j in range(len(gameMap[0])):
                 traversible = True if (gameMap[i][j] == 0) else False
                 self.allNodes[i].append(Node(i, j, traversible))
+
+        print("***** INITIALIZED NODE MAP IN  %s SECONDS *****" % (time.time() - sTime))
 
     def getNode(self, i, j):
         return self.allNodes[i][j]
@@ -262,17 +264,10 @@ class Astar():
         startNode = self.getNode(int(startPos.y() / 1000), int(startPos.x() / 1000))
         targetNode = self.getNode(int(targetPos.y() / 1000), int(targetPos.x() / 1000))
 
-        self.openList.append(startNode)
+        self.openList.addItem(startNode)
 
-        while len(self.openList) > 0:
-            self.currentNode = self.openList[0]
-            for i in range(1, len(self.openList)):
-                if (self.openList[i].fCost() < self.currentNode.fCost()) |\
-                    ((self.openList[i].fCost() == self.currentNode.fCost()) &\
-                     (self.openList[i].hCost < self.currentNode.hCost)):
-                    self.currentNode = self.openList[i]
-
-            self.openList.remove(self.currentNode)
+        while self.openList.size() > 0:
+            self.currentNode = self.openList.removeFirst()
             self.closedList.append(self.currentNode)
 
             if self.currentNode == targetNode:
@@ -286,9 +281,9 @@ class Astar():
                         continue
 
                     newMoveCost = self.currentNode.gCost + self.distanceB2Nodes(self.currentNode, node)
-                    if (newMoveCost < node.gCost) | (node not in self.openList):
+                    if (newMoveCost < node.gCost) | (node not in self.openList.items):
                         node.gCost = newMoveCost
                         node.hCost = self.distanceB2Nodes(node, targetNode)
                         node.parent = self.currentNode
-                        if node not in self.openList:
-                            self.openList.append(node)
+                        if node not in self.openList.items:
+                            self.openList.addItem(node)
