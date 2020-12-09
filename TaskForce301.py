@@ -93,15 +93,14 @@ class Ui_TSKF301MainWindow(object):
         self.actionAstar.setShortcut(_translate("TSKF301MainWindow", "A"))
 
     def newGame(self):
-        self.graphicsScene.setSceneRect(0, 0, 100000, 100000)
+        self.graphicsScene.setSceneRect(0, 0, 150000, 50000)
         self.graphicsView.fitInView(QtCore.QRectF(0, 0,
                                                   self.graphicsScene.width(),
                                                   self.graphicsScene.height()),
                                     Qt.KeepAspectRatio)
         self.graphicsScene.dispGrid(1000)
-        self.mapGen = Mapping.MapGenerator(int(self.graphicsScene.width() / 1000),
-                                           int(self.graphicsScene.height() / 1000),
-                                           1)
+        self.mapGen = Mapping.MapGenerator(self.graphicsScene.width(),
+                                           self.graphicsScene.height(), 1000)
         self.mapGen.setMapParameters(0.25, 2, 5, 2, 5, 2)
         self.genRandomMap()
         self.gameState = False
@@ -109,10 +108,10 @@ class Ui_TSKF301MainWindow(object):
         self.rComs = InGameData.RadioCommunications(self.mainClock,
                                                     self.graphicsScene)
 
-        ship1 = Battleship.Battleship(self.mainClock, self.graphicsScene,
-                                      QtCore.QPointF(0, 0), 1, 1, 1, 0)
-        ship1.setTag("ALLY")
-        self.graphicsScene.addShip(ship1)
+        # ship1 = Battleship.Battleship(self.mainClock, self.graphicsScene,
+        #                               QtCore.QPointF(0, 0), 1, 1, 1, 0)
+        # ship1.setTag("ALLY")
+        # self.graphicsScene.addShip(ship1)
 
         # ship2 = Battleship.Battleship(self.mainClock, self.graphicsScene,
         #                               QtCore.QPointF(10000, 15000), 1, 1, 1, 0)
@@ -136,8 +135,8 @@ class Ui_TSKF301MainWindow(object):
         self.graphicsScene.displayMap(genObs)
 
     def launchAstar(self):
-        aStar = Mapping.Astar(self.mapGen.gameMap)
-        nodesPath = aStar.findPath(QPointF(0, 0), QPointF(99000, 99000))
+        aStar = Mapping.Astar(self.mapGen.gameMap, self.mapGen.mapS)
+        nodesPath = aStar.findPath(QPointF(0, 0), QPointF(149000, 49000))
         for node in nodesPath:
             self.graphicsScene.addRect(node.xPos, node.yPos, 1000, 1000,
                                         QPen(QColor("blue")), QBrush(QColor("blue")))

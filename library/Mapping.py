@@ -26,10 +26,10 @@ class MapGenerator():
         self.geometrics = MathsFormulas.Geometrics()
         self.gameMap = []
 
-        self.mapW = mapWidth
-        self.mapH = mapHeight
+        self.mapW = int(mapWidth / mapSlicing)
+        self.mapH = int(mapHeight / mapSlicing)
+        self.mapS = mapSlicing  # The "resolution" of the map.
         self.mapA = self.mapW * self.mapH  # Map area
-        self.mapS = mapSlicing  # The "resolution" of the map."
 
         self.maxO = 0.0  # The maximum percentage of the map area that can be obstacles.
         self.minObsW = 0  # The minimun width of an obstacle.
@@ -41,9 +41,9 @@ class MapGenerator():
         self.polygonsList = []  # All obstacles defining polygons.
 
         # Creation of the map.
-        for i in range(int((self.mapW / self.mapS))):
+        for i in range(self.mapH):
             self.gameMap.append([])
-            for j in range(int((self.mapH / self. mapS))):
+            for j in range(self.mapW):
                 self.gameMap[i].append(0)
 
     def setMapParameters(self, maxObstruction, minObstWidth, maxObstWidth,
@@ -81,36 +81,26 @@ class MapGenerator():
             c_tly = 0
 
         c_brx = x + w + self.minD2O
-        if c_brx > len(self.gameMap) - 1:
-            c_brx = len(self.gameMap) - 1
+        if c_brx > len(self.gameMap[0]):
+            c_brx = len(self.gameMap[0])
             w = c_brx - x
 
         c_bry = y + h + self.minD2O
-        if c_bry > len(self.gameMap[0]) - 1:
-            c_bry = len(self.gameMap[0]) - 1
+        if c_bry > len(self.gameMap):
+            c_bry = len(self.gameMap)
             h = c_bry - y
 
-        for i in range(c_tlx, c_brx + 1):
-            for j in range(c_tly, c_bry + 1):
+        for i in range(c_tly, c_bry):
+            for j in range(c_tlx, c_brx):
                 if self.gameMap[i][j] != 0:
                     return None
         return [x, y, w, h]
 
     def randomObstacle(self):
-        tlx = random.randint(0, len(self.gameMap) - 1 - self.minObsW)  # Ensures that obstacle is inside the map
-        tly = random.randint(0, len(self.gameMap[0]) - 1 - self.minObsH)  # Ensures that obstacle is inside the map
+        tlx = random.randint(0, len(self.gameMap[0]) - 1 - self.minObsW)  # Ensures that obstacle is inside the map
+        tly = random.randint(0, len(self.gameMap) - 1 - self.minObsH)  # Ensures that obstacle is inside the map
         w = random.randint(self.minObsW, self.maxObsW)
         h = random.randint(self.minObsH, self.maxObsH)
-
-        brx = tlx + w
-        if brx > len(self.gameMap) - 1:
-            brx = len(self.gameMap) - 1
-            w = brx - tlx
-
-        bry = tly + h
-        if bry > len(self.gameMap[0]) - 1:
-            bry = len(self.gameMap[0]) - 1
-            h = bry - tly
         return [tlx, tly, w, h]
 
     def generateObstacle(self, ObsAsList):
@@ -120,14 +110,14 @@ class MapGenerator():
         h = ObsAsList[3]
         poly = QPolygonF()
 
-        for i in range(x, x + w):
-            for j in range(y, y + h):
+        for i in range(y, y + h):
+            for j in range(x, x + w):
                 self.gameMap[i][j] = 1
 
-        polyTL = QPoint(y * 1000, x * 1000)
-        polyBL = QPoint(y * 1000, (x + w) * 1000)
-        polyBR = QPoint((y + h) * 1000, (x + w) * 1000)
-        polyTR = QPoint((y + h) * 1000, x * 1000)
+        polyTL = QPoint(x * self.mapS, y * self.mapS)
+        polyBL = QPoint(x * self.mapS, (y + h) * self.mapS)
+        polyBR = QPoint((x + w) * self.mapS, (y + h) * self.mapS)
+        polyTR = QPoint((x + w) * self.mapS, y * self.mapS)
 
         poly<<polyTL<<polyBL<<polyBR<<polyTR
 
@@ -165,13 +155,13 @@ class Node(HEAP.HEAPItem):
     hCost = 0
     parent = None
 
-    def __init__(self, iGrid, jGrid, traversible):
+    def __init__(self, iGrid, jGrid, mapSlicing, traversible):
         super(Node, self).__init__()
 
         self.iGrid = iGrid
         self.jGrid = jGrid
-        self.xPos = self.jGrid * 1000
-        self.yPos = self.iGrid * 1000
+        self.xPos = self.jGrid * mapSlicing
+        self.yPos = self.iGrid * mapSlicing
         self.traversible = traversible
 
     def fCost(self):
@@ -199,8 +189,9 @@ class Node(HEAP.HEAPItem):
 
 class Astar():
 
-    def __init__(self, gameMap):
+    def __init__(self, gameMap, mapSlicing):
         sTime = 0
+        self.gridS = mapSlicing
         self.allNodes = []
         self.openList = HEAP.HEAP()
         self.closedList = []
@@ -211,9 +202,7 @@ class Astar():
             self.allNodes.append([])
             for j in range(len(gameMap[0])):
                 traversible = True if (gameMap[i][j] == 0) else False
-                self.allNodes[i].append(Node(i, j, traversible))
-
-        print("***** INITIALIZED NODE MAP IN  %s SECONDS *****" % (time.time() - sTime))
+                self.allNodes[i].append(Node(i, j, self.gridS, traversible))
 
     def getNode(self, i, j):
         return self.allNodes[i][j]
@@ -261,8 +250,10 @@ class Astar():
 
     def findPath(self, startPos, targetPos):
         sTime = time.time()
-        startNode = self.getNode(int(startPos.y() / 1000), int(startPos.x() / 1000))
-        targetNode = self.getNode(int(targetPos.y() / 1000), int(targetPos.x() / 1000))
+        startNode = self.getNode(int(startPos.y() / self.gridS),
+                                 int(startPos.x() / self.gridS))
+        targetNode = self.getNode(int(targetPos.y() / self.gridS),
+                                  int(targetPos.x() / self.gridS))
 
         self.openList.addItem(startNode)
 
