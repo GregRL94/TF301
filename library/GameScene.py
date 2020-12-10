@@ -5,7 +5,7 @@
     Author: Grégory LARGANGE
     Date created: 12/10/2020
     Last modified by: Grégory LARGANGE
-    Date last modified: 15/10/2020
+    Date last modified: 10/12/2020
     Python version: 3.8.1
 '''
 
@@ -59,10 +59,6 @@ class GameScene(QGraphicsScene):
 
         for i in range(0, int(self.width() + steps), steps):
             self.addLine(i, 0, i, self.height(), QPen(QColor("black"), 4))
-
-        self.addEllipse(4750, 4750, 500, 500, QPen(QColor("darkRed"), 12))
-        self.addEllipse(9750, 2250, 500, 500, QPen(QColor("darkRed"), 12))
-        self.addEllipse(12250, 12250, 500, 500, QPen(QColor("darkRed"), 12))
 
     def printPoint(self, point):
         self.addEllipse(point.x() - 50, point.y() - 50, 100, 100,

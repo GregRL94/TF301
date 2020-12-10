@@ -5,7 +5,7 @@
     Author: Grégory LARGANGE
     Date created: 07/10/2020
     Last modified by: Grégory LARGANGE
-    Date last modified: 09/12/2020
+    Date last modified: 10/12/2020
     Python version: 3.8.1
 '''
 
@@ -23,6 +23,7 @@ class Ui_TSKF301MainWindow(object):
 
     mainClock = MainClock.MainClock(20)  #ms
     mapGen = None
+    mapRes = 1000
 
     def setupUi(self, TSKF301MainWindow):
         TSKF301MainWindow.setObjectName("TSKF301MainWindow")
@@ -93,14 +94,15 @@ class Ui_TSKF301MainWindow(object):
         self.actionAstar.setShortcut(_translate("TSKF301MainWindow", "A"))
 
     def newGame(self):
-        self.graphicsScene.setSceneRect(0, 0, 150000, 50000)
+        self.graphicsScene.setSceneRect(0, 0, 100000, 100000)
         self.graphicsView.fitInView(QtCore.QRectF(0, 0,
                                                   self.graphicsScene.width(),
                                                   self.graphicsScene.height()),
                                     Qt.KeepAspectRatio)
-        self.graphicsScene.dispGrid(1000)
+        self.graphicsScene.dispGrid(self.mapRes)
         self.mapGen = Mapping.MapGenerator(self.graphicsScene.width(),
-                                           self.graphicsScene.height(), 1000)
+                                           self.graphicsScene.height(),
+                                           self.mapRes)
         self.mapGen.setMapParameters(0.25, 2, 5, 2, 5, 2)
         self.genRandomMap()
         self.gameState = False
@@ -136,9 +138,9 @@ class Ui_TSKF301MainWindow(object):
 
     def launchAstar(self):
         aStar = Mapping.Astar(self.mapGen.gameMap, self.mapGen.mapS)
-        nodesPath = aStar.findPath(QPointF(0, 0), QPointF(149000, 49000))
+        nodesPath = aStar.findPath(QPointF(0, 0), QPointF(99500, 99500))
         for node in nodesPath:
-            self.graphicsScene.addRect(node.xPos, node.yPos, 1000, 1000,
+            self.graphicsScene.addRect(node.xPos, node.yPos, self.mapRes, self.mapRes,
                                         QPen(QColor("blue")), QBrush(QColor("blue")))
 
     def start_Pause_Game(self):
