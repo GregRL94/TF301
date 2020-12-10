@@ -5,23 +5,25 @@
     Author: Grégory LARGANGE
     Date created: 07/10/2020
     Last modified by: Grégory LARGANGE
-    Date last modified: 27/11/2020
+    Date last modified: 10/12/2020
     Python version: 3.8.1
 '''
 
 import sys
 
 from PyQt5 import QtCore, QtWidgets
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QPointF
+from PyQt5.QtGui import QPen, QBrush, QColor
 from PyQt5.QtWidgets import QGraphicsView
 
-from library import MainClock, GameScene, Battleship, InGameData, MapGenerator
+from library import MainClock, GameScene, Battleship, InGameData, Mapping
 
 
 class Ui_TSKF301MainWindow(object):
 
     mainClock = MainClock.MainClock(20)  #ms
     mapGen = None
+    mapRes = 1000
 
     def setupUi(self, TSKF301MainWindow):
         TSKF301MainWindow.setObjectName("TSKF301MainWindow")
@@ -61,9 +63,12 @@ class Ui_TSKF301MainWindow(object):
         self.actionNew_GameMap.setObjectName("actionNew_GameMap")
         self.actionStart_Pause_Game = QtWidgets.QAction(TSKF301MainWindow)
         self.actionStart_Pause_Game.setObjectName("actionStart_Pause_Game")
+        self.actionAstar = QtWidgets.QAction(TSKF301MainWindow)
+        self.actionAstar.setObjectName("actionAstar")
         self.menuGame.addAction(self.actionNew_Game)
         self.menuGame.addAction(self.actionNew_GameMap)
         self.menuGame.addAction(self.actionStart_Pause_Game)
+        self.menuGame.addAction(self.actionAstar)
         self.menubar.addAction(self.menuGame.menuAction())
 
         self.retranslateUi(TSKF301MainWindow)
@@ -72,6 +77,7 @@ class Ui_TSKF301MainWindow(object):
         self.actionNew_Game.triggered.connect(self.newGame)
         self.actionNew_GameMap.triggered.connect(self.newGameMap)
         self.actionStart_Pause_Game.triggered.connect(self.start_Pause_Game)
+        self.actionAstar.triggered.connect(self.launchAstar)
 
     def retranslateUi(self, TSKF301MainWindow):
         _translate = QtCore.QCoreApplication.translate
@@ -84,28 +90,30 @@ class Ui_TSKF301MainWindow(object):
         self.actionNew_GameMap.setShortcut(_translate("TSKF301MainWindow", "M"))
         self.actionStart_Pause_Game.setText(_translate("TSKF301MainWindow", "Start Game"))
         self.actionStart_Pause_Game.setShortcut(_translate("TSKF301MainWindow", "Space"))
+        self.actionAstar.setText(_translate("TSKF301MainWindow", "PathFinder"))
+        self.actionAstar.setShortcut(_translate("TSKF301MainWindow", "A"))
 
     def newGame(self):
-        self.graphicsScene.setSceneRect(0, 0, 20000, 20000)
+        self.graphicsScene.setSceneRect(0, 0, 100000, 100000)
         self.graphicsView.fitInView(QtCore.QRectF(0, 0,
                                                   self.graphicsScene.width(),
                                                   self.graphicsScene.height()),
                                     Qt.KeepAspectRatio)
-        self.graphicsScene.dispGrid(1000)
-        self.mapGen = MapGenerator.MapGenerator(int(self.graphicsScene.width() / 1000),
-                                                int(self.graphicsScene.height() / 1000),
-                                                1)
-        self.mapGen.setMapParameters(0.1, 2, 5, 2, 5, 2)
+        self.graphicsScene.dispGrid(self.mapRes)
+        self.mapGen = Mapping.MapGenerator(self.graphicsScene.width(),
+                                           self.graphicsScene.height(),
+                                           self.mapRes)
+        self.mapGen.setMapParameters(0.25, 2, 5, 2, 5, 2)
         self.genRandomMap()
         self.gameState = False
 
         self.rComs = InGameData.RadioCommunications(self.mainClock,
                                                     self.graphicsScene)
 
-        ship1 = Battleship.Battleship(self.mainClock, self.graphicsScene,
-                                      QtCore.QPointF(0, 0), 1, 1, 1, 0)
-        ship1.setTag("ALLY")
-        self.graphicsScene.addShip(ship1)
+        # ship1 = Battleship.Battleship(self.mainClock, self.graphicsScene,
+        #                               QtCore.QPointF(0, 0), 1, 1, 1, 0)
+        # ship1.setTag("ALLY")
+        # self.graphicsScene.addShip(ship1)
 
         # ship2 = Battleship.Battleship(self.mainClock, self.graphicsScene,
         #                               QtCore.QPointF(10000, 15000), 1, 1, 1, 0)
@@ -127,6 +135,13 @@ class Ui_TSKF301MainWindow(object):
     def genRandomMap(self):
         genObs = self.mapGen.generateMap()
         self.graphicsScene.displayMap(genObs)
+
+    def launchAstar(self):
+        aStar = Mapping.Astar(self.mapGen.gameMap, self.mapGen.mapS)
+        nodesPath = aStar.findPath(QPointF(0, 0), QPointF(99500, 99500))
+        for node in nodesPath:
+            self.graphicsScene.addRect(node.xPos, node.yPos, self.mapRes, self.mapRes,
+                                        QPen(QColor("blue")), QBrush(QColor("blue")))
 
     def start_Pause_Game(self):
         if self.gameState:
