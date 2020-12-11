@@ -9,21 +9,84 @@
     Python version: 3.8.1
 '''
 
+from PyQt5.QtGui import QColor
 
-class ProjectileData():
+
+class TurretData():
     """
 
-    A class holding projectiles parameters
+    A class holding turrets parameters.
 
     ...
 
     Attributes
     ----------
+    rect_values : list of int
+        A list of heights for the turret rectangle per turret size.
+
+    thk_values : list of int
+        A list of thicknesses for the turret borders per turret size.
+
+    n_guns : list of int
+        A list of number of guns per turret size.
+
+    reload_t_values : list of int
+        A list of reload times per turret size.
+
+    rot_rate_values : list of floqt
+        A list of rotation speeds per turret size.
+
+    acc_f_values : list of float
+        A list of accuracy appreciation per turret size.
+
+    w_h_ratio : float
+        The ratio between the turret width and height.
+
+    Methods
+    -------
+    None.
+
+    """
+
+    # Ordered regarding size of the turret. 0 small -> 2 large #
+    rect_values = [25, 50, 100]
+    thk_values = [5, 10, 10]
+    n_guns = [1, 2, 3]  # Number of guns
+    reload_t_values = [50, 75, 150]  # The lower the value the faster the turret reloads
+    rot_rate_values = [3.6, 2.4, 1.2]  # The higher the value the faster the turret rotates
+    acc_f_values = [0.6, 0.8, 1]  # The lower the value the better the accuracy
+    w_h_ratio = 1.25
+
+
+class ProjectileData():
+    """
+
+    A class holding projectiles parameters.
+
+    ...
+
+    Attributes
+    ----------
+    size_tags : list of string
+        A list of tags to identify the size of a projectile.
+
+    size_values : list of int
+        A list of in game size per shell size.
+
+    thk_values : list of int
+        A list of thickness of projectile border per shell size.
+
+    ranges_shellSize : list of int
+        A list of ranges in units per shell size.
+
+    inaccuracy : list of float
+        A list of error margin per shell size.
+
     speeds_shellType : list of int
         A list of speeds per shell type.
 
-    ranges_shellSize : list of int
-        A list of ranges per shell size.
+    colors_values : list of QColor
+        A list of colors per shell type.
 
     damage_type : list of lists of int
         A list per shell size of sublist of damage per shell type.
@@ -31,16 +94,63 @@ class ProjectileData():
     pen_values : list of sublists of int
         A list per shell size of sublist of penetration per shell type.
 
+    v_decreaseRate : float
+        The speed lost per game clock cycle.
+
+    w_h_ratio : float
+        The ratio between the projectile width and height.
+
     Methods
     -------
-    None
+    None.
 
     """
 
-    speeds_shellType = [150, 125]
-    ranges_shellSize= [9000, 15000, 21000]
-    damage_type = [[210, 350], [420, 680], [720, 1080]]
-    pen_values = [[150, 50], [300, 75], [400, 100]]
+    size_tags = ["s", "m", "l"]  # Also defines the ordering of shell size bound data
+    size_values = [15, 22, 38]  # Hence here [0] is for "s" shells, [1] for "m" etc
+    thk_values = [3, 5, 8]
+    ranges_shellSize = [9000, 15000, 21000]
+    inaccuracy = [0.025, 0.0325, 0.0375]
+    speeds_shellType = [150, 125]  # Element 0 is AP, 1 is HE
+    colors_values = [QColor("lightGray"), QColor("gray"),
+                     QColor("yellow"), QColor(255, 165, 0)]  # RGB value is orange
+    damage_type = [[210, 350], [420, 680], [720, 1080]]  # A shell of size can always be of type AP or HE
+    pen_values = [[150, 50], [300, 75], [400, 100]]  # HE shells have much lower penetration power than AP shells
+    v_decreaseRate = 0.2
+    w_h_ratio = 2
+
+
+class TechsData():
+    """
+
+    A class holding technologies parameters.
+
+    ...
+
+    Attributes
+    ----------
+    gun_tech_acc : list of float
+        A list of accuracy values per gun technology level.
+
+    fc_tech_e : list of float
+        A list of speed estimation error per fire control technology level.
+
+    pc_tech_reduc : list of float
+        A list of error reduction percentage per cycle, per computer technology level.
+
+    radar_tech_aug : list of float
+        A list of base radar range augmentation percentage per radar technology level.
+
+    Methods
+    -------
+    None.
+
+    """
+
+    gun_tech_acc = [5.7106, 4.2891, 2.8624]  # The higher the tech, the more accurate the guns
+    fc_tech_e = [0.3, 0.2, 0.1]  # The higher the tech, the lower the error on target speed
+    pc_tech_reduc = [0.1, 0.25, 0.5]  # The higher the tech, the faster the fc error is reduced
+    radar_tech_aug = [0, 0.25, 0.37, 0.5]  # The higher the tech, the higher the boost on the base radar range
 
 
 class RadioCommunications():

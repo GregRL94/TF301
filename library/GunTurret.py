@@ -5,7 +5,7 @@
     Author: Grégory LARGANGE
     Date created: 12/10/2020
     Last modified by: Grégory LARGANGE
-    Date last modified: 15/10/2020
+    Date last modified: 10/12/2020
     Python version: 3.8.1
 '''
 
@@ -16,25 +16,15 @@ from PyQt5.QtCore import QRectF, QPointF
 from PyQt5.QtGui import QColor, QPen, QBrush
 from PyQt5.QtWidgets import QGraphicsRectItem
 
-from library import MathsFormulas, Projectile
+from library import Projectile
 
 
 class GunTurret(QGraphicsRectItem):
 
-    rect_values = [25, 50, 100]
-    thk_values = [5, 10, 10]
     d_shipCenter = 0
-
     refresh_rate = 10
-    rot_rate_values = [3.6, 2.4, 1.2]
-    acc_f_values = [0.6, 0.8, 1]
-    reload_t_values = [50, 75, 150]
-
-    shell_s_values = ["s", "m", "l"]
     shell_t = "HE"
-
     azimut = 0
-
     fc_correction_rate = 150
 
     target = None
@@ -44,37 +34,43 @@ class GunTurret(QGraphicsRectItem):
     t_x_1 = t_v_x = 0
     t_y_1 = t_v_y = 0
 
-    def __init__(self, clock, gameScene, tur_type, gun_tech, fc_tech, pc_tech, parent=None):
+    def __init__(self, clock, gameScene, tur_type, gun_tech, fc_tech, pc_tech,
+                 parent=None):
         super(GunTurret, self).__init__(QRectF(0, 0, 0, 0), parent)
 
         self.clock = clock
         self.gameScene = gameScene
         self.parentShip = parent
+        self.t_data = self.parentShip.turretData
+        self.p_data = self.parentShip.projectileData
 
         if tur_type == "s":
-            rect = QRectF(0, 0, self.rect_values[0] * 1.25, self.rect_values[0])
-            self.thickness = self.thk_values[0]
-            self.rot_speed = self.rot_rate_values[0]
-            self.acc_f = self.acc_f_values[0]
-            self.gun_number = 1
-            self.reloadTime = self.reload_t_values[0]
-            self.shell_s = self.shell_s_values[0]
+            rect = QRectF(0, 0, self.t_data.rect_values[0] * self.t_data.w_h_ratio,
+                          self.t_data.rect_values[0])
+            self.thickness = self.t_data.thk_values[0]
+            self.rot_speed = self.t_data.rot_rate_values[0]
+            self.acc_f = self.t_data.acc_f_values[0]
+            self.gun_number = self.t_data.n_guns[0]
+            self.reloadTime = self.t_data.reload_t_values[0]
+            self.shell_s = self.p_data.size_tags[0]
         elif tur_type == "m":
-            rect = QRectF(0, 0, self.rect_values[1] * 1.25, self.rect_values[1])
-            self.thickness = self.thk_values[1]
-            self.rot_speed = self.rot_rate_values[1]
-            self.acc_f = self.acc_f_values[1]
-            self.gun_number = 2
-            self.reloadTime = self.reload_t_values[1]
-            self.shell_s = self.shell_s_values[1]
+            rect = QRectF(0, 0, self.t_data.rect_values[1] * self.t_data.w_h_ratio,
+                          self.t_data.rect_values[1])
+            self.thickness = self.t_data.thk_values[1]
+            self.rot_speed = self.t_data.rot_rate_values[1]
+            self.acc_f = self.t_data.acc_f_values[1]
+            self.gun_number = self.t_data.n_guns[1]
+            self.reloadTime = self.t_data.reload_t_values[1]
+            self.shell_s = self.p_data.size_tags[1]
         elif tur_type == "l":
-            rect = QRectF(0, 0, self.rect_values[2] * 1.25, self.rect_values[2])
-            self.thickness = self.thk_values[2]
-            self.rot_speed = self.rot_rate_values[2]
-            self.acc_f = self.acc_f_values[2]
-            self.gun_number = 3
-            self.reloadTime = self.reload_t_values[2]
-            self.shell_s = self.shell_s_values[2]
+            rect = QRectF(0, 0, self.t_data.rect_values[2] * self.t_data.w_h_ratio,
+                          self.t_data.rect_values[2])
+            self.thickness = self.t_data.thk_values[2]
+            self.rot_speed = self.t_data.rot_rate_values[2]
+            self.acc_f = self.t_data.acc_f_values[2]
+            self.gun_number = self.t_data.n_guns[2]
+            self.reloadTime = self.t_data.reload_t_values[2]
+            self.shell_s = self.p_data.size_tags[2]
 
         ## For this section accuracy is in degrees for later use by the scripts.
         ## The formula is: acc(deg) = tan-1(disp(units)/range(units))
@@ -142,8 +138,8 @@ class GunTurret(QGraphicsRectItem):
                 self.t_y_1 = self.target.pos().y()
 
     def compute_Firing_Solution(self):
-        shellSpeed = self.parentShip.projectileData.speeds_shellType[0] if self.shell_t == "AP" else\
-            self.parentShip.projectileData.speeds_shellType[1]
+        shellSpeed = self.p_data.speeds_shellType[0] if self.shell_t == "AP" else\
+            self.p_data.speeds_shellType[1]
         shellSpeed *= self.refresh_rate
         estimatedFlightTime = round(self.t_range / shellSpeed, 4)
         estimated_t_speed_x = self.fc_RNG_Error(self.t_v_x)
@@ -161,7 +157,6 @@ class GunTurret(QGraphicsRectItem):
         self.t_azimut = round(math.degrees(math.acos(a_h)), 4)
         if (estimatedCenter.y() - self.pos().y()) < 0:
             self.t_azimut *= -1
-
 
     def rotate_To_T_Azimut(self):
         static_gain = 1
@@ -201,63 +196,57 @@ class GunTurret(QGraphicsRectItem):
         teta_offset = math.acos(self.rect().width() / h)
         teta_t = angleInRad + teta_offset
         xpos = self.x() + h * math.cos(teta_t)
-        ypos = self.y() + self.rect().height()+ h * math.sin(teta_t)
+        ypos = self.y() + self.rect().height() + h * math.sin(teta_t)
         spawnPos = QPointF(xpos, ypos)
         return spawnPos
 
     def shoot(self):
         az_rad = math.radians(self.azimut)
-    
+
         if self.gun_number == 1:
             a = self.gun_Dispersion()
-            shell = Projectile.Projectile(self.clock, self.gameScene,
-                                      a, self.t_range, self.shell_s,
-                                      self.shell_t)
+            shell = Projectile.Projectile(self.clock, self.gameScene, self.p_data,
+                                          a, self.t_range, self.shell_s, self.shell_t)
             spawnPos = self.compute_SpawnsPos(13, az_rad)
             shell.setPos(spawnPos)
-    
+
             self.gameScene.addItem(shell)
-    
+
         elif self.gun_number == 2:
             a = self.gun_Dispersion()
-            shell0 = Projectile.Projectile(self.clock, self.gameScene,
-                                      a, self.t_range, self.shell_s,
-                                      self.shell_t)
+            shell0 = Projectile.Projectile(self.clock, self.gameScene, self.p_data,
+                                           a, self.t_range, self.shell_s, self.shell_t)
             spawnPos = self.compute_SpawnsPos(10, az_rad)
             shell0.setPos(spawnPos)
-    
+
             a = self.gun_Dispersion()
-            shell1 = Projectile.Projectile(self.clock, self.gameScene,
-                                      a, self.t_range, self.shell_s,
-                                      self.shell_t)
+            shell1 = Projectile.Projectile(self.clock, self.gameScene, self.p_data,
+                                           a, self.t_range, self.shell_s, self.shell_t)
             spawnPos = self.compute_SpawnsPos(40, az_rad)
             shell1.setPos(spawnPos)
-    
+
             self.gameScene.addItem(shell0)
             self.gameScene.addItem(shell1)
-    
+
         elif self.gun_number == 3:
             a = self.gun_Dispersion()
-            shell0 = Projectile.Projectile(self.clock, self.gameScene,
-                                      a, self.t_range, self.shell_s,
-                                      self.shell_t)
+            shell0 = Projectile.Projectile(self.clock, self.gameScene, self.p_data,
+                                           a, self.t_range, self.shell_s, self.shell_t)
             spawnPos = self.compute_SpawnsPos(5, az_rad)
             shell0.setPos(spawnPos)
-    
+
             a = self.gun_Dispersion()
-            shell1 = Projectile.Projectile(self.clock, self.gameScene,
-                                      a, self.t_range, self.shell_s,
-                                      self.shell_t)
+            shell1 = Projectile.Projectile(self.clock, self.gameScene, self.p_data,
+                                           a, self.t_range, self.shell_s, self.shell_t)
             spawnPos = self.compute_SpawnsPos(50, az_rad)
             shell1.setPos(spawnPos)
-    
+
             a = self.gun_Dispersion()
-            shell2 = Projectile.Projectile(self.clock, self.gameScene,
-                                      a, self.t_range, self.shell_s,
-                                      self.shell_t)
+            shell2 = Projectile.Projectile(self.clock, self.gameScene, self.p_data,
+                                           a, self.t_range, self.shell_s, self.shell_t)
             spawnPos = self.compute_SpawnsPos(95, az_rad)
             shell2.setPos(spawnPos)
-    
+
             self.gameScene.addItem(shell0)
             self.gameScene.addItem(shell1)
             self.gameScene.addItem(shell2)

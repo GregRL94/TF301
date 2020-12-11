@@ -5,7 +5,7 @@
     Author: Grégory LARGANGE
     Date created: 07/10/2020
     Last modified by: Grégory LARGANGE
-    Date last modified: 10/12/2020
+    Date last modified: 11/12/2020
     Python version: 3.8.1
 '''
 
@@ -94,7 +94,7 @@ class Ui_TSKF301MainWindow(object):
         self.actionAstar.setShortcut(_translate("TSKF301MainWindow", "A"))
 
     def newGame(self):
-        self.graphicsScene.setSceneRect(0, 0, 100000, 100000)
+        self.graphicsScene.setSceneRect(0, 0, 20000, 20000)
         self.graphicsView.fitInView(QtCore.QRectF(0, 0,
                                                   self.graphicsScene.width(),
                                                   self.graphicsScene.height()),
@@ -110,20 +110,20 @@ class Ui_TSKF301MainWindow(object):
         self.rComs = InGameData.RadioCommunications(self.mainClock,
                                                     self.graphicsScene)
 
-        # ship1 = Battleship.Battleship(self.mainClock, self.graphicsScene,
-        #                               QtCore.QPointF(0, 0), 1, 1, 1, 0)
-        # ship1.setTag("ALLY")
-        # self.graphicsScene.addShip(ship1)
+        ship1 = Battleship.Battleship(self.mainClock, self.graphicsScene,
+                                      QtCore.QPointF(0, 0), 1, 1, 1, 0)
+        ship1.setTag("ALLY")
+        self.graphicsScene.addShip(ship1)
 
-        # ship2 = Battleship.Battleship(self.mainClock, self.graphicsScene,
-        #                               QtCore.QPointF(10000, 15000), 1, 1, 1, 0)
-        # ship2.setTag("ALLY")
-        # self.graphicsScene.addShip(ship2)
+        ship2 = Battleship.Battleship(self.mainClock, self.graphicsScene,
+                                      QtCore.QPointF(10000, 15000), 1, 1, 1, 0)
+        ship2.setTag("ALLY")
+        self.graphicsScene.addShip(ship2)
 
-        # ship3 = Battleship.Battleship(self.mainClock, self.graphicsScene,
-        #                               QtCore.QPointF(12000, 17000), 1, 1, 1, 0)
-        # ship3.setTag("ENNEMY")
-        # self.graphicsScene.addShip(ship3)
+        ship3 = Battleship.Battleship(self.mainClock, self.graphicsScene,
+                                      QtCore.QPointF(12000, 17000), 1, 1, 1, 0)
+        ship3.setTag("ENNEMY")
+        self.graphicsScene.addShip(ship3)
 
         self.rComs.updateShipLists()
 
@@ -138,7 +138,7 @@ class Ui_TSKF301MainWindow(object):
 
     def launchAstar(self):
         aStar = Mapping.Astar(self.mapGen.gameMap, self.mapGen.mapS)
-        nodesPath = aStar.findPath(QPointF(0, 0), QPointF(99500, 99500))
+        nodesPath = aStar.findPath(QPointF(0, 0), QPointF(19000, 19000))
         for node in nodesPath:
             self.graphicsScene.addRect(node.xPos, node.yPos, self.mapRes, self.mapRes,
                                         QPen(QColor("blue")), QBrush(QColor("blue")))

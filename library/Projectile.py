@@ -5,7 +5,7 @@
     Author: Grégory LARGANGE
     Date created: 07/10/2020
     Last modified by: Grégory LARGANGE
-    Date last modified: 15/10/2020
+    Date last modified: 10/12/2020
     Python version: 3.8.1
 '''
 
@@ -13,25 +13,17 @@ import math
 import random
 
 from PyQt5.QtCore import QRectF, QPointF
-from PyQt5.QtGui import QColor, QPen, QBrush
+from PyQt5.QtGui import QPen, QBrush
 from PyQt5.QtWidgets import QGraphicsRectItem
 
 
 class Projectile(QGraphicsRectItem):
 
     projectileTag = ""
-    size_values = [15, 22, 38]
-    thk_values = [3, 5, 8]
-    v_values = [150, 125]
-    v_decreaseRate = 0.2
-    m_range = 5000
+    m_range = 0
     cur_d = 0
-    dmg_values = [[210, 350], [420, 680], [720, 1080]]
-    pen_values = [[150, 50], [300, 75], [400, 100]]
-    colors_values = [QColor("lightGray"), QColor("gray"),
-                     QColor("yellow"), QColor(255, 165, 0)]  # RGB value is orange
 
-    def __init__(self, clock, gameScene, _rotation, _range, _size="l", _type="AP"):
+    def __init__(self, clock, gameScene, p_data, _rotation, _range, _size="l", _type="AP"):
         super(Projectile, self).__init__(QRectF(0, 0, 0, 0))
 
         self.clock = clock
@@ -40,26 +32,26 @@ class Projectile(QGraphicsRectItem):
         self._range = _range
 
         if _size == "s":
-            rect = QRectF(0, 0,
-                               2 * self.size_values[0], self.size_values[0])
-            self.thickness = self.thk_values[0]
-            self.innacc = 0.025
-            self.m_range = 9000
-            sub_index = 0
+            rect = QRectF(0, 0, p_data.w_h_ratio * p_data.size_values[0],
+                          p_data.size_values[0])
+            self.thk = p_data.thk_values[0]
+            self.inacc = p_data.inaccuracy[0]
+            self.m_range = p_data.ranges_shellSize[0]
+            index = 0
         elif _size == "m":
-            rect = QRectF(0, 0,
-                               2 * self.size_values[1], self.size_values[1])
-            self.thickness = self.thk_values[1]
-            self.innacc = 0.0325
-            self.m_range = 15000
-            sub_index = 1
+            rect = QRectF(0, 0, p_data.w_h_ratio * p_data.size_values[1],
+                          p_data.size_values[1])
+            self.thk = p_data.thk_values[1]
+            self.inacc = p_data.inaccuracy[1]
+            self.m_range = p_data.ranges_shellSize[1]
+            index = 1
         elif _size == "l":
-            rect = QRectF(0, 0,
-                               2 * self.size_values[2], self.size_values[2])
-            self.thickness = self.thk_values[2]
-            self.innacc = 0.0375
-            self.m_range = 21000
-            sub_index = 2
+            rect = QRectF(0, 0, p_data.w_h_ratio * p_data.size_values[2],
+                          p_data.size_values[2])
+            self.thk = p_data.thk_values[2]
+            self.inacc = p_data.inaccuracy[2]
+            self.m_range = p_data.ranges_shellSize[2]
+            index = 2
 
         self.setRect(rect)
         self.eff_range = round(self.range_rng(), 4)
@@ -69,15 +61,16 @@ class Projectile(QGraphicsRectItem):
 
         self._type = _type
         if self._type == "AP":
-            self.v = self.v0 = self.v_values[0]
-            self.dmg = self.dmg_values[sub_index][0]
-            self.pen = self.p0 = self.pen_values[sub_index][0]
-            self.colors = [self.colors_values[0], self.colors_values[1]]
+            self.v = self.v0 = p_data.speeds_shellType[0]
+            self.dmg = p_data.damage_type[index][0]
+            self.pen = self.p0 = p_data.pen_values[index][0]
+            self.colors = [p_data.colors_values[0], p_data.colors_values[1]]
         else:
-            self.v = self.v0 = self.v_values[1]
-            self.dmg = self.dmg_values[sub_index][1]
-            self.pen = self.p0 = self.pen_values[sub_index][1]
-            self.colors = [self.colors_values[2], self.colors_values[3]]
+            self.v = self.v0 = p_data.speeds_shellType[1]
+            self.dmg = p_data.damage_type[index][1]
+            self.pen = self.p0 = p_data.pen_values[index][1]
+            self.colors = [p_data.colors_values[2], p_data.colors_values[3]]
+        self.v_dec = p_data.v_decreaseRate
 
         self.clock.clockSignal.connect(self.move)
 
@@ -101,12 +94,11 @@ class Projectile(QGraphicsRectItem):
                 self.pen_decrease()
 
     def range_rng(self):
-        disp = self._range * self.innacc
-        f_range = random.uniform(self._range - disp, self._range + disp)
-        return f_range
+        disp = self._range * self.inacc
+        return random.uniform(self._range - disp, self._range + disp)
 
     def v_decrease(self):
-        self.v = round(self.v - self.v_decreaseRate, 4)
+        self.v = round(self.v - self.v_dec, 4)
 
     def pen_decrease(self):
         self.pen = int(self.p0 + self.p0 * ((self.v - self.v0) / self.v0))
@@ -116,5 +108,5 @@ class Projectile(QGraphicsRectItem):
 
     def paint(self, painter, option, widget=None):
         painter.setBrush(QBrush(self.colors[0]))
-        painter.setPen(QPen(self.colors[1], self.thickness))
+        painter.setPen(QPen(self.colors[1], self.thk))
         painter.drawRect(self.rect())

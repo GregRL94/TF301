@@ -88,6 +88,7 @@ class Ship(QGraphicsRectItem):
         self.geometrics = MathsFormulas.Geometrics()
         self.cinematics = MathsFormulas.Cinematics()
         self.controllers = MathsFormulas.Controllers()
+        self.turretData = InGameData.TurretData()
         self.projectileData = InGameData.ProjectileData()
 
         self.gameScene = gameScene
