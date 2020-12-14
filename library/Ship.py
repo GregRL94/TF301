@@ -5,7 +5,7 @@
     Author: Grégory LARGANGE
     Date created: 09/10/2020
     Last modified by: Grégory LARGANGE
-    Date last modified: 03/12/2020
+    Date last modified: 14/12/2020
     Python version: 3.8.1
 '''
 
@@ -43,10 +43,10 @@ class Ship(QGraphicsRectItem):
     laser_turrets_list = None
     laser_turrets_pos = None
     guns_range = 0
-    guns_tech = 1
-    fireControl_tech = 1
-    computer_tech = 1
-    radar_tech = 1
+    guns_tech = 0
+    fireControl_tech = 0
+    computer_tech = 0
+    radar_tech = 0
     radar_b_values = [0, 0.25, 0.37, 0.5]
     #---------------------------------------#
 
@@ -90,6 +90,7 @@ class Ship(QGraphicsRectItem):
         self.controllers = MathsFormulas.Controllers()
         self.turretData = InGameData.TurretData()
         self.projectileData = InGameData.ProjectileData()
+        self.techData = InGameData.TechsData()
 
         self.gameScene = gameScene
         self.clock = clock
@@ -148,7 +149,7 @@ class Ship(QGraphicsRectItem):
                                                          self.speed,
                                                          self.turn_rate)
 
-    def accelerateToSpeed(self, speedOption):
+    def reachSpeed(self, speedOption):
         targetSpeed = 0
 
         if speedOption is None:
@@ -161,10 +162,10 @@ class Ship(QGraphicsRectItem):
     def setSpeed(self):
         if self.checkpoint is None:
             if self.speed_user_override:
-                self.accelerateToSpeed(self.speed_user_override)
+                self.reachSpeed(self.speed_user_override)
                 print("User overridde:", self.speed_user_override)
             else:
-                self.accelerateToSpeed("STOP")
+                self.reachSpeed("STOP")
                 print("No user override, using: STOP because no further checkpoints.")
         else:
             print("Remaining distance to checkpoint:", self.geometrics.distance_A_B(self.center,
@@ -173,17 +174,17 @@ class Ship(QGraphicsRectItem):
             # print("Calculated break distance at current speed", self.speed, ":", brakeD)
             if self.geometrics.distance_A_B(self.center, self.checkpoint) <= brakeD:
                 # print("brake trigger distance reached")
-                self.accelerateToSpeed("STOP")
+                self.reachSpeed("STOP")
             elif self.checkpointInTurnRadius() is False:
                 print("Slowing down to match checkpoint")
-                self.accelerateToSpeed("SLOW")
+                self.reachSpeed("SLOW")
             else:
                 if self.speed_user_override:
                     print("No brake triggers. Using user overridde:", self.speed_user_override)
-                    self.accelerateToSpeed(self.speed_user_override)
+                    self.reachSpeed(self.speed_user_override)
                 else:
                     print("No brake triggers. No user override. Using default speed:", self.default_speed)
-                    self.accelerateToSpeed(self.default_speed)
+                    self.reachSpeed(self.default_speed)
 
     def computeHeading(self):
         distance = self.geometrics.distance_A_B(self.center, self.checkpoint)

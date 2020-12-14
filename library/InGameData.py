@@ -5,7 +5,7 @@
     Author: Grégory LARGANGE
     Date created: 19/10/2020
     Last modified by: Grégory LARGANGE
-    Date last modified: 10/12/2020
+    Date last modified: 14/12/2020
     Python version: 3.8.1
 '''
 
@@ -106,6 +106,14 @@ class ProjectileData():
 
     """
 
+    ##### INFORMATIONS ON LIST CONTRUCTION #####
+    # For simple lists: ordered regarding the size of the shells
+    # [0] -> small, [2] -> large 
+    # For nested lists, the subelements of the list gives the type of the shell
+    # [0]-> AP [1] -> HE
+    # Hence [1][0] gives the value of a "Medium" size "AP" shell
+    ############################################
+
     size_tags = ["s", "m", "l"]  # Also defines the ordering of shell size bound data
     size_values = [15, 22, 38]  # Hence here [0] is for "s" shells, [1] for "m" etc
     thk_values = [3, 5, 8]
@@ -114,7 +122,7 @@ class ProjectileData():
     speeds_shellType = [150, 125]  # Element 0 is AP, 1 is HE
     colors_values = [QColor("lightGray"), QColor("gray"),
                      QColor("yellow"), QColor(255, 165, 0)]  # RGB value is orange
-    damage_type = [[210, 350], [420, 680], [720, 1080]]  # A shell of size can always be of type AP or HE
+    damage_type = [[240, 360], [480, 720], [800, 1200]]  # A shell of size can always be of type AP or HE
     pen_values = [[150, 50], [300, 75], [400, 100]]  # HE shells have much lower penetration power than AP shells
     v_decreaseRate = 0.2
     w_h_ratio = 2
@@ -147,6 +155,9 @@ class TechsData():
 
     """
 
+    # The higher the index in the lists the higher is the associated tech level #
+
+    # The formula is: acc(deg) = tan-1(disp(units)/range(units))
     gun_tech_acc = [5.7106, 4.2891, 2.8624]  # The higher the tech, the more accurate the guns
     fc_tech_e = [0.3, 0.2, 0.1]  # The higher the tech, the lower the error on target speed
     pc_tech_reduc = [0.1, 0.25, 0.5]  # The higher the tech, the faster the fc error is reduced

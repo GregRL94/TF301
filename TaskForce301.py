@@ -5,7 +5,7 @@
     Author: Grégory LARGANGE
     Date created: 07/10/2020
     Last modified by: Grégory LARGANGE
-    Date last modified: 11/12/2020
+    Date last modified: 14/12/2020
     Python version: 3.8.1
 '''
 
@@ -111,17 +111,17 @@ class Ui_TSKF301MainWindow(object):
                                                     self.graphicsScene)
 
         ship1 = Battleship.Battleship(self.mainClock, self.graphicsScene,
-                                      QtCore.QPointF(0, 0), 1, 1, 1, 0)
+                                      QtCore.QPointF(0, 0), 0, 0, 0, 0)
         ship1.setTag("ALLY")
         self.graphicsScene.addShip(ship1)
 
         ship2 = Battleship.Battleship(self.mainClock, self.graphicsScene,
-                                      QtCore.QPointF(10000, 15000), 1, 1, 1, 0)
+                                      QtCore.QPointF(10000, 15000), 0, 0, 0, 0)
         ship2.setTag("ALLY")
         self.graphicsScene.addShip(ship2)
 
         ship3 = Battleship.Battleship(self.mainClock, self.graphicsScene,
-                                      QtCore.QPointF(12000, 17000), 1, 1, 1, 0)
+                                      QtCore.QPointF(12000, 17000), 0, 0, 0, 0)
         ship3.setTag("ENNEMY")
         self.graphicsScene.addShip(ship3)
 

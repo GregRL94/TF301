@@ -5,7 +5,7 @@
     Author: Grégory LARGANGE
     Date created: 12/10/2020
     Last modified by: Grégory LARGANGE
-    Date last modified: 10/12/2020
+    Date last modified: 14/12/2020
     Python version: 3.8.1
 '''
 
@@ -36,65 +36,84 @@ class GunTurret(QGraphicsRectItem):
 
     def __init__(self, clock, gameScene, tur_type, gun_tech, fc_tech, pc_tech,
                  parent=None):
+        """
+
+        Parameters
+        ----------
+        clock : MainClock
+            The main clock of the game.
+        gameScene : GameScene
+            The main display of the game.
+        tur_type : str
+            The size of the turret. See InGameData.py file for further informations.
+        gun_tech : int
+            The technology level of the guns. See InGameData.py file for further
+            informations.
+        fc_tech : int
+            The technology level of the fire control. See InGameData.py file for
+            further informations.
+        pc_tech : int
+            The technology level of the targeting computer. See InGameData.py
+            file for further informations.
+        parent : Ship, optional
+            The parent Ship object of the turret. The default is None.
+
+        Returns
+        -------
+        None.
+
+        Summary
+        -------
+        The constructor of the class.
+
+        """
         super(GunTurret, self).__init__(QRectF(0, 0, 0, 0), parent)
 
         self.clock = clock
         self.gameScene = gameScene
         self.parentShip = parent
-        self.t_data = self.parentShip.turretData
         self.p_data = self.parentShip.projectileData
+        t_data = self.parentShip.turretData
+        tech_data = self.parentShip.techData
 
+        # Sets turret parameters from t_data according to passed tur_type #
         if tur_type == "s":
-            rect = QRectF(0, 0, self.t_data.rect_values[0] * self.t_data.w_h_ratio,
-                          self.t_data.rect_values[0])
-            self.thickness = self.t_data.thk_values[0]
-            self.rot_speed = self.t_data.rot_rate_values[0]
-            self.acc_f = self.t_data.acc_f_values[0]
-            self.gun_number = self.t_data.n_guns[0]
-            self.reloadTime = self.t_data.reload_t_values[0]
+            rect = QRectF(0, 0, t_data.rect_values[0] * t_data.w_h_ratio,
+                          t_data.rect_values[0])
+            self.thickness = t_data.thk_values[0]
+            self.rot_speed = t_data.rot_rate_values[0]
+            self.acc_f = t_data.acc_f_values[0]
+            self.gun_number = t_data.n_guns[0]
+            self.reloadTime = t_data.reload_t_values[0]
             self.shell_s = self.p_data.size_tags[0]
         elif tur_type == "m":
-            rect = QRectF(0, 0, self.t_data.rect_values[1] * self.t_data.w_h_ratio,
-                          self.t_data.rect_values[1])
-            self.thickness = self.t_data.thk_values[1]
-            self.rot_speed = self.t_data.rot_rate_values[1]
-            self.acc_f = self.t_data.acc_f_values[1]
-            self.gun_number = self.t_data.n_guns[1]
-            self.reloadTime = self.t_data.reload_t_values[1]
+            rect = QRectF(0, 0, t_data.rect_values[1] * t_data.w_h_ratio,
+                          t_data.rect_values[1])
+            self.thickness = t_data.thk_values[1]
+            self.rot_speed = t_data.rot_rate_values[1]
+            self.acc_f = t_data.acc_f_values[1]
+            self.gun_number = t_data.n_guns[1]
+            self.reloadTime = t_data.reload_t_values[1]
             self.shell_s = self.p_data.size_tags[1]
         elif tur_type == "l":
-            rect = QRectF(0, 0, self.t_data.rect_values[2] * self.t_data.w_h_ratio,
-                          self.t_data.rect_values[2])
-            self.thickness = self.t_data.thk_values[2]
-            self.rot_speed = self.t_data.rot_rate_values[2]
-            self.acc_f = self.t_data.acc_f_values[2]
-            self.gun_number = self.t_data.n_guns[2]
-            self.reloadTime = self.t_data.reload_t_values[2]
+            rect = QRectF(0, 0, t_data.rect_values[2] * t_data.w_h_ratio,
+                          t_data.rect_values[2])
+            self.thickness = t_data.thk_values[2]
+            self.rot_speed = t_data.rot_rate_values[2]
+            self.acc_f = t_data.acc_f_values[2]
+            self.gun_number = t_data.n_guns[2]
+            self.reloadTime = t_data.reload_t_values[2]
             self.shell_s = self.p_data.size_tags[2]
 
-        ## For this section accuracy is in degrees for later use by the scripts.
-        ## The formula is: acc(deg) = tan-1(disp(units)/range(units))
-        if gun_tech == 1:
-            self.gun_acc = round(5.7106 * self.acc_f, 4)  # degrees
-        elif gun_tech == 2:
-            self.gun_acc = round(4.2891 * self.acc_f, 4)  # degrees
-        elif gun_tech == 3:
-            self.gun_acc = round(2.8624 * self.acc_f, 4)  # degrees
+        # Sets gun_acc parameters from tech_data according to passed gun_tech #
+        self.gun_acc = round(tech_data.gun_tech_acc[gun_tech] * self.acc_f, 4)
 
-        if fc_tech == 1:
-            self.base_fc_error = 0.3
-        elif fc_tech == 2:
-            self.base_fc_error = 0.2
-        elif fc_tech == 3:
-            self.base_fc_error = 0.1
+        # Sets base_fc_error parameters from tech_data according to passed fc_tech #
+        self.base_fc_error = tech_data.fc_tech_e[fc_tech]
         self.fc_error = self.base_fc_error
 
-        if pc_tech == 1:
-            self.fc_e_reduc_rate = 0.1
-        elif pc_tech == 2:
-            self.fc_e_reduc_rate = 0.25
-        elif pc_tech == 3:
-            self.fc_e_reduc_rate = 0.5
+        # Sets fc_e_reduc_rate parameters from tech_data according to passed pc_tech #
+        self.fc_e_reduc_rate = tech_data.pc_tech_reduc[pc_tech]
 
         self.setRect(rect)
         self.nextShot = self.reloadTime
