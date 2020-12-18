@@ -5,7 +5,7 @@
     Author: Grégory LARGANGE
     Date created: 14/10/2020
     Last modified by: Grégory LARGANGE
-    Date last modified: 25/11/2020
+    Date last modified: 18/12/2020
     Python version: 3.8.1
 '''
 
@@ -38,11 +38,11 @@ class Battleship(Ship.Ship):
         self.base_detection_range = 5000
         self.guns_range = self.projectileData.ranges_shellSize[2]
         self.gun_tech = gun_tech
-        self.fireControl_tech = fireControl_tech
-        self.computer_tech = pc_tech
+        self.fc_tech = fireControl_tech
+        self.pc_tech = pc_tech
         self.radar_tech = radar_tech
         self.detection_range = self.base_detection_range +\
-            self.base_detection_range * self.radar_b_values[self.radar_tech]
+            self.base_detection_range * self.techData.radar_tech_aug[self.radar_tech]
 
         self.setRect(rect)
         self.setPos(pos)
@@ -54,29 +54,23 @@ class Battleship(Ship.Ship):
                                  QPointF(self.x() + 625, self.y() + 75),
                                  QPointF(self.x() + 800, self.y() + 75)]
 
-        turretC = GunTurret.GunTurret(self.clock, self.gameScene, "l",
-                                      self.gun_tech, self.fireControl_tech,
-                                      self.computer_tech, self)
+        turretC = GunTurret.GunTurret(self.clock, self.gameScene, "l", self)
         turretC.setPos(self.gun_turrets_pos[0])
         turretC.setDFromShipCenter(175 - self.rect().width() / 2)
-        turretC.setZValue(7)
+        turretC.setZValue(3)
         self.gameScene.addItem(turretC)
 
 
-        turretB = GunTurret.GunTurret(self.clock, self.gameScene, "l",
-                                      self.gun_tech, self.fireControl_tech,
-                                      self.computer_tech, self)
+        turretB = GunTurret.GunTurret(self.clock, self.gameScene, "l", self)
         turretB.setPos(self.gun_turrets_pos[1])
         turretB.setDFromShipCenter(625 - self.rect().width() / 2)
-        turretB.setZValue(7)
+        turretB.setZValue(3)
         self.gameScene.addItem(turretB)
 
-        turretA = GunTurret.GunTurret(self.clock, self.gameScene, "l",
-                                      self.gun_tech, self.fireControl_tech,
-                                      self.computer_tech, self)
+        turretA = GunTurret.GunTurret(self.clock, self.gameScene, "l", self)
         turretA.setPos(self.gun_turrets_pos[2])
         turretA.setDFromShipCenter(800 - self.rect().width() / 2)
-        turretA.setZValue(7)
+        turretA.setZValue(3)
         self.gameScene.addItem(turretA)
 
         self.gun_turrets_list = [turretC, turretB, turretA]

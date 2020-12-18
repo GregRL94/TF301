@@ -5,7 +5,7 @@
     Author: Grégory LARGANGE
     Date created: 12/10/2020
     Last modified by: Grégory LARGANGE
-    Date last modified: 10/12/2020
+    Date last modified: 18/12/2020
     Python version: 3.8.1
 '''
 
@@ -34,6 +34,7 @@ class GameScene(QGraphicsScene):
             thisIslandId = self.nextIslandID
             self.currentItem.setData(0, thisIslandId)
             self.currentItem.setData(1, "ISLAND")
+            self.currentItem.setZValue(1)
             self.nextIslandID += 1
             self.addItem(self.currentItem)
             self.islandsList.append(self.currentItem)
@@ -43,7 +44,7 @@ class GameScene(QGraphicsScene):
         shipsInDRange = []
 
         for ship in self.shipList.values():
-            if (ship.shipID != ship0ID) & (ship.shipTag != ship0Tag):
+            if (ship.data(0) != ship0ID) & (ship.data(1) != ship0Tag):
                 effS0ScanRange = ship0ScanRange - (ship0ScanRange - 1000) * ship.concealement
                 shipNCenterSPos = self.geometrics.parallelepiped_Center(
                     ship.pos(), ship.rect().width(), ship.rect().height())
@@ -64,9 +65,11 @@ class GameScene(QGraphicsScene):
         self.addEllipse(point.x() - 50, point.y() - 50, 100, 100,
                         QPen(QColor("blue")), QBrush(QColor("blue")))
 
-    def addShip(self, shipObject):
+    def addShip(self, shipObject, tag):
         thisShipId = self.nextShipID
-        shipObject.setID(thisShipId)
+        shipObject.setData(0, thisShipId)
+        shipObject.setData(1, tag)
+        shipObject.setZValue(2)
         self.shipList[thisShipId] = shipObject
         self.nextShipID += 1
         self.addItem(shipObject)

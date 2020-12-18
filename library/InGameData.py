@@ -162,6 +162,7 @@ class TechsData():
     fc_tech_e = [0.3, 0.2, 0.1]  # The higher the tech, the lower the error on target speed
     pc_tech_reduc = [0.1, 0.25, 0.5]  # The higher the tech, the faster the fc error is reduced
     radar_tech_aug = [0, 0.25, 0.37, 0.5]  # The higher the tech, the higher the boost on the base radar range
+    fc_correction_rate = 150  # The rate at which the error on target speed estimation is reduced.
 
 
 class RadioCommunications():
@@ -254,7 +255,7 @@ class RadioCommunications():
 
         """
         for ship in self.gameScene.shipList.values():
-            if ship.shipTag == "ALLY":
+            if ship.data(1) == "ALLY":
                 self.alliedShips.append(ship)
             else:
                 self.ennemyShips.append(ship)

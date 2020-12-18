@@ -5,7 +5,7 @@
     Author: Grégory LARGANGE
     Date created: 09/10/2020
     Last modified by: Grégory LARGANGE
-    Date last modified: 14/12/2020
+    Date last modified: 18/12/2020
     Python version: 3.8.1
 '''
 
@@ -20,13 +20,8 @@ from library import MathsFormulas, InGameData
 
 class Ship(QGraphicsRectItem):
 
-    #--- USED FOR IDENTIFICATION IN GAME ---#
-    shipID = None
-    shipTag = ""
-    #---------------------------------------#
-
     #--------- HULL CHARACTERISTICS --------#
-    _type = "BB"
+    _type = ""
     max_hp = 0
     armor = 0
     max_shield = 0
@@ -44,23 +39,21 @@ class Ship(QGraphicsRectItem):
     laser_turrets_pos = None
     guns_range = 0
     guns_tech = 0
-    fireControl_tech = 0
-    computer_tech = 0
+    fc_tech = 0
+    pc_tech = 0
     radar_tech = 0
-    radar_b_values = [0, 0.25, 0.37, 0.5]
     #---------------------------------------#
 
     #-------------- SCAN RATES -------------#
-    radar_scan_rate = 9
-    target_acquisition_rate = 9
+    refresh_rate = 9
     print_point_rate = 99  # TO DELETE ONLY FOR VISU
     #---------------------------------------#
 
     #------ CRITICAL COMPONENT STATES ------#
-    bridge_state = "ok"
-    engine_state = "ok"
-    radar_state = "ok"
-    shield_generator_state = "ok"
+    bridge_state = "OK"
+    engine_state = "OK"
+    radar_state = "OK"
+    shield_generator_state = "OK"
     #---------------------------------------#
 
     #-------- DETECTION AND RANGING --------#
@@ -128,14 +121,14 @@ class Ship(QGraphicsRectItem):
         if self.next_radarScan <= 0:
             self.scan()
             self.ships_in_range = self.computeShipsInRange()
-            self.next_radarScan = self.radar_scan_rate
+            self.next_radarScan = self.refresh_rate
         else:
             self.next_radarScan -= 1
 
         if self.next_targetAcquisition <= 0:
             for turret in self.gun_turrets_list:
-                turret.set_Target(self.autoSelectTarget())
-            self.next_targetAcquisition = self.target_acquisition_rate
+                turret.setTarget(self.autoSelectTarget())
+            self.next_targetAcquisition = self.refresh_rate
         else:
             self.next_targetAcquisition -= 1
 
@@ -297,8 +290,8 @@ class Ship(QGraphicsRectItem):
             self.selectNextCheckpoint()
 
     def scan(self):
-        self.detected_ships = self.gameScene.shipsInDetectionRange(self.shipID,
-                                                                   self.shipTag,
+        self.detected_ships = self.gameScene.shipsInDetectionRange(self.data(0),
+                                                                   self.data(1),
                                                                    self.center,
                                                                    self.detection_range)
 
@@ -338,12 +331,6 @@ class Ship(QGraphicsRectItem):
     def repair(self):
         True
 
-    def setID(self, shipId):
-        self.shipID = shipId
-
-    def setTag(self, shipTag):
-        self.shipTag = shipTag
-
     def printInfos(self):
         txt = ""
         num_turr = 0
@@ -373,8 +360,8 @@ class Ship(QGraphicsRectItem):
         print("")
         print("--------- TECHNOLOGIES ------------")
         print("GUN TECHNOLOGY:", "Mk", str(self.gun_tech))
-        print("FIRE CONTROL TECHNOLOGY:", "Mk", str(self.fireControl_tech))
-        print("TARGETING COMPUTER TECHNOLOGY:", "Mk", str(self.computer_tech))
+        print("FIRE CONTROL TECHNOLOGY:", "Mk", str(self.fc_tech))
+        print("TARGETING COMPUTER TECHNOLOGY:", "Mk", str(self.pc_tech))
         print("RADAR TECHNOLOGY:", "Mk", str(self.radar_tech))
         print("")
         print("----------- VISIBILITY ------------")
@@ -399,10 +386,10 @@ class Ship(QGraphicsRectItem):
         print("")
 
     def paint(self, painter, option, widget=None):
-        if self.shipTag == "ALLY":
+        if self.data(1) == "ALLY":
             painter.setBrush(QBrush(QColor("blue")))
             painter.setPen(QPen(QColor("darkBlue"), 10))
-        if self.shipTag == "ENNEMY":
+        if self.data(1) == "ENNEMY":
             painter.setBrush(QBrush(QColor("red")))
             painter.setPen(QPen(QColor("darkred"), 10))
         painter.drawEllipse(self.rect())

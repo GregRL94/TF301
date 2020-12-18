@@ -112,18 +112,15 @@ class Ui_TSKF301MainWindow(object):
 
         ship1 = Battleship.Battleship(self.mainClock, self.graphicsScene,
                                       QtCore.QPointF(0, 0), 0, 0, 0, 0)
-        ship1.setTag("ALLY")
-        self.graphicsScene.addShip(ship1)
+        self.graphicsScene.addShip(ship1, "ALLY")
 
         ship2 = Battleship.Battleship(self.mainClock, self.graphicsScene,
                                       QtCore.QPointF(10000, 15000), 0, 0, 0, 0)
-        ship2.setTag("ALLY")
-        self.graphicsScene.addShip(ship2)
+        self.graphicsScene.addShip(ship2, "ALLY")
 
         ship3 = Battleship.Battleship(self.mainClock, self.graphicsScene,
                                       QtCore.QPointF(12000, 17000), 0, 0, 0, 0)
-        ship3.setTag("ENNEMY")
-        self.graphicsScene.addShip(ship3)
+        self.graphicsScene.addShip(ship3, "ENNEMY")
 
         self.rComs.updateShipLists()
 
