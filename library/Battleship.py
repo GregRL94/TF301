@@ -5,7 +5,7 @@
     Author: Grégory LARGANGE
     Date created: 14/10/2020
     Last modified by: Grégory LARGANGE
-    Date last modified: 18/12/2020
+    Date last modified: 19/12/2020
     Python version: 3.8.1
 '''
 
@@ -15,8 +15,60 @@ from library import Ship, GunTurret
 
 
 class Battleship(Ship.Ship):
+    """
 
-    def __init__(self, clock, gameScene, pos, gun_tech, fireControl_tech, pc_tech, radar_tech):
+    A class derived from Ship class to create Battleship type of ships.
+
+    ...
+
+    Attributes
+    ----------
+    None
+
+    Methods
+    -------
+    __init__(clock : MainClock, gameScene : GameScene, pos : QPointF,
+             gun_tech : int, fireControl_tech : int, pc_tech : int, radar_tech : int)
+        The constructor of the class.
+
+    spawnWeapons()
+        Spawn the ships turrets.
+
+    """
+
+    def __init__(self, clock, gameScene, pos, gun_tech, fireControl_tech,
+                 pc_tech, radar_tech):
+        """
+
+        Parameters
+        ----------
+        clock : MainClock
+            The main clock of the game.
+        gameScene : GameScene
+            The main display of the game.
+        pos : QPointF
+            The world poijnt at which to spawn the projectile.
+        gun_tech : int
+            The gun technology level to be used on the ship. Between 0 and 2.
+        fireControl_tech : int
+            The fire control technology level to be used opn the ship.
+            Between 0 and 2.
+        pc_tech : int
+            The computer technology level to be used on the ship.
+            Between 0 and 2.
+        radar_tech : int
+            The radar technology level to be used on the ship.
+            Between 0 and 3.
+
+        Returns
+        -------
+        None.
+
+        Summary
+        -------
+        The constructor of the class.
+
+        """
         super(Battleship, self).__init__(clock, gameScene)
 
         rect = QRectF(0, 0, 1150, 250)
@@ -46,10 +98,22 @@ class Battleship(Ship.Ship):
 
         self.setRect(rect)
         self.setPos(pos)
-        self.spawn_Weapons()
+        self.spawnWeapons()
         self.printInfos()
 
-    def spawn_Weapons(self):
+    def spawnWeapons(self):
+        """
+
+        Returns
+        -------
+        None.
+
+        Summary
+        -------
+        Spawns the turrets of the battlship at predefined places. See documentation
+        for further informations.
+
+        """
         self.gun_turrets_pos = [QPointF(self.x() + 175, self.y() + 75),
                                  QPointF(self.x() + 625, self.y() + 75),
                                  QPointF(self.x() + 800, self.y() + 75)]

@@ -5,7 +5,7 @@
     Author: Grégory LARGANGE
     Date created: 12/10/2020
     Last modified by: Grégory LARGANGE
-    Date last modified: 18/12/2020
+    Date last modified: 19/12/2020
     Python version: 3.8.1
 '''
 
@@ -81,6 +81,41 @@ class GunTurret(QGraphicsRectItem):
     computeFiringSolution()
         Calculate the angle at which to rotate the turret to in order to hit the
         target.
+
+    rotateToTAzimut()
+        Rotates the turret towards target angle.
+
+    chooseShellType(shell_type : string)
+        Selects the type of shell to shoot depending on shell_type.
+
+    gunDispersion()
+        Applies a random dispersion depending on gun_acc to the azimut of an
+        individual gun.
+
+    fcREG()
+        Applies a random error depending on fc_error to the input mesured target
+        speed.
+
+    fcErrorReduction()
+        Gradually reduces the error fc_error depending on fc_e_reduc_rate.
+
+    computeSpawnPos(yposOnTur : int, angleInRad : float)
+        Computes the spawn position of a projectile depending on the position
+        of the gun in the turret, and the current turret rotation.
+
+    shoot()
+        Spawn projectiles.
+
+    setDFromShipCenter(distanceFromCenter : float)
+        Sets the distance between the center of the turret and its parent ship
+        center.
+
+    printInfos()
+        Print onfos about the turret.
+
+    paint()
+        Instructions to draw the item on the game scene.
+
     """
 
     d_shipCenter = 0
@@ -190,7 +225,7 @@ class GunTurret(QGraphicsRectItem):
             self.nextShot -= 1
         if self.target is not None:
             if self.next_fc_correction <= 0:
-                self.fc_Error_Reduction()
+                self.fcErrorReduction()
                 self.next_fc_correction = self.fc_corr_rate
             else:
                 self.next_fc_correction -= 1
@@ -260,8 +295,8 @@ class GunTurret(QGraphicsRectItem):
             self.p_data.speeds_shellType[1]
         shellSpeed *= self.parentShip.refresh_rate  # We accomodate for the fact that the firing soluting is not computed every frame
         estimatedFlightTime = round(self.t_range / shellSpeed, 4)
-        estimated_t_speed_x = self.fc_RNG_Error(self.t_v_x)
-        estimated_t_speed_y = self.fc_RNG_Error(self.t_v_y)
+        estimated_t_speed_x = self.fcREG(self.t_v_x)
+        estimated_t_speed_y = self.fcREG(self.t_v_y)
         # See docs for more infos on the maths
         estimatedPos = QPointF(self.target.pos().x() + estimated_t_speed_x * estimatedFlightTime,
                                self.target.pos().y() + estimated_t_speed_y * estimatedFlightTime)
@@ -303,7 +338,7 @@ class GunTurret(QGraphicsRectItem):
                                               self.rect().height() / 2))
         self.setRotation(self.azimut)
 
-    def choose_Shell_Type(self, shell_type):
+    def chooseShellType(self, shell_type):
         """
 
         Parameters
@@ -322,7 +357,7 @@ class GunTurret(QGraphicsRectItem):
         """
         self.shell_t = shell_type
 
-    def gun_Dispersion(self):
+    def gunDispersion(self):
         """
 
         Returns
@@ -339,7 +374,7 @@ class GunTurret(QGraphicsRectItem):
         disp = round(random.uniform(0, self.gun_acc), 4)
         return self.azimut - disp if sign < 0.5 else self.azimut + disp
 
-    def fc_RNG_Error(self, speedInput):
+    def fcREG(self, speedInput):
         """
 
         Parameters
@@ -361,7 +396,7 @@ class GunTurret(QGraphicsRectItem):
         speedOutput = random.uniform(speedInput - error, speedInput + error)
         return speedOutput
 
-    def fc_Error_Reduction(self):
+    def fcErrorReduction(self):
         """
 
         Returns
@@ -377,7 +412,7 @@ class GunTurret(QGraphicsRectItem):
         if self.fc_error < 0:
             self.fc_error = 0
 
-    def compute_SpawnsPos(self, yposOnTur, angleInRad):
+    def computeSpawnPos(self, yposOnTur, angleInRad):
         """
 
         Parameters
@@ -423,27 +458,27 @@ class GunTurret(QGraphicsRectItem):
         # Appliable to all: setZValue defines which item will be drawn on top of another.
         # The item with the highest Z value will be on top.
         if self.gun_number == 1:
-            a = self.gun_Dispersion()
+            a = self.gunDispersion()
             shell = Projectile.Projectile(self.clock, self.gameScene, self.p_data,
                                           a, self.t_range, self.shell_s, self.shell_t)
-            spawnPos = self.compute_SpawnsPos(13, az_rad)
+            spawnPos = self.computeSpawnPos(13, az_rad)
             shell.setZValue(4)
             shell.setPos(spawnPos)
 
             self.gameScene.addItem(shell)
 
         elif self.gun_number == 2:
-            a = self.gun_Dispersion()
+            a = self.gunDispersion()
             shell0 = Projectile.Projectile(self.clock, self.gameScene, self.p_data,
                                            a, self.t_range, self.shell_s, self.shell_t)
-            spawnPos = self.compute_SpawnsPos(10, az_rad)
+            spawnPos = self.computeSpawnPos(10, az_rad)
             shell0.setZValue(4)
             shell0.setPos(spawnPos)
 
-            a = self.gun_Dispersion()
+            a = self.gunDispersion()
             shell1 = Projectile.Projectile(self.clock, self.gameScene, self.p_data,
                                            a, self.t_range, self.shell_s, self.shell_t)
-            spawnPos = self.compute_SpawnsPos(40, az_rad)
+            spawnPos = self.computeSpawnPos(40, az_rad)
             shell1.setZValue(4)
             shell1.setPos(spawnPos)
 
@@ -451,24 +486,24 @@ class GunTurret(QGraphicsRectItem):
             self.gameScene.addItem(shell1)
 
         elif self.gun_number == 3:
-            a = self.gun_Dispersion()
+            a = self.gunDispersion()
             shell0 = Projectile.Projectile(self.clock, self.gameScene, self.p_data,
                                            a, self.t_range, self.shell_s, self.shell_t)
-            spawnPos = self.compute_SpawnsPos(5, az_rad)
+            spawnPos = self.computeSpawnPos(5, az_rad)
             shell0.setZValue(4)
             shell0.setPos(spawnPos)
 
-            a = self.gun_Dispersion()
+            a = self.gunDispersion()
             shell1 = Projectile.Projectile(self.clock, self.gameScene, self.p_data,
                                            a, self.t_range, self.shell_s, self.shell_t)
-            spawnPos = self.compute_SpawnsPos(50, az_rad)
+            spawnPos = self.computeSpawnPos(50, az_rad)
             shell1.setZValue(4)
             shell1.setPos(spawnPos)
 
-            a = self.gun_Dispersion()
+            a = self.gunDispersion()
             shell2 = Projectile.Projectile(self.clock, self.gameScene, self.p_data,
                                            a, self.t_range, self.shell_s, self.shell_t)
-            spawnPos = self.compute_SpawnsPos(95, az_rad)
+            spawnPos = self.computeSpawnPos(95, az_rad)
             shell2.setZValue(4)
             shell2.setPos(spawnPos)
 

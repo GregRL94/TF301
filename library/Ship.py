@@ -77,6 +77,24 @@ class Ship(QGraphicsRectItem):
     #---------------------------------------#
 
     def __init__(self, clock, gameScene):
+        """
+
+        Parameters
+        ----------
+        clock : MainClock
+            The main clock of the game.
+        gameScene : GameScene
+            The main display of the game.
+
+        Returns
+        -------
+        None.
+
+        Summary
+        -------
+        The constructor of the class.
+
+        """
         super(Ship, self).__init__(QRectF(0, 0, 0, 0))
         self.geometrics = MathsFormulas.Geometrics()
         self.cinematics = MathsFormulas.Cinematics()
