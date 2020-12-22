@@ -121,6 +121,17 @@ class Ship(QGraphicsRectItem):
         self.clock.clockSignal.connect(self.fixedUpdate)
 
     def fixedUpdate(self):
+        """
+
+        Returns
+        -------
+        None.
+
+        Summary
+        -------
+        Updates the ship at each clock signal.
+
+        """
         self.updateCenter()
         self.updateRCenters()
         self.move()
@@ -151,16 +162,55 @@ class Ship(QGraphicsRectItem):
             self.next_targetAcquisition -= 1
 
     def updateCenter(self):
+        """
+
+        Returns
+        -------
+        None.
+
+        Summary
+        -------
+        Updates the position of the ship center.
+
+        """
         self.center = self.geometrics.parallelepiped_Center(self.pos(),
                                                             self.rect().width(),
                                                             self.rect().height())
+
     def updateRCenters(self):
+        """
+
+        Returns
+        -------
+        None.
+
+        Summary
+        -------
+        Updates the position od the ship rotation centers.
+
+        """
         self.r_centers = self.cinematics.rotationCenters(self.center,
                                                          self.heading,
                                                          self.speed,
                                                          self.turn_rate)
 
     def reachSpeed(self, speedOption):
+        """
+
+        Parameters
+        ----------
+        speedOption : string
+            A string corresponding to a key of the speed_option dictionary.
+
+        Returns
+        -------
+        None.
+
+        Summary
+        -------
+        Tries to reach the discrete speed value corresponding to speedOption.
+
+        """
         targetSpeed = 0
 
         if speedOption is None:
@@ -171,6 +221,17 @@ class Ship(QGraphicsRectItem):
         self.speed += self.controllers.proportional(targetSpeed, self.speed, self.max_accel)
 
     def setSpeed(self):
+        """
+
+        Returns
+        -------
+        None.
+
+        Summary
+        -------
+        Sets the speed that the ship should reach.
+
+        """
         if self.checkpoint is None:
             if self.speed_user_override:
                 self.reachSpeed(self.speed_user_override)
@@ -182,9 +243,7 @@ class Ship(QGraphicsRectItem):
             print("Remaining distance to checkpoint:", self.geometrics.distance_A_B(self.center,
                                                                                     self.checkpoint))
             brakeD = self.cinematics.brakeDistance(self.speed, -self.max_accel)
-            # print("Calculated break distance at current speed", self.speed, ":", brakeD)
             if self.geometrics.distance_A_B(self.center, self.checkpoint) <= brakeD:
-                # print("brake trigger distance reached")
                 self.reachSpeed("STOP")
             elif self.checkpointInTurnRadius() is False:
                 print("Slowing down to match checkpoint")
@@ -198,6 +257,17 @@ class Ship(QGraphicsRectItem):
                     self.reachSpeed(self.default_speed)
 
     def computeHeading(self):
+        """
+
+        Returns
+        -------
+        None.
+
+        Summary
+        -------
+        Computes the rotation angle to apply in order to reach the next checkpoint.
+
+        """
         distance = self.geometrics.distance_A_B(self.center, self.checkpoint)
         a_h = (self.checkpoint.x() - self.center.x()) / distance
         if a_h > 1.:
@@ -209,6 +279,18 @@ class Ship(QGraphicsRectItem):
             self.t_heading *= -1
 
     def rotateToHeading(self):
+        """
+
+        Returns
+        -------
+        None.
+
+        Summary
+        -------
+        Applies a basic controller to rotate the ship from its current heading
+        to the target heading.
+
+        """
         diff = self.geometrics.smallestAngle(self.t_heading, self.heading)
         if diff < -0.5:
             self.rot_direction = -1
@@ -227,44 +309,74 @@ class Ship(QGraphicsRectItem):
         True
 
     def checkpointReached(self):
+        """
+
+        Returns
+        -------
+        bool
+            Indicates if a checkpoint has been reached.
+
+        Summary
+        -------
+        Checks if the ship center is within a tolerance rectangle of a point.
+        Returns True if yes, False otherwise.
+
+        """
         if self.checkpoint is not None:
             toleranceRect = QRectF(self.checkpoint.x() - 250,
                                    self.checkpoint.y() - 250,
                                    500, 500)
             if toleranceRect.contains(self.center):
-                # print("Checkpoint reached. Returning True")
                 self.checkpoint = None
                 return True
             else:
                 return False
         else:
-            # print("No checkpoints, returning True")
             return True
 
     def selectNextCheckpoint(self):
-        # print("Selecting new checkpoint...")
+        """
+
+        Returns
+        -------
+        None.
+
+        Summary
+        -------
+        Selects the next point in the trajectory list to be reached. If there
+        is no more points, resets the trajectory and current checkpoint.
+
+        """
         if self.trajectory is None:
             self.checkpoint = None
             self.sel_checkpoint_id = None
-            # print("No trajectory to follow")
         else:
             if self.sel_checkpoint_id is None:
-                # print("Selecting first checkpoint")
                 self.checkpoint = self.trajectory[0]
-                # print(self.checkpoint.x(), self.checkpoint.y())
                 self.sel_checkpoint_id = 0
             else:
-                # print("Selecting next checkpoint")
                 if self.sel_checkpoint_id + 1 <= len(self.trajectory) - 1:
                     self.sel_checkpoint_id += 1
                     self.checkpoint = self.trajectory[self.sel_checkpoint_id]
                 else:
-                    # print("No more checkpoints. Passing everything to None")
                     self.trajectory = None
                     self.chekpoint = None
                     self.sel_checkpoint = None
 
     def checkpointInTurnRadius(self):
+        """
+
+        Returns
+        -------
+        bool
+            True if the point is reachable, False otherwise.
+
+        Summary
+        -------
+        Calculates if a point is reachable with a turn. returns True if yes,
+        False otherwise.
+
+        """
         rot_center = QPointF()
 
         if self.rot_direction < 0:
@@ -284,6 +396,19 @@ class Ship(QGraphicsRectItem):
             return True
 
     def updateTurretPos(self):
+        """
+
+        Returns
+        -------
+        None.
+
+        Summary
+        -------
+        Updates the position of the ship's turret in game world referential
+        according to the ship's own movements and the position of its turrets
+        in its referential.
+
+        """
         for turret in self.gun_turrets_list:
             tur_angle = 180 if turret.d_shipCenter < 0 else 0
             teta = math.radians(self.heading + tur_angle)
@@ -294,6 +419,17 @@ class Ship(QGraphicsRectItem):
             turret.setPos(nextTurPosX, nextTurPosY)
 
     def move(self):
+        """
+
+        Returns
+        -------
+        None.
+
+        Summary
+        -------
+        Moves the ship according to is ship in the direction heading.
+
+        """
         if self.checkpoint is not None:
             self.computeHeading()
             self.rotateToHeading()
@@ -308,15 +444,54 @@ class Ship(QGraphicsRectItem):
             self.selectNextCheckpoint()
 
     def scan(self):
+        """
+
+        Returns
+        -------
+        None.
+
+        Summary
+        -------
+        Scans the game world for ennemy ships in its detection range.
+
+        """
         self.detected_ships = self.gameScene.shipsInDetectionRange(self.data(0),
                                                                    self.data(1),
                                                                    self.center,
                                                                    self.detection_range)
 
     def receiveRadioComm(self, infosList):
+        """
+
+        Parameters
+        ----------
+        infosList : list
+            Q list of Ship object.
+
+        Returns
+        -------
+        None.
+
+        Summary
+        -------
+        Receives a list of ennemy ships detected by allied ships.
+
+        """
         self.rcom_ships = infosList
 
     def computeShipsInRange(self):
+        """
+
+        Returns
+        -------
+        sIR : list
+            A list of all detected ennemy ships in gun range.
+
+        Summary
+        -------
+        Computes and returns a list of all enney detected ships zithin gun range.
+
+        """
         sIR = []
 
         if self.detected_ships is not None:
@@ -339,6 +514,18 @@ class Ship(QGraphicsRectItem):
         return sIR
 
     def autoSelectTarget(self):
+        """
+
+        Returns
+        -------
+        target : Ship
+            The Ship object to target.
+
+        Summary
+        -------
+        Computes and return the best ship to set as target.
+
+        """
         target = None
 
         if self.ships_in_range is not None:
@@ -350,6 +537,17 @@ class Ship(QGraphicsRectItem):
         True
 
     def printInfos(self):
+        """
+
+        Returns
+        -------
+        None.
+
+        Summary
+        -------
+        Print onfos about the ship.
+
+        """
         txt = ""
         num_turr = 0
         num_laser = 0
@@ -404,6 +602,26 @@ class Ship(QGraphicsRectItem):
         print("")
 
     def paint(self, painter, option, widget=None):
+        """
+
+        Parameters
+        ----------
+        painter : QPainter
+            A QPainter object.
+        option : QtOption
+            Options to apply to the QPainter.
+        widget : QWidget, optional
+            A QWidget object. The default is None.
+
+        Returns
+        -------
+        None.
+
+        Summary
+        -------
+        Instructions to draw the item on the game scene.
+
+        """
         if self.data(1) == "ALLY":
             painter.setBrush(QBrush(QColor("blue")))
             painter.setPen(QPen(QColor("darkBlue"), 10))
