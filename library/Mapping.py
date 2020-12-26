@@ -745,4 +745,3 @@ class Astar():
                             self.openList.addItem(node)
                         else:
                             self.openList.updateItem(node)
-
