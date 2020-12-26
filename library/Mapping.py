@@ -743,3 +743,5 @@ class Astar():
                         node.parent = self.currentNode
                         if node not in self.openList.items:
                             self.openList.addItem(node)
+                        else:
+                            self.openList.updateItem(node)
