@@ -36,8 +36,7 @@ class Battleship(Ship.Ship):
 
     """
 
-    def __init__(self, clock, gameScene, pos, gun_tech, fireControl_tech,
-                 pc_tech, radar_tech):
+    def __init__(self, clock, gameScene, gameMap, mapSlicing, data_list, pos, params):
         """
 
         Parameters
@@ -46,18 +45,23 @@ class Battleship(Ship.Ship):
             The main clock of the game.
         gameScene : GameScene
             The main display of the game.
+        gameMap : list of lists.
+            The gameMap as a matrix.
+        mapSlicing : int
+            The resolution of the map.
+        dataList : list of Objects
+            A list containing references to data holding classes.
         pos : QPointF
             The world poijnt at which to spawn the projectile.
-        gun_tech : int
-            The gun technology level to be used on the ship. Between 0 and 2.
-        fireControl_tech : int
-            The fire control technology level to be used opn the ship.
+        params : list of int.
+            A list containing indexes to use for technology levels.
+            [gun_tech, fireControl_tech, pc_tech, radar_tech]
+            gun_tech : The gun technology level to be used on the ship. Between 0 and 2.
+            fireControl_tech : The fire control technology level to be used on the ship.
             Between 0 and 2.
-        pc_tech : int
-            The computer technology level to be used on the ship.
+            pc_tech : The computer technology level to be used on the ship.
             Between 0 and 2.
-        radar_tech : int
-            The radar technology level to be used on the ship.
+            radar_tech : The radar technology level to be used on the ship.
             Between 0 and 3.
 
         Returns
@@ -69,7 +73,9 @@ class Battleship(Ship.Ship):
         The constructor of the class.
 
         """
-        super(Battleship, self).__init__(clock, gameScene)
+        super(Battleship, self).__init__(clock, gameScene, gameMap, mapSlicing,
+                                         data_list[0], data_list[1], data_list[2],
+                                         data_list[3], data_list[4], data_list[5])
 
         rect = QRectF(0, 0, 1150, 250)
         self._type = "BB"
@@ -89,15 +95,16 @@ class Battleship(Ship.Ship):
         self.concealement = self.base_concealement = 0.1
         self.base_detection_range = 5000
         self.guns_range = self.projectileData.ranges_shellSize[2]
-        self.gun_tech = gun_tech
-        self.fc_tech = fireControl_tech
-        self.pc_tech = pc_tech
-        self.radar_tech = radar_tech
+        self.gun_tech = params[0]
+        self.fc_tech = params[1]
+        self.pc_tech = params[2]
+        self.radar_tech = params[3]
         self.detection_range = self.base_detection_range +\
             self.base_detection_range * self.techData.radar_tech_aug[self.radar_tech]
 
         self.setRect(rect)
         self.setPos(pos)
+
         self.spawnWeapons()
         self.printInfos()
 

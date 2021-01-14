@@ -9,6 +9,7 @@
     Python version: 3.8.1
 '''
 
+from PyQt5.QtCore import Qt, QPointF
 from PyQt5.QtGui import QPen, QBrush, QColor
 from PyQt5.QtWidgets import QGraphicsScene
 
@@ -17,6 +18,7 @@ from library import MathsFormulas, Island
 
 class GameScene(QGraphicsScene):
 
+    attachedGView = None
     nextShipID = 0
     nextIslandID = 0
     currentItem = None
@@ -27,6 +29,18 @@ class GameScene(QGraphicsScene):
 
         self.shipList = {}
         self.islandsList = []
+
+    def mousePressEvent(self, mouseDown):
+        itemSelected = self.itemAt(mouseDown.scenePos(),
+                                   self.attachedGView.transform())
+        if (mouseDown.button() == Qt.RightButton) and not itemSelected:
+            for item in self.selectedItems():
+                point = QPointF(int(mouseDown.scenePos().x()),
+                                int(mouseDown.scenePos().y()))
+                item.setDestination(point)
+            mouseDown.accept()
+        else:
+            super(GameScene, self).mousePressEvent(mouseDown)
 
     def displayMap(self, obstaclesList):
         for obstacle in obstaclesList:
@@ -61,9 +75,9 @@ class GameScene(QGraphicsScene):
         for i in range(0, int(self.width() + steps), steps):
             self.addLine(i, 0, i, self.height(), QPen(QColor("black"), 4))
 
-    def printPoint(self, point):
-        self.addEllipse(point.x() - 50, point.y() - 50, 100, 100,
-                        QPen(QColor("blue")), QBrush(QColor("blue")))
+    def printPoint(self, point, size, color):
+        self.addEllipse(point.x() - int(size / 2), point.y() - int(size / 2), size, size,
+                        QPen(QColor(color)), QBrush(QColor(color)))
 
     def addShip(self, shipObject, tag):
         thisShipId = self.nextShipID

@@ -85,6 +85,9 @@ class HEAP():
     swap(_heapItemA : HEAPItem, _heapItemB : HEAPItem)
         Swaps the position of _heapItemA and _heapItemB in the dataset.
 
+    clearItems()
+        Clears the dataset.
+
     """
 
     def __init__(self):
@@ -296,3 +299,17 @@ class HEAP():
         tmp_itemAIndex = _heapItemA.heapIndex
         _heapItemA.heapIndex = _heapItemB.heapIndex
         _heapItemB.heapIndex = tmp_itemAIndex
+
+    def clearItems(self):
+        """
+
+        Returns
+        -------
+        None.
+
+        Summary
+        -------
+        Clears the dataset.
+
+        """
+        self.items.clear()

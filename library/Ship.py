@@ -11,11 +11,11 @@
 
 import math
 
-from PyQt5.QtCore import QRectF, QPointF
-from PyQt5.QtGui import QColor, QPen, QBrush
-from PyQt5.QtWidgets import QGraphicsRectItem
+from PyQt5.QtCore import Qt, QRectF, QPointF
+from PyQt5.QtGui import QColor, QPen, QBrush, QCursor
+from PyQt5.QtWidgets import QGraphicsItem, QGraphicsRectItem
 
-from library import MathsFormulas, InGameData
+from library import Mapping
 
 
 class Ship(QGraphicsRectItem):
@@ -65,18 +65,21 @@ class Ship(QGraphicsRectItem):
     #-------------- PATHFINDING ------------#
     center = QPointF()
     r_centers = None
-    trajectory = [QPointF(5000, 5000),
-                  QPointF(10000, 2500),
-                  QPointF(12500, 12500)]
+    trajectory = None
+# [QPointF(5000, 5000),
+# QPointF(15000, 5000),
+# QPointF(15000, 15000),
+# QPointF(19000, 19000)]
     checkpoint = None
     sel_checkpoint_id = None
-    is_final_checkpoint = True
+    targetPoint = None
     heading = 0
     t_heading = 0
     rot_direction = 0
     #---------------------------------------#
 
-    def __init__(self, clock, gameScene):
+    def __init__(self, clock, gameScene, gameMap, mapSlicing, geo, cin, con,
+                 tur_dat, p_dat, tech_dat):
         """
 
         Parameters
@@ -96,12 +99,17 @@ class Ship(QGraphicsRectItem):
 
         """
         super(Ship, self).__init__(QRectF(0, 0, 0, 0))
-        self.geometrics = MathsFormulas.Geometrics()
-        self.cinematics = MathsFormulas.Cinematics()
-        self.controllers = MathsFormulas.Controllers()
-        self.turretData = InGameData.TurretData()
-        self.projectileData = InGameData.ProjectileData()
-        self.techData = InGameData.TechsData()
+        self.astar = Mapping.Astar(gameMap, mapSlicing)
+        self.geometrics = geo
+        self.cinematics = cin
+        self.controllers = con
+        self.turretData = tur_dat
+        self.projectileData = p_dat
+        self.techData = tech_dat
+
+        self.setAcceptHoverEvents(True)
+        self.setFlag(QGraphicsItem.ItemIsSelectable, True)
+        self.setFlag(QGraphicsItem.ItemIsFocusable, True)
 
         self.gameScene = gameScene
         self.clock = clock
@@ -138,11 +146,11 @@ class Ship(QGraphicsRectItem):
 
         # TO BE DELETED WHEN NOT NEEDED #
         if self.next_point_print <= 0:
-            self.gameScene.printPoint(self.center)
+            self.gameScene.printPoint(self.center, 100, "blue")
             if self.rot_direction < 0:
-                self.gameScene.printPoint(self.r_centers[0])
+                self.gameScene.printPoint(self.r_centers[0], 100, "blue")
             elif self.rot_direction > 0:
-                self.gameScene.printPoint(self.r_centers[1])
+                self.gameScene.printPoint(self.r_centers[1], 100, "blue")
             self.next_point_print = self.print_point_rate
         else:
             self.next_point_print -= 1
@@ -160,6 +168,31 @@ class Ship(QGraphicsRectItem):
             self.next_targetAcquisition = self.refresh_rate
         else:
             self.next_targetAcquisition -= 1
+
+    def hoverMoveEvent(self, mousePos):
+        """
+
+        Parameters
+        ----------
+        mousePos : QEvent
+            An event indicating that the mouse was moved over the item..
+
+        Returns
+        -------
+        None.
+
+        Summary
+        -------
+        Changes the apperance of the cursor and display basic infos.
+
+        """
+        self.setCursor(QCursor(Qt.PointingHandCursor))
+        # Display an information bubble
+        info = self._type + str(self.data(0)) + "  " + "HP: " + str(self.hp)
+        super().setToolTip(info)
+
+    def mousePressEvent(self, mouseDown):
+        print(self._type + str(self.data(0)), "selected at:", mouseDown.pos())
 
     def updateCenter(self):
         """
@@ -235,25 +268,25 @@ class Ship(QGraphicsRectItem):
         if self.checkpoint is None:
             if self.speed_user_override:
                 self.reachSpeed(self.speed_user_override)
-                print("User overridde:", self.speed_user_override)
+                # print("User overridde:", self.speed_user_override)
             else:
                 self.reachSpeed("STOP")
-                print("No user override, using: STOP because no further checkpoints.")
+                # print("No user override, using: STOP because no further checkpoints.")
         else:
-            print("Remaining distance to checkpoint:", self.geometrics.distance_A_B(self.center,
-                                                                                    self.checkpoint))
+            # print("Remaining distance to checkpoint:", self.geometrics.distance_A_B(self.center,
+            #                                                                         self.checkpoint))
             brakeD = self.cinematics.brakeDistance(self.speed, -self.max_accel)
             if self.geometrics.distance_A_B(self.center, self.checkpoint) <= brakeD:
                 self.reachSpeed("STOP")
             elif self.checkpointInTurnRadius() is False:
-                print("Slowing down to match checkpoint")
+                # print("Slowing down to match checkpoint")
                 self.reachSpeed("SLOW")
             else:
                 if self.speed_user_override:
-                    print("No brake triggers. Using user overridde:", self.speed_user_override)
+                    # print("No brake triggers. Using user overridde:", self.speed_user_override)
                     self.reachSpeed(self.speed_user_override)
                 else:
-                    print("No brake triggers. No user override. Using default speed:", self.default_speed)
+                    # print("No brake triggers. No user override. Using default speed:", self.default_speed)
                     self.reachSpeed(self.default_speed)
 
     def computeHeading(self):
@@ -305,8 +338,15 @@ class Ship(QGraphicsRectItem):
                                              self.rect().height() / 2))
         self.setRotation(self.heading)
 
-    def computeTrajectory(self):
-        True
+    def setDestination(self, targetPoint):
+        self.trajectory = []
+        self.targetPoint = targetPoint
+        print("Coordinates received:", self.targetPoint.x(), self.targetPoint.y())
+        self.astar.reset()
+        for node in self.astar.findPath(self.pos(), self.targetPoint):
+            self.trajectory.append(QPointF(node.xPos, node.yPos))
+        for point in self.trajectory:
+            self.gameScene.printPoint(point, 500, "green")
 
     def checkpointReached(self):
         """
@@ -323,9 +363,9 @@ class Ship(QGraphicsRectItem):
 
         """
         if self.checkpoint is not None:
-            toleranceRect = QRectF(self.checkpoint.x() - 250,
-                                   self.checkpoint.y() - 250,
-                                   500, 500)
+            toleranceRect = QRectF(self.checkpoint.x() - 500,
+                                   self.checkpoint.y() - 500,
+                                   1000, 1000)
             if toleranceRect.contains(self.center):
                 self.checkpoint = None
                 return True
@@ -384,15 +424,15 @@ class Ship(QGraphicsRectItem):
         elif self.rot_direction > 0:
             rot_center = self.r_centers[1]
         else:
-            print("No turning detected")
+            # print("No turning detected")
             return None
 
         if self.geometrics.distance_A_B(rot_center, self.checkpoint) <\
             self.cinematics.rotationRadius(self.speed, self.turn_rate):
-            print("Checkpoint is not reachable")
+            # print("Checkpoint is not reachable")
             return False
         else:
-            print("Checkpoint is reachable")
+            # print("Checkpoint is reachable")
             return True
 
     def updateTurretPos(self):
@@ -623,8 +663,12 @@ class Ship(QGraphicsRectItem):
 
         """
         if self.data(1) == "ALLY":
-            painter.setBrush(QBrush(QColor("blue")))
-            painter.setPen(QPen(QColor("darkBlue"), 10))
+            if self.isSelected():
+                painter.setBrush(QBrush(QColor("green")))
+                painter.setPen(QPen(QColor("darkGreen"), 10))
+            else:
+                painter.setBrush(QBrush(QColor("blue")))
+                painter.setPen(QPen(QColor("darkBlue"), 10))
         if self.data(1) == "ENNEMY":
             painter.setBrush(QBrush(QColor("red")))
             painter.setPen(QPen(QColor("darkred"), 10))

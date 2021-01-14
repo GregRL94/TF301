@@ -46,7 +46,7 @@ class Island(QGraphicsPolygonItem):
     """
 
     thickness = 100
-    colorInner = QColor(107, 134, 68)
+    colorInner = QColor(108, 98, 79) # 107, 134, 68
     colorBorder = QColor(108, 98, 79)
 
     def __init__(self, parentScene, polygon):

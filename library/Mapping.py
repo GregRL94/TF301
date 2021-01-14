@@ -439,11 +439,12 @@ class Node(HEAP.HEAPItem):
 
         Summary
         -------
-        Clears costs of the node.
+        Clears costs and parent of the node.
 
         """
         self.gCost = 0
         self.hCost = 0
+        self.parent = None
 
     def compareTo(self, otherNode):
         """
@@ -497,6 +498,9 @@ class Astar():
     __init__(gameMap : list of lists, mapSlicing : int)
         The constructor of the class.
 
+    reset()
+        Resets the algorithm.
+
     getNode(i : int, j : int)
         Gets the node at position (i, j).
 
@@ -549,6 +553,28 @@ class Astar():
                 self.allNodes[i].append(Node(i, j, self.gridS, traversible))
 
         print("***** INITIALIZED A* IN %s SECONDS *****" % (time.time() - sTime))
+
+    def reset(self):
+        """
+
+        Returns
+        -------
+        None.
+
+        Summary
+        -------
+        Reset all Nodes costs and parents, clears openList and closedList. Clears
+        the finalPath.
+
+        """
+        for i in range(len(self.allNodes)):
+            for j in range(len(self.allNodes[0])):
+                self.allNodes[i][j].clearCosts()
+
+        self.openList.clearItems()
+        self.closedList.clear()
+        self.finalPath.clear()
+        self.currentNode = None
 
     def getNode(self, i, j):
         """
