@@ -268,9 +268,14 @@ class MapGenerator():
         poly = QPolygonF()
 
         # Sets the value of each point within the polygon to one in the map grid.
-        for i in range(y, y + h):
-            for j in range(x, x + w):
-                self.gameMap[i][j] = 1
+        for i in range(y, y + h + 1):
+            for j in range(x, x + w + 1):
+                line, column = i, j
+                if line > len(self.gameMap) - 1:
+                    line = len(self.gameMap) - 1
+                if column > len(self.gameMap[0]) - 1:
+                    column = len(self.gameMap[0]) - 1
+                self.gameMap[line][column] = 1
 
         # Creates the polygon that will be used for display
         polyTL = QPoint(x * self.mapS, y * self.mapS)
@@ -321,6 +326,8 @@ class MapGenerator():
             if safeCounter > self.emergencyBreak:
                 break
         print("** GENERATED GAME MAP IN %s SECONDS **" % (time.time() - sTime))
+        for line in range(len(self.gameMap)):
+                print(self.gameMap[line])
         # returns a list of polygon. This list is only used for display.
         return self.polygonsList
 

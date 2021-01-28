@@ -66,10 +66,6 @@ class Ship(QGraphicsRectItem):
     center = QPointF()
     r_centers = None
     trajectory = None
-# [QPointF(5000, 5000),
-# QPointF(15000, 5000),
-# QPointF(15000, 15000),
-# QPointF(19000, 19000)]
     checkpoint = None
     sel_checkpoint_id = None
     targetPoint = None
@@ -113,6 +109,7 @@ class Ship(QGraphicsRectItem):
 
         self.gameScene = gameScene
         self.clock = clock
+        self.next_Path_Update = self.refresh_rate
         self.next_radarScan = 0
         self.next_targetAcquisition = 0
         self.next_point_print = 0  # TO DELETE ONLY FOR VISUALISATION
@@ -155,6 +152,12 @@ class Ship(QGraphicsRectItem):
         else:
             self.next_point_print -= 1
         #################################
+        if (self.next_Path_Update <= 0) & (self.targetPoint is not None):
+            self.updatePath()
+            self.next_Path_Update = self.refresh_rate
+        else:
+            self.next_Path_Update -= 1
+
         if self.next_radarScan <= 0:
             self.scan()
             self.ships_in_range = self.computeShipsInRange()
@@ -347,6 +350,12 @@ class Ship(QGraphicsRectItem):
             self.trajectory.append(QPointF(node.xPos, node.yPos))
         for point in self.trajectory:
             self.gameScene.printPoint(point, 500, "green")
+
+    def updatePath(self):
+        self.trajectory = []
+        self.astar.reset()
+        for node in self.astar.findPath(self.pos(), self.targetPoint):
+            self.trajectory.append(QPointF(node.xPos, node.yPos))
 
     def checkpointReached(self):
         """

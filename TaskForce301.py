@@ -97,7 +97,7 @@ class Ui_TSKF301MainWindow(object):
         self.actionAstar.setShortcut(_translate("TSKF301MainWindow", "A"))
 
     def initGameData(self):
-        self.mainClock = MainClock.MainClock(20)  #ms
+        self.mainClock = MainClock.MainClock(25)  #ms
         self.tf_geometrics = MathsFormulas.Geometrics()
         self.tf_cinematics = MathsFormulas.Cinematics()
         self.tf_controllers = MathsFormulas.Controllers()
@@ -143,17 +143,17 @@ class Ui_TSKF301MainWindow(object):
                                       [0, 0, 0, 0])
         self.graphicsScene.addShip(ship1, "ALLY")
 
-        ship2 = Battleship.Battleship(self.mainClock, self.graphicsScene,
-                                      self.mapGen.gameMap, self.mapGen.mapS,
-                                      self.dataList, QtCore.QPointF(0, 5000),
-                                      [0, 0, 0, 0])
-        self.graphicsScene.addShip(ship2, "ALLY")
+        # ship2 = Battleship.Battleship(self.mainClock, self.graphicsScene,
+        #                               self.mapGen.gameMap, self.mapGen.mapS,
+        #                               self.dataList, QtCore.QPointF(0, 5000),
+        #                               [0, 0, 0, 0])
+        # self.graphicsScene.addShip(ship2, "ALLY")
 
-        ship3 = Battleship.Battleship(self.mainClock, self.graphicsScene,
-                                      self.mapGen.gameMap, self.mapGen.mapS,
-                                      self.dataList, QtCore.QPointF(0, 10000),
-                                      [0, 0, 0, 0])
-        self.graphicsScene.addShip(ship3, "ALLY")
+        # ship3 = Battleship.Battleship(self.mainClock, self.graphicsScene,
+        #                               self.mapGen.gameMap, self.mapGen.mapS,
+        #                               self.dataList, QtCore.QPointF(0, 10000),
+        #                               [0, 0, 0, 0])
+        # self.graphicsScene.addShip(ship3, "ALLY")
 
         # ship3 = Battleship.Battleship(self.mainClock, self.graphicsScene, self.dataList,
         #                               QtCore.QPointF(12000, 17000), 0, 0, 0, 0)
