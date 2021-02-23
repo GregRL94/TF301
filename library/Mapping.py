@@ -11,7 +11,7 @@
 
 import random, time
 
-from PyQt5.QtCore import QPoint
+from PyQt5.QtCore import QPoint, QPointF
 from PyQt5.QtGui import QPolygonF
 from library import MathsFormulas, HEAP
 
@@ -342,10 +342,10 @@ class Node(HEAP.HEAPItem):
     Attributes
     ----------
     iGrid : int
-        The position in the main list.
+        The y position in the grid.
 
     jGrid : int
-        The position in a sublist of the main list.
+        The x position in the grid.
 
     xPos : int
         The x position in the game scene.
@@ -396,9 +396,9 @@ class Node(HEAP.HEAPItem):
         Parameters
         ----------
         iGrid : int
-            The position in the main list ([HERE][j]).
+            The y position in the grid ([HERE][j]).
         jGrid : int
-            The position in a sublist of the main list ([i][HERE]).
+            The x position in the grid ([i][HERE]).
         mapSlicing : int
             The resolution of the map.
         traversible : bool
@@ -550,7 +550,6 @@ class Astar():
         self.allNodes = []
         self.openList = HEAP.HEAP()  # A special set to optimize the sorting of nodes
         self.closedList = []
-        self.finalPath = []
         self.currentNode = None
 
         for i in range(len(gameMap)):
@@ -580,7 +579,6 @@ class Astar():
 
         self.openList.clearItems()
         self.closedList.clear()
-        self.finalPath.clear()
         self.currentNode = None
 
     def getNode(self, i, j):
@@ -705,12 +703,47 @@ class Astar():
 
         """
         currentNode = endNode
+        path = []
 
         while currentNode != startNode:
-            self.finalPath.append(currentNode)
+            path.append(currentNode)
             currentNode = currentNode.parent
 
-        self.finalPath.reverse()
+        finalPath = self.simplifyPath(path)
+        finalPath.reverse()
+        return finalPath
+
+    def simplifyPath(self, path):
+        """
+
+        Parameters
+        ----------
+        path : list of Node
+            The path to simplify.
+
+        Returns
+        -------
+        simplifiedPath : list of Node
+            A simplified path.
+
+        Summary
+        -------
+        Simplifies an already existing path by reducing the number of nodes,
+        by only adding to the path nodes which have a change of direction from
+        the previous one.
+
+        """
+        simplifiedPath = []
+        directionOld = QPointF()
+
+        for i in range(1, len(path)):
+            directionNew = QPointF(path[i-1].jGrid - path[i].jGrid,
+                                   path[i-1].iGrid - path[i].iGrid)
+            if directionNew != directionOld:
+                simplifiedPath.append(path[i])
+            directionOld = directionNew
+        
+        return simplifiedPath
 
     def findPath(self, startPos, targetPos):
         """
@@ -735,10 +768,10 @@ class Astar():
         """
         sTime = time.time()
         # Converts from game scene position to grid position
-        startNode = self.getNode(int(startPos.y() / self.gridS),
-                                 int(startPos.x() / self.gridS))
-        targetNode = self.getNode(int(targetPos.y() / self.gridS),
-                                  int(targetPos.x() / self.gridS))
+        startNode = self.getNode(round(startPos.y() / self.gridS),
+                                 round(startPos.x() / self.gridS))
+        targetNode = self.getNode(round(targetPos.y() / self.gridS),
+                                  round(targetPos.x() / self.gridS))
 
         # We always start by ading the startNode to the openList.
         self.openList.addItem(startNode)
@@ -753,9 +786,9 @@ class Astar():
             # If current node is the target node, bingo, we found the path !!
             if self.currentNode == targetNode:
                 # We retrace the path using each nodes parents
-                self.retracePath(startNode, targetNode)
-                print("***** FOUND PATH IN %s SECONDS *****" % (time.time() - sTime))
-                return self.finalPath
+                foundPath = self.retracePath(startNode, targetNode)
+                # print("***** FOUND PATH IN %s SECONDS *****" % (time.time() - sTime))
+                return foundPath
             else:
                 # We get all neighbours of the node being evaluated
                 neighboursList = self.getNeighbours(self.currentNode)

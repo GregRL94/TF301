@@ -69,6 +69,7 @@ class Ship(QGraphicsRectItem):
     checkpoint = None
     sel_checkpoint_id = None
     targetPoint = None
+    cp_tolerance = 500
     heading = 0
     t_heading = 0
     rot_direction = 0
@@ -152,11 +153,12 @@ class Ship(QGraphicsRectItem):
         else:
             self.next_point_print -= 1
         #################################
-        if (self.next_Path_Update <= 0) & (self.targetPoint is not None):
-            self.updatePath()
-            self.next_Path_Update = self.refresh_rate
-        else:
-            self.next_Path_Update -= 1
+        if self.targetPointReached() is False:
+            if (self.next_Path_Update <= 0) & (self.targetPoint is not None):
+                self.updatePath()
+                self.next_Path_Update = self.refresh_rate
+            else:
+                self.next_Path_Update -= 1
 
         if self.next_radarScan <= 0:
             self.scan()
@@ -342,6 +344,22 @@ class Ship(QGraphicsRectItem):
         self.setRotation(self.heading)
 
     def setDestination(self, targetPoint):
+        """
+
+        Parameters
+        ----------
+        targetPoint : QPointF
+            The world point the unit must move to.
+        
+        Returns
+        -------
+        None
+
+        Summary
+        -------
+        Sets the end point of the pathfinding algorithm to targetPoint.
+
+        """
         self.trajectory = []
         self.targetPoint = targetPoint
         print("Coordinates received:", self.targetPoint.x(), self.targetPoint.y())
@@ -349,13 +367,19 @@ class Ship(QGraphicsRectItem):
         for node in self.astar.findPath(self.pos(), self.targetPoint):
             self.trajectory.append(QPointF(node.xPos, node.yPos))
         for point in self.trajectory:
-            self.gameScene.printPoint(point, 500, "green")
+            self.gameScene.printPoint(point, 1000, "black")
 
     def updatePath(self):
-        self.trajectory = []
+        self.gameScene.clearWaypoints()  ###### to be deleted afteer Astar debug
+        self.trajectory.clear()
+        self.sel_checkpoint_id = None ####
         self.astar.reset()
         for node in self.astar.findPath(self.pos(), self.targetPoint):
             self.trajectory.append(QPointF(node.xPos, node.yPos))
+        self.selectNextCheckpoint() #####
+        ###### to be deleted afteer Astar debug
+        for point in self.trajectory:
+            self.gameScene.printPoint(point, 1000, "black")
 
     def checkpointReached(self):
         """
@@ -372,9 +396,9 @@ class Ship(QGraphicsRectItem):
 
         """
         if self.checkpoint is not None:
-            toleranceRect = QRectF(self.checkpoint.x() - 500,
-                                   self.checkpoint.y() - 500,
-                                   1000, 1000)
+            toleranceRect = QRectF(self.checkpoint.x() - self.cp_tolerance,
+                                   self.checkpoint.y() - self.cp_tolerance,
+                                   2 * self.cp_tolerance, 2 * self.cp_tolerance)
             if toleranceRect.contains(self.center):
                 self.checkpoint = None
                 return True
@@ -382,6 +406,27 @@ class Ship(QGraphicsRectItem):
                 return False
         else:
             return True
+
+    def targetPointReached(self):
+        """
+
+        Returns
+        -------
+        Boolean
+
+        Summary
+        -------
+        Indicates if the ship has reached its target world point.
+
+        """
+        if self.targetPoint:
+            toleranceRect = QRectF(self.targetPoint.x() - 4 * self.cp_tolerance,
+                                   self.targetPoint.y() - 4 * self.cp_tolerance,
+                                   8 * self.cp_tolerance, 8 * self.cp_tolerance)
+            if toleranceRect.contains(self.center):
+                return True
+            return False
+        return True
 
     def selectNextCheckpoint(self):
         """

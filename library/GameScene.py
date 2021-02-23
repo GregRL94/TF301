@@ -11,9 +11,9 @@
 
 from PyQt5.QtCore import Qt, QPointF
 from PyQt5.QtGui import QPen, QBrush, QColor
-from PyQt5.QtWidgets import QGraphicsScene
+from PyQt5.QtWidgets import QGraphicsScene, QGraphicsEllipseItem
 
-from library import MathsFormulas, Island
+from library import MathsFormulas, Island, Waypoint
 
 
 class GameScene(QGraphicsScene):
@@ -22,6 +22,7 @@ class GameScene(QGraphicsScene):
     nextShipID = 0
     nextIslandID = 0
     currentItem = None
+    waypoints = []  ###### to be deleted afteer Astar debug
 
     def __init__(self, parent=None):
         super(GameScene, self).__init__(parent)
@@ -76,8 +77,18 @@ class GameScene(QGraphicsScene):
             self.addLine(i, 0, i, self.height(), QPen(QColor("black"), 4))
 
     def printPoint(self, point, size, color):
-        self.addEllipse(point.x() - int(size / 2), point.y() - int(size / 2), size, size,
-                        QPen(QColor(color)), QBrush(QColor(color)))
+        c_point = Waypoint.Waypoint(point.x() - int(size / 2), point.y() - int(size / 2), size, size, color) ###### to be deleted afteer Astar debug
+        # self.addEllipse(point.x() - int(size / 2), point.y() - int(size / 2), size, size,
+        #                 QPen(QColor(color)))  # QBrush(QColor(color))
+        self.waypoints.append(c_point) ###### to be deleted afteer Astar debug
+        self.addItem(c_point) ###### to be deleted afteer Astar debug
+
+    ###### to be deleted afteer Astar debug
+    def clearWaypoints(self):
+        for item in self.waypoints:
+            self.removeItem(item)
+        self.waypoints.clear()
+    ######
 
     def addShip(self, shipObject, tag):
         thisShipId = self.nextShipID
