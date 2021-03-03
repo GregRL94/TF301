@@ -9,17 +9,20 @@
     Python version: 3.8.1
 '''
 
+from PyQt5.QtCore import Qt, QPointF
 from PyQt5.QtGui import QPen, QBrush, QColor
-from PyQt5.QtWidgets import QGraphicsScene
+from PyQt5.QtWidgets import QGraphicsScene, QGraphicsEllipseItem
 
-from library import MathsFormulas, Island
+from library import MathsFormulas, Island, Waypoint
 
 
 class GameScene(QGraphicsScene):
 
+    attachedGView = None
     nextShipID = 0
     nextIslandID = 0
     currentItem = None
+    waypoints = []  ###### to be deleted afteer Astar debug
 
     def __init__(self, parent=None):
         super(GameScene, self).__init__(parent)
@@ -27,6 +30,18 @@ class GameScene(QGraphicsScene):
 
         self.shipList = {}
         self.islandsList = []
+
+    def mousePressEvent(self, mouseDown):
+        itemSelected = self.itemAt(mouseDown.scenePos(),
+                                   self.attachedGView.transform())
+        if (mouseDown.button() == Qt.RightButton) and not itemSelected:
+            for item in self.selectedItems():
+                point = QPointF(int(mouseDown.scenePos().x()),
+                                int(mouseDown.scenePos().y()))
+                item.setDestination(point)
+            mouseDown.accept()
+        else:
+            super(GameScene, self).mousePressEvent(mouseDown)
 
     def displayMap(self, obstaclesList):
         for obstacle in obstaclesList:
@@ -55,15 +70,25 @@ class GameScene(QGraphicsScene):
         return shipsInDRange
 
     def dispGrid(self, steps):
-        for i in range(0, int(self.height() + steps), steps):
+        for i in range(0, int(self.height()), steps):
             self.addLine(0, i, int(self.width()), i, QPen(QColor("black"), 4))
 
-        for i in range(0, int(self.width() + steps), steps):
+        for i in range(0, int(self.width()), steps):
             self.addLine(i, 0, i, self.height(), QPen(QColor("black"), 4))
 
-    def printPoint(self, point):
-        self.addEllipse(point.x() - 50, point.y() - 50, 100, 100,
-                        QPen(QColor("blue")), QBrush(QColor("blue")))
+    def printPoint(self, point, size, color):
+        c_point = Waypoint.Waypoint(point.x() - int(size / 2), point.y() - int(size / 2), size, size, color) ###### to be deleted afteer Astar debug
+        # self.addEllipse(point.x() - int(size / 2), point.y() - int(size / 2), size, size,
+        #                 QPen(QColor(color)))  # QBrush(QColor(color))
+        self.waypoints.append(c_point) ###### to be deleted afteer Astar debug
+        self.addItem(c_point) ###### to be deleted afteer Astar debug
+
+    ###### to be deleted afteer Astar debug
+    def clearWaypoints(self):
+        for item in self.waypoints:
+            self.removeItem(item)
+        self.waypoints.clear()
+    ######
 
     def addShip(self, shipObject, tag):
         thisShipId = self.nextShipID

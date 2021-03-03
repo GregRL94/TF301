@@ -16,14 +16,10 @@ from PyQt5.QtCore import Qt, QPointF
 from PyQt5.QtGui import QPen, QBrush, QColor
 from PyQt5.QtWidgets import QGraphicsView
 
-from library import MainClock, GameScene, Battleship, InGameData, Mapping
+from library import MainClock, GameScene, Mapping, InGameData, MathsFormulas, Battleship
 
 
 class Ui_TSKF301MainWindow(object):
-
-    mainClock = MainClock.MainClock(20)  #ms
-    mapGen = None
-    mapRes = 1000
 
     def setupUi(self, TSKF301MainWindow):
         TSKF301MainWindow.setObjectName("TSKF301MainWindow")
@@ -35,6 +31,7 @@ class Ui_TSKF301MainWindow(object):
         self.graphicsScene = GameScene.GameScene(self.centralwidget)
         self.graphicsView = QGraphicsView(self.graphicsScene)
         self.graphicsView.setObjectName("graphicsView")
+        self.graphicsScene.attachedGView = self.graphicsView
         self.gridLayout.addWidget(self.graphicsView, 0, 0, 1, 1)
         TSKF301MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(TSKF301MainWindow)
@@ -61,12 +58,15 @@ class Ui_TSKF301MainWindow(object):
         self.actionNew_Game.setObjectName("actionNew_Game")
         self.actionNew_GameMap = QtWidgets.QAction(TSKF301MainWindow)
         self.actionNew_GameMap.setObjectName("actionNew_GameMap")
+        self.actionSpawnShips = QtWidgets.QAction(TSKF301MainWindow)
+        self.actionSpawnShips.setObjectName("actionSpawnShips")
         self.actionStart_Pause_Game = QtWidgets.QAction(TSKF301MainWindow)
         self.actionStart_Pause_Game.setObjectName("actionStart_Pause_Game")
         self.actionAstar = QtWidgets.QAction(TSKF301MainWindow)
         self.actionAstar.setObjectName("actionAstar")
         self.menuGame.addAction(self.actionNew_Game)
         self.menuGame.addAction(self.actionNew_GameMap)
+        self.menuGame.addAction(self.actionSpawnShips)
         self.menuGame.addAction(self.actionStart_Pause_Game)
         self.menuGame.addAction(self.actionAstar)
         self.menubar.addAction(self.menuGame.menuAction())
@@ -76,8 +76,9 @@ class Ui_TSKF301MainWindow(object):
 
         self.actionNew_Game.triggered.connect(self.newGame)
         self.actionNew_GameMap.triggered.connect(self.newGameMap)
+        self.actionSpawnShips.triggered.connect(self.spawnShips)
         self.actionStart_Pause_Game.triggered.connect(self.start_Pause_Game)
-        self.actionAstar.triggered.connect(self.launchAstar)
+        # self.actionAstar.triggered.connect(self.launchAstar)
 
     def retranslateUi(self, TSKF301MainWindow):
         _translate = QtCore.QCoreApplication.translate
@@ -88,10 +89,26 @@ class Ui_TSKF301MainWindow(object):
         self.actionNew_Game.setShortcut(_translate("TSKF301MainWindow", "N"))
         self.actionNew_GameMap.setText(_translate("TSKF301MainWindow", "New Game Map"))
         self.actionNew_GameMap.setShortcut(_translate("TSKF301MainWindow", "M"))
+        self.actionSpawnShips.setText(_translate("TSKF301MainWindow", "Spawn ships"))
+        self.actionSpawnShips.setShortcut(_translate("TSKF301MainWindow", "S"))
         self.actionStart_Pause_Game.setText(_translate("TSKF301MainWindow", "Start Game"))
         self.actionStart_Pause_Game.setShortcut(_translate("TSKF301MainWindow", "Space"))
         self.actionAstar.setText(_translate("TSKF301MainWindow", "PathFinder"))
         self.actionAstar.setShortcut(_translate("TSKF301MainWindow", "A"))
+
+    def initGameData(self):
+        self.mainClock = MainClock.MainClock(25)  #ms
+        self.tf_geometrics = MathsFormulas.Geometrics()
+        self.tf_cinematics = MathsFormulas.Cinematics()
+        self.tf_controllers = MathsFormulas.Controllers()
+        self.tf_turretData = InGameData.TurretData()
+        self.tf_projectileData = InGameData.ProjectileData()
+        self.tf_techData = InGameData.TechsData()
+        self.dataList = [self.tf_geometrics, self.tf_cinematics,
+                         self.tf_controllers, self.tf_turretData,
+                         self.tf_projectileData, self.tf_techData]
+        self.mapGen = None
+        self.mapRes = 1000
 
     def newGame(self):
         self.graphicsScene.setSceneRect(0, 0, 20000, 20000)
@@ -110,20 +127,6 @@ class Ui_TSKF301MainWindow(object):
         self.rComs = InGameData.RadioCommunications(self.mainClock,
                                                     self.graphicsScene)
 
-        ship1 = Battleship.Battleship(self.mainClock, self.graphicsScene,
-                                      QtCore.QPointF(0, 0), 0, 0, 0, 0)
-        self.graphicsScene.addShip(ship1, "ALLY")
-
-        ship2 = Battleship.Battleship(self.mainClock, self.graphicsScene,
-                                      QtCore.QPointF(10000, 15000), 0, 0, 0, 0)
-        self.graphicsScene.addShip(ship2, "ALLY")
-
-        ship3 = Battleship.Battleship(self.mainClock, self.graphicsScene,
-                                      QtCore.QPointF(12000, 17000), 0, 0, 0, 0)
-        self.graphicsScene.addShip(ship3, "ENNEMY")
-
-        self.rComs.updateShipLists()
-
     def newGameMap(self):
         self.graphicsScene.clearMap()
         self.mapGen.resetMap()
@@ -133,12 +136,37 @@ class Ui_TSKF301MainWindow(object):
         genObs = self.mapGen.generateMap()
         self.graphicsScene.displayMap(genObs)
 
-    def launchAstar(self):
-        aStar = Mapping.Astar(self.mapGen.gameMap, self.mapGen.mapS)
-        nodesPath = aStar.findPath(QPointF(0, 0), QPointF(19000, 19000))
-        for node in nodesPath:
-            self.graphicsScene.addRect(node.xPos, node.yPos, self.mapRes, self.mapRes,
-                                        QPen(QColor("blue")), QBrush(QColor("blue")))
+    def spawnShips(self):
+        ship1 = Battleship.Battleship(self.mainClock, self.graphicsScene,
+                                      self.mapGen.gameMap, self.mapGen.mapS,
+                                      self.dataList, QtCore.QPointF(0, 0),
+                                      [0, 0, 0, 0])
+        self.graphicsScene.addShip(ship1, "ALLY")
+
+        # ship2 = Battleship.Battleship(self.mainClock, self.graphicsScene,
+        #                               self.mapGen.gameMap, self.mapGen.mapS,
+        #                               self.dataList, QtCore.QPointF(0, 5000),
+        #                               [0, 0, 0, 0])
+        # self.graphicsScene.addShip(ship2, "ALLY")
+
+        # ship3 = Battleship.Battleship(self.mainClock, self.graphicsScene,
+        #                               self.mapGen.gameMap, self.mapGen.mapS,
+        #                               self.dataList, QtCore.QPointF(0, 10000),
+        #                               [0, 0, 0, 0])
+        # self.graphicsScene.addShip(ship3, "ALLY")
+
+        # ship3 = Battleship.Battleship(self.mainClock, self.graphicsScene, self.dataList,
+        #                               QtCore.QPointF(12000, 17000), 0, 0, 0, 0)
+        # self.graphicsScene.addShip(ship3, "ENNEMY")
+
+        self.rComs.updateShipLists()
+
+    # def launchAstar(self):
+    #     aStar = Mapping.Astar(self.mapGen.gameMap, self.mapGen.mapS)
+    #     nodesPath = aStar.findPath(QPointF(0, 0), QPointF(19000, 19000))
+    #     for node in nodesPath:
+    #         self.graphicsScene.addRect(node.xPos, node.yPos, self.mapRes, self.mapRes,
+    #                                     QPen(QColor("blue")), QBrush(QColor("blue")))
 
     def start_Pause_Game(self):
         if self.gameState:
@@ -160,5 +188,6 @@ if __name__ == "__main__":
     TSKF301MainWindow = QtWidgets.QMainWindow()
     ui = Ui_TSKF301MainWindow()
     ui.setupUi(TSKF301MainWindow)
+    ui.initGameData()
     TSKF301MainWindow.show()
     sys.exit(app.exec_())
