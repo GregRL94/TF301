@@ -108,19 +108,22 @@ class Ui_TSKF301MainWindow(object):
                          self.tf_controllers, self.tf_turretData,
                          self.tf_projectileData, self.tf_techData]
         self.mapGen = None
+        self.mapExtPercentage = 0.25
         self.mapRes = 1000
 
     def newGame(self):
-        self.graphicsScene.setSceneRect(0, 0, 20000, 20000)
+        playableArea = 20000
+        self.graphicsScene.setSceneRect(0, 0, int(playableArea * (1 + self.mapExtPercentage)), int(playableArea * (1 + self.mapExtPercentage)))
+        self.graphicsScene.setInnerMap(self.mapExtPercentage, playableArea)
         self.graphicsView.fitInView(QtCore.QRectF(0, 0,
-                                                  self.graphicsScene.width(),
-                                                  self.graphicsScene.height()),
+                                                  playableArea,
+                                                  playableArea),
                                     Qt.KeepAspectRatio)
         self.graphicsScene.dispGrid(self.mapRes)
         self.mapGen = Mapping.MapGenerator(self.graphicsScene.width(),
                                            self.graphicsScene.height(),
                                            self.mapRes)
-        self.mapGen.setMapParameters(0.25, 2, 5, 2, 5, 2)
+        self.mapGen.setMapParameters(0.1, 2, 5, 2, 5, 2)
         self.genRandomMap()
         self.gameState = False
 
@@ -139,7 +142,7 @@ class Ui_TSKF301MainWindow(object):
     def spawnShips(self):
         ship1 = Battleship.Battleship(self.mainClock, self.graphicsScene,
                                       self.mapGen.gameMap, self.mapGen.mapS,
-                                      self.dataList, QtCore.QPointF(0, 0),
+                                      self.dataList, QtCore.QPointF(7500, 7500),
                                       [0, 0, 0, 0])
         self.graphicsScene.addShip(ship1, "ALLY")
 

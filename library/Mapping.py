@@ -125,9 +125,9 @@ class MapGenerator():
         maxObstWidth : int
             The maximum width of an obstacle..
         minObstHeight : int
-            The minimun height of an obstacle..
+            The minimun height of an obstacle.
         maxObstHeight : int
-            The maximum height of an obstacle..
+            The maximum height of an obstacle.
         minD2Obstacles : int
             The minimum distance between two distinct obstacles..
 
