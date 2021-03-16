@@ -46,7 +46,7 @@ class Ship(QGraphicsRectItem):
 
     #-------------- SCAN RATES -------------#
     refresh_rate = 9
-    print_point_rate = 99  # TO DELETE ONLY FOR VISU
+    print_point_rate = 74  # TO DELETE ONLY FOR VISU
     #---------------------------------------#
 
     #------ CRITICAL COMPONENT STATES ------#
@@ -63,6 +63,7 @@ class Ship(QGraphicsRectItem):
     #---------------------------------------#
 
     #-------------- PATHFINDING ------------#
+    pathUpdateRate = 99
     center = QPointF()
     r_centers = None
     trajectory = None
@@ -110,7 +111,7 @@ class Ship(QGraphicsRectItem):
 
         self.gameScene = gameScene
         self.clock = clock
-        self.next_Path_Update = self.refresh_rate
+        self.next_Path_Update = self.pathUpdateRate
         self.next_radarScan = 0
         self.next_targetAcquisition = 0
         self.next_point_print = 0  # TO DELETE ONLY FOR VISUALISATION
@@ -156,7 +157,7 @@ class Ship(QGraphicsRectItem):
         if self.targetPointReached() is False:
             if (self.next_Path_Update <= 0) & (self.targetPoint is not None):
                 self.updatePath()
-                self.next_Path_Update = self.refresh_rate
+                self.next_Path_Update = self.pathUpdateRate
             else:
                 self.next_Path_Update -= 1
 

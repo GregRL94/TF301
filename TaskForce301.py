@@ -109,7 +109,7 @@ class Ui_TSKF301MainWindow(object):
                          self.tf_projectileData, self.tf_techData]
         self.mapGen = None
         self.mapExtPercentage = 0.25
-        self.mapRes = 250
+        self.mapRes = 500
 
     def newGame(self):
         playableArea = 20000
@@ -123,8 +123,10 @@ class Ui_TSKF301MainWindow(object):
         self.mapGen = Mapping.MapGenerator(self.graphicsScene.width(),
                                            self.graphicsScene.height(),
                                            self.mapRes)
-        self.mapGen.setMapParameters(0.25, 8, 20, 8, 20, 8)
+        self.mapGen.setMapParameters(0.25, 4, 10, 4, 10, 4)
         self.genRandomMap()
+        #_penaltyMap = self.mapGen.getPenaltyMap()
+        #self.graphicsScene.dispPenalties(_penaltyMap, self.mapRes)
         self.gameState = False
 
         self.rComs = InGameData.RadioCommunications(self.mainClock,

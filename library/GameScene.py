@@ -9,7 +9,7 @@
     Python version: 3.8.1
 '''
 
-from PyQt5.QtCore import Qt, QPointF
+from PyQt5.QtCore import QRectF, Qt, QPointF
 from PyQt5.QtGui import QPen, QBrush, QColor
 from PyQt5.QtWidgets import QGraphicsScene, QGraphicsEllipseItem
 
@@ -96,6 +96,16 @@ class GameScene(QGraphicsScene):
         self.addLine(self.innerBL, self.innerBT, self.innerBL, self.innerBB, QPen(QColor("black"), 20))
         self.addLine(self.innerBR, self.innerBT, self.innerBR, self.innerBB, QPen(QColor("black"), 20))
         self.addLine(self.innerBL, self.innerBB, self.innerBR, self.innerBB, QPen(QColor("black"), 20))
+
+    def dispPenalties(self, penaltyMap, step):
+        baseColor = [255, 255, 255]
+
+        for i, line in enumerate(penaltyMap):
+            for j, penalty in enumerate(line):
+                c_color = QColor(baseColor[0] * ((100 - penalty * 10) / 100),
+                                baseColor[1] * ((100 - penalty * 10) / 100),
+                                baseColor[2] * ((100 - penalty * 10) / 100))
+                self.addRect(j * step, i * step, step, step, QPen(c_color), QBrush(c_color))
 
     def printPoint(self, point, size, color):
         c_point = Waypoint.Waypoint(point.x() - int(size / 2), point.y() - int(size / 2), size, size, color) ###### to be deleted afteer Astar debug

@@ -275,7 +275,7 @@ class MapGenerator():
                     line = len(self.gameMap) - 1
                 if column > len(self.gameMap[0]) - 1:
                     column = len(self.gameMap[0]) - 1
-                self.gameMap[line][column] = 100
+                self.gameMap[line][column] = 10
 
         # Creates the polygon that will be used for display
         polyTL = QPoint(x * self.mapS, y * self.mapS)
@@ -314,7 +314,7 @@ class MapGenerator():
         penaltiesH = []
         penaltiesV = []
         kernelSize = blurrSize * 2 + 1
-        kernelExtent = (kernelSize - 1) / 2
+        kernelExtent = int((kernelSize - 1) / 2)
 
         for i in range(len(self.gameMap)):
             penaltiesH.append([])
@@ -332,7 +332,7 @@ class MapGenerator():
                 removedIndex = min(len(self.gameMap[0]) - 1, max(0, j - kernelSize - 1))
                 addedIndex = min(len(self.gameMap[0]) - 2, max(0, j + kernelExtent))
 
-                penaltiesH[i][j] = penaltiesH[i, j - 1] - self.gameMap[i][removedIndex] + self.gameMap[i][addedIndex]
+                penaltiesH[i][j] = penaltiesH[i][j - 1] - self.gameMap[i][removedIndex] + self.gameMap[i][addedIndex]
 
         # Vertical Pass
         for j in range(len(self.gameMap[0])):
@@ -340,14 +340,14 @@ class MapGenerator():
                 sampleI = min(kernelExtent, max(0, i))
                 penaltiesV[0][j] += penaltiesH[sampleI][j]
             blurredPenalty = round(penaltiesV[i][j] / (kernelSize * kernelSize))
-            self.gameMap[i][j] = blurredPenalty if self.gameMap[i][j] != 100 else 100
+            self.gameMap[i][j] = blurredPenalty if self.gameMap[i][j] != 10 else 10
             for i in range(1, len(self.gameMap)):
                 removedIndex = min(len(self.gameMap) - 1, max(0, i - kernelSize - 1))
                 addedIndex = min(len(self.gameMap) - 2, max(0, i + kernelExtent))
 
-                penaltiesV[i][j] = penaltiesV[i - 1, j] - penaltiesH[removedIndex][j] + penaltiesH[addedIndex][j]
+                penaltiesV[i][j] = penaltiesV[i - 1][j] - penaltiesH[removedIndex][j] + penaltiesH[addedIndex][j]
                 blurredPenalty = round(penaltiesV[i][j] / (kernelSize * kernelSize))
-                self.gameMap[i][j] = blurredPenalty if self.gameMap[i][j] != 100 else 100
+                self.gameMap[i][j] = max(0, min(9, blurredPenalty)) if self.gameMap[i][j] != 10 else 10
 
     def generateMap(self):
         """
@@ -383,11 +383,18 @@ class MapGenerator():
                 break
         self.blurrMap(3)
         print("** GENERATED GAME MAP IN %s SECONDS **" % (time.time() - sTime))
-        for line in range(len(self.gameMap)):
-                print(self.gameMap[line])
         # returns a list of polygon. This list is only used for display.
         return self.polygonsList
 
+    def getPenaltyMap(self):
+        penaltyMap = []
+
+        for i in range(len(self.gameMap)):
+            penaltyMap.append([])
+            for j in range(len(self.gameMap[0])):
+                penaltyMap[i].append(self.gameMap[i][j])
+
+        return penaltyMap
 
 class Node(HEAP.HEAPItem):
     """
@@ -613,7 +620,7 @@ class Astar():
         for i in range(len(gameMap)):
             self.allNodes.append([])
             for j in range(len(gameMap[0])):
-                traversible = True if (gameMap[i][j] != 100) else False
+                traversible = True if (gameMap[i][j] != 10) else False
                 self.allNodes[i].append(Node(i, j, self.gridS, traversible, gameMap[i][j]))
 
         print("***** INITIALIZED A* IN %s SECONDS *****" % (time.time() - sTime))
@@ -845,7 +852,7 @@ class Astar():
             if self.currentNode == targetNode:
                 # We retrace the path using each nodes parents
                 foundPath = self.retracePath(startNode, targetNode)
-                # print("***** FOUND PATH IN %s SECONDS *****" % (time.time() - sTime))
+                print("***** FOUND PATH IN %s SECONDS *****" % (time.time() - sTime))
                 return foundPath
             else:
                 # We get all neighbours of the node being evaluated
