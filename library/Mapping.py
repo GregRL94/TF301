@@ -268,14 +268,14 @@ class MapGenerator():
         poly = QPolygonF()
 
         # Sets the value of each point within the polygon to one in the map grid.
-        for i in range(y, y + h + 1):
+        for i in range(y, y + h + 1): # +1 Because of the way the map is drawn (think about fence sections)
             for j in range(x, x + w + 1):
                 line, column = i, j
                 if line > len(self.gameMap) - 1:
                     line = len(self.gameMap) - 1
                 if column > len(self.gameMap[0]) - 1:
                     column = len(self.gameMap[0]) - 1
-                self.gameMap[line][column] = 1
+                self.gameMap[line][column] = 100
 
         # Creates the polygon that will be used for display
         polyTL = QPoint(x * self.mapS, y * self.mapS)
@@ -292,6 +292,62 @@ class MapGenerator():
         oA = w * h  # Obstacle area
         oP = oA / self.mapA  # the obstruction percentage of this obstacle on the map
         self.curO += oP
+
+    def blurrMap(self, blurrSize):
+        """
+
+        Parameters
+        ----------
+        blurrSize : int
+            The size of the blurringbox. The greate the value, the more cells will be
+            taken in the average cell value calculation.
+
+        Returns
+        -------
+        None
+
+        Summary
+        -------
+        A function to blurr the penatlies values in a box of size blurrSize.
+
+        """
+        penaltiesH = []
+        penaltiesV = []
+        kernelSize = blurrSize * 2 + 1
+        kernelExtent = (kernelSize - 1) / 2
+
+        for i in range(len(self.gameMap)):
+            penaltiesH.append([])
+            penaltiesV.append([])
+            for j in range(len(self.gameMap[0])):
+                penaltiesH[i].append(0)
+                penaltiesV[i].append(0)
+
+        # Horizontal Pass
+        for i in range(len(self.gameMap)):
+            for j in range(-kernelExtent, kernelExtent + 1):
+                sampleJ = min(kernelExtent, max(0, j))
+                penaltiesH[i][0] += self.gameMap[i][sampleJ]
+            for j in range(1, len(self.gameMap[0])):
+                removedIndex = min(len(self.gameMap[0]) - 1, max(0, j - kernelSize - 1))
+                addedIndex = min(len(self.gameMap[0]) - 2, max(0, j + kernelExtent))
+
+                penaltiesH[i][j] = penaltiesH[i, j - 1] - self.gameMap[i][removedIndex] + self.gameMap[i][addedIndex]
+
+        # Vertical Pass
+        for j in range(len(self.gameMap[0])):
+            for i in range(-kernelExtent, kernelExtent + 1):
+                sampleI = min(kernelExtent, max(0, i))
+                penaltiesV[0][j] += penaltiesH[sampleI][j]
+            blurredPenalty = round(penaltiesV[i][j] / (kernelSize * kernelSize))
+            self.gameMap[i][j] = blurredPenalty if self.gameMap[i][j] != 100 else 100
+            for i in range(1, len(self.gameMap)):
+                removedIndex = min(len(self.gameMap) - 1, max(0, i - kernelSize - 1))
+                addedIndex = min(len(self.gameMap) - 2, max(0, i + kernelExtent))
+
+                penaltiesV[i][j] = penaltiesV[i - 1, j] - penaltiesH[removedIndex][j] + penaltiesH[addedIndex][j]
+                blurredPenalty = round(penaltiesV[i][j] / (kernelSize * kernelSize))
+                self.gameMap[i][j] = blurredPenalty if self.gameMap[i][j] != 100 else 100
 
     def generateMap(self):
         """
@@ -325,6 +381,7 @@ class MapGenerator():
             # Safe break to break out of the loop
             if safeCounter > self.emergencyBreak:
                 break
+        self.blurrMap(3)
         print("** GENERATED GAME MAP IN %s SECONDS **" % (time.time() - sTime))
         for line in range(len(self.gameMap)):
                 print(self.gameMap[line])
@@ -388,9 +445,10 @@ class Node(HEAP.HEAPItem):
     traversible = True
     gCost = 0
     hCost = 0
+    movementPenalty = 0
     parent = None
 
-    def __init__(self, iGrid, jGrid, mapSlicing, traversible):
+    def __init__(self, iGrid, jGrid, mapSlicing, traversible, movementPenalty):
         """
 
         Parameters
@@ -420,6 +478,7 @@ class Node(HEAP.HEAPItem):
         self.xPos = self.jGrid * mapSlicing
         self.yPos = self.iGrid * mapSlicing
         self.traversible = traversible
+        self.movementPenalty = movementPenalty
 
     def fCost(self):
         """
@@ -482,7 +541,6 @@ class Node(HEAP.HEAPItem):
                 return 1
             else:
                 return -1
-            return 0
         # If the current node has a higher Fcost than the node's Fcost it is compared to.
         else:
             return -1
@@ -555,8 +613,8 @@ class Astar():
         for i in range(len(gameMap)):
             self.allNodes.append([])
             for j in range(len(gameMap[0])):
-                traversible = True if (gameMap[i][j] == 0) else False
-                self.allNodes[i].append(Node(i, j, self.gridS, traversible))
+                traversible = True if (gameMap[i][j] != 100) else False
+                self.allNodes[i].append(Node(i, j, self.gridS, traversible, gameMap[i][j]))
 
         print("***** INITIALIZED A* IN %s SECONDS *****" % (time.time() - sTime))
 
@@ -800,7 +858,7 @@ class Astar():
 
                     # This node gCost is the distance between him and the current
                     # node we are at
-                    newMoveCost = self.currentNode.gCost + self.distanceB2Nodes(self.currentNode, node)
+                    newMoveCost = self.currentNode.gCost + self.distanceB2Nodes(self.currentNode, node) + node.movementPenalty
                     # If the new move cost is lower than the node current gCost
                     # or if it is not in the openList, we update its data
                     if (newMoveCost < node.gCost) | (node not in self.openList.items):

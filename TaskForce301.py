@@ -109,7 +109,7 @@ class Ui_TSKF301MainWindow(object):
                          self.tf_projectileData, self.tf_techData]
         self.mapGen = None
         self.mapExtPercentage = 0.25
-        self.mapRes = 1000
+        self.mapRes = 250
 
     def newGame(self):
         playableArea = 20000
@@ -123,7 +123,7 @@ class Ui_TSKF301MainWindow(object):
         self.mapGen = Mapping.MapGenerator(self.graphicsScene.width(),
                                            self.graphicsScene.height(),
                                            self.mapRes)
-        self.mapGen.setMapParameters(0.1, 2, 5, 2, 5, 2)
+        self.mapGen.setMapParameters(0.25, 8, 20, 8, 20, 8)
         self.genRandomMap()
         self.gameState = False
 

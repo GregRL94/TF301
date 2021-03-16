@@ -86,8 +86,8 @@ class GameScene(QGraphicsScene):
         return shipsInDRange
 
     def dispGrid(self, step):
-        for i in range(0, int(self.height()) + step, step):
-            self.addLine(0, i, int(self.width()) + step, i, QPen(QColor("black"), 4))
+        for i in range(0, int(self.height()), step):
+            self.addLine(0, i, int(self.width()), i, QPen(QColor("black"), 4))
 
         for i in range(0, int(self.width()), step):
             self.addLine(i, 0, i, self.height(), QPen(QColor("black"), 4))
