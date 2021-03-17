@@ -111,22 +111,33 @@ class Ui_TSKF301MainWindow(object):
         self.mapExtPercentage = 0.25
         self.mapRes = 500
 
+    def genRandomMap(self):
+        genObs = self.mapGen.generateMap()
+        self.graphicsScene.displayMap(genObs)
+
+    def debugDisp(self, gridOn=True, penalties=True):
+        if gridOn:
+            self.graphicsScene.dispGrid(self.mapRes)
+        if penalties:
+            _penaltyMap = self.mapGen.getPenaltyMap()
+            self.graphicsScene.dispPenalties(_penaltyMap, self.mapRes)
+
     def newGame(self):
         playableArea = 20000
-        self.graphicsScene.setSceneRect(0, 0, int(playableArea * (1 + self.mapExtPercentage)), int(playableArea * (1 + self.mapExtPercentage)))
+        self.graphicsScene.setSceneRect(0, 0, int(playableArea * (1 + self.mapExtPercentage)),
+                                              int(playableArea * (1 + self.mapExtPercentage)))
         self.graphicsScene.setInnerMap(self.mapExtPercentage, playableArea)
-        self.graphicsView.fitInView(QtCore.QRectF(0, 0,
+        self.graphicsView.fitInView(QtCore.QRectF(int(self.mapExtPercentage * playableArea),
+                                                  int(self.mapExtPercentage * playableArea),
                                                   playableArea,
                                                   playableArea),
                                     Qt.KeepAspectRatio)
-        self.graphicsScene.dispGrid(self.mapRes)
         self.mapGen = Mapping.MapGenerator(self.graphicsScene.width(),
                                            self.graphicsScene.height(),
                                            self.mapRes)
         self.mapGen.setMapParameters(0.25, 4, 10, 4, 10, 4)
         self.genRandomMap()
-        #_penaltyMap = self.mapGen.getPenaltyMap()
-        #self.graphicsScene.dispPenalties(_penaltyMap, self.mapRes)
+        self.debugDisp(True, False)
         self.gameState = False
 
         self.rComs = InGameData.RadioCommunications(self.mainClock,
@@ -136,10 +147,7 @@ class Ui_TSKF301MainWindow(object):
         self.graphicsScene.clearMap()
         self.mapGen.resetMap()
         self.genRandomMap()
-
-    def genRandomMap(self):
-        genObs = self.mapGen.generateMap()
-        self.graphicsScene.displayMap(genObs)
+        self.debugDisp(True, False)
 
     def spawnShips(self):
         ship1 = Battleship.Battleship(self.mainClock, self.graphicsScene,

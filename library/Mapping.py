@@ -59,6 +59,9 @@ class MapGenerator():
     generateObstacle(ObsAsList : list of int)
         Generates an obstacle with the coordinates given by ObsAsList.
 
+    blurrMap(blurrSize : int)
+        Blurs the penalties value of the map using box blur technique, where blurrSize
+        is the range in nodes from box center to edge.
     generateMap()
         The main loop function to generate a procedural map.
 
@@ -325,25 +328,28 @@ class MapGenerator():
 
         # Horizontal Pass
         for i in range(len(self.gameMap)):
-            for j in range(-kernelExtent, kernelExtent + 1):
+            for j in range(-kernelExtent + 1, kernelExtent):
                 sampleJ = min(kernelExtent, max(0, j))
                 penaltiesH[i][0] += self.gameMap[i][sampleJ]
+
             for j in range(1, len(self.gameMap[0])):
-                removedIndex = min(len(self.gameMap[0]) - 1, max(0, j - kernelSize - 1))
-                addedIndex = min(len(self.gameMap[0]) - 2, max(0, j + kernelExtent))
+                removedIndex = min(len(self.gameMap[0]) - 1, max(0, j - kernelExtent))
+                addedIndex = min(len(self.gameMap[0]) - 2, max(0, j + kernelExtent - 1))
 
                 penaltiesH[i][j] = penaltiesH[i][j - 1] - self.gameMap[i][removedIndex] + self.gameMap[i][addedIndex]
 
         # Vertical Pass
         for j in range(len(self.gameMap[0])):
-            for i in range(-kernelExtent, kernelExtent + 1):
+            for i in range(-kernelExtent + 1, kernelExtent):
                 sampleI = min(kernelExtent, max(0, i))
                 penaltiesV[0][j] += penaltiesH[sampleI][j]
-            blurredPenalty = round(penaltiesV[i][j] / (kernelSize * kernelSize))
-            self.gameMap[i][j] = blurredPenalty if self.gameMap[i][j] != 10 else 10
+
+            blurredPenalty = round(penaltiesV[0][j] / (kernelSize * kernelSize))
+            self.gameMap[0][j] = max(0, min(9, blurredPenalty)) if self.gameMap[0][j] != 10 else 10
+
             for i in range(1, len(self.gameMap)):
-                removedIndex = min(len(self.gameMap) - 1, max(0, i - kernelSize - 1))
-                addedIndex = min(len(self.gameMap) - 2, max(0, i + kernelExtent))
+                removedIndex = min(len(self.gameMap) - 1, max(0, i - kernelExtent))
+                addedIndex = min(len(self.gameMap) - 2, max(0, i + kernelExtent - 1))
 
                 penaltiesV[i][j] = penaltiesV[i - 1][j] - penaltiesH[removedIndex][j] + penaltiesH[addedIndex][j]
                 blurredPenalty = round(penaltiesV[i][j] / (kernelSize * kernelSize))

@@ -135,6 +135,7 @@ class GameScene(QGraphicsScene):
             self.removeItem(item)
         self.nextIslandID = 0
         self.islandsList.clear()
+        self.clear()
         self.update()
 
     def destroyObject(self, _object):

@@ -365,7 +365,7 @@ class Ship(QGraphicsRectItem):
         self.targetPoint = targetPoint
         print("Coordinates received:", self.targetPoint.x(), self.targetPoint.y())
         self.astar.reset()
-        for node in self.astar.findPath(self.pos(), self.targetPoint):
+        for node in self.astar.findPath(self.center, self.targetPoint):
             self.trajectory.append(QPointF(node.xPos, node.yPos))
         for point in self.trajectory:
             self.gameScene.printPoint(point, 1000, "black")
@@ -421,9 +421,9 @@ class Ship(QGraphicsRectItem):
 
         """
         if self.targetPoint:
-            toleranceRect = QRectF(self.targetPoint.x() - 4 * self.cp_tolerance,
-                                   self.targetPoint.y() - 4 * self.cp_tolerance,
-                                   8 * self.cp_tolerance, 8 * self.cp_tolerance)
+            toleranceRect = QRectF(self.targetPoint.x() - 2 * self.cp_tolerance,
+                                   self.targetPoint.y() - 2 * self.cp_tolerance,
+                                   4 * self.cp_tolerance, 4 * self.cp_tolerance)
             if toleranceRect.contains(self.center):
                 return True
             return False
