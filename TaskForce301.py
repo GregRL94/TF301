@@ -5,15 +5,14 @@
     Author: Grégory LARGANGE
     Date created: 07/10/2020
     Last modified by: Grégory LARGANGE
-    Date last modified: 14/12/2020
+    Date last modified: 18/03/2021
     Python version: 3.8.1
 '''
 
 import sys
 
 from PyQt5 import QtCore, QtWidgets
-from PyQt5.QtCore import Qt, QPointF
-from PyQt5.QtGui import QPen, QBrush, QColor
+from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QGraphicsView
 
 from library import MainClock, GameScene, Mapping, InGameData, MathsFormulas, Battleship
@@ -78,7 +77,6 @@ class Ui_TSKF301MainWindow(object):
         self.actionNew_GameMap.triggered.connect(self.newGameMap)
         self.actionSpawnShips.triggered.connect(self.spawnShips)
         self.actionStart_Pause_Game.triggered.connect(self.start_Pause_Game)
-        # self.actionAstar.triggered.connect(self.launchAstar)
 
     def retranslateUi(self, TSKF301MainWindow):
         _translate = QtCore.QCoreApplication.translate
@@ -173,13 +171,6 @@ class Ui_TSKF301MainWindow(object):
         # self.graphicsScene.addShip(ship3, "ENNEMY")
 
         self.rComs.updateShipLists()
-
-    # def launchAstar(self):
-    #     aStar = Mapping.Astar(self.mapGen.gameMap, self.mapGen.mapS)
-    #     nodesPath = aStar.findPath(QPointF(0, 0), QPointF(19000, 19000))
-    #     for node in nodesPath:
-    #         self.graphicsScene.addRect(node.xPos, node.yPos, self.mapRes, self.mapRes,
-    #                                     QPen(QColor("blue")), QBrush(QColor("blue")))
 
     def start_Pause_Game(self):
         if self.gameState:

@@ -5,7 +5,7 @@
     Author: Grégory LARGANGE
     Date created: 25/11/2020
     Last modified by: Grégory LARGANGE
-    Date last modified: 10/12/2020
+    Date last modified: 18/03/2021
     Python version: 3.8.1
 '''
 
@@ -302,7 +302,7 @@ class MapGenerator():
         Parameters
         ----------
         blurrSize : int
-            The size of the blurringbox. The greate the value, the more cells will be
+            The size of the blurringbox. The greater the value, the more cells will be
             taken in the average cell value calculation.
 
         Returns
@@ -328,10 +328,12 @@ class MapGenerator():
 
         # Horizontal Pass
         for i in range(len(self.gameMap)):
+            # We first calculate average for nodes on the edges
             for j in range(-kernelExtent + 1, kernelExtent):
                 sampleJ = min(kernelExtent, max(0, j))
                 penaltiesH[i][0] += self.gameMap[i][sampleJ]
 
+            # Then we move through the line
             for j in range(1, len(self.gameMap[0])):
                 removedIndex = min(len(self.gameMap[0]) - 1, max(0, j - kernelExtent))
                 addedIndex = min(len(self.gameMap[0]) - 2, max(0, j + kernelExtent - 1))
@@ -340,17 +342,21 @@ class MapGenerator():
 
         # Vertical Pass
         for j in range(len(self.gameMap[0])):
+            # We first calculate average for nodes on the edges
             for i in range(-kernelExtent + 1, kernelExtent):
                 sampleI = min(kernelExtent, max(0, i))
                 penaltiesV[0][j] += penaltiesH[sampleI][j]
 
+            # We assign the calculated values
             blurredPenalty = round(penaltiesV[0][j] / (kernelSize * kernelSize))
             self.gameMap[0][j] = max(0, min(9, blurredPenalty)) if self.gameMap[0][j] != 10 else 10
 
+            # Then we move through the column
             for i in range(1, len(self.gameMap)):
                 removedIndex = min(len(self.gameMap) - 1, max(0, i - kernelExtent))
                 addedIndex = min(len(self.gameMap) - 2, max(0, i + kernelExtent - 1))
 
+                # We assign the calculated values
                 penaltiesV[i][j] = penaltiesV[i - 1][j] - penaltiesH[removedIndex][j] + penaltiesH[addedIndex][j]
                 blurredPenalty = round(penaltiesV[i][j] / (kernelSize * kernelSize))
                 self.gameMap[i][j] = max(0, min(9, blurredPenalty)) if self.gameMap[i][j] != 10 else 10
@@ -399,8 +405,8 @@ class MapGenerator():
             penaltyMap.append([])
             for j in range(len(self.gameMap[0])):
                 penaltyMap[i].append(self.gameMap[i][j])
-
         return penaltyMap
+
 
 class Node(HEAP.HEAPItem):
     """
@@ -431,6 +437,9 @@ class Node(HEAP.HEAPItem):
 
     hCost : int
         The distance of this node to the target node.
+
+    movementPenalty : int
+        A penalty from moving through this node.
 
     parent : Node
         The node we moved from to reach this node.
@@ -474,6 +483,8 @@ class Node(HEAP.HEAPItem):
             The resolution of the map.
         traversible : bool
             True if the value of map[i][j] is 0, False otherwise.
+        movementPenalty : int
+            A penalty from moving through this node.
 
         Returns
         -------
