@@ -15,7 +15,10 @@ from PyQt5.QtCore import Qt, QRectF, QPointF
 from PyQt5.QtGui import QColor, QPen, QBrush, QCursor
 from PyQt5.QtWidgets import QGraphicsItem, QGraphicsRectItem
 
-from library import Mapping
+from library.MathsFormulas import Geometrics as geo, Cinematics as cin,\
+    Controllers as con
+from library.Mapping import Astar as astar
+
 
 
 class Ship(QGraphicsRectItem):
@@ -76,8 +79,7 @@ class Ship(QGraphicsRectItem):
     rot_direction = 0
     #---------------------------------------#
 
-    def __init__(self, clock, gameScene, gameMap, mapSlicing, geo, cin, con,
-                 tur_dat, p_dat, tech_dat):
+    def __init__(self, clock, gameScene, gameMap, mapSlicing):
         """
 
         Parameters
@@ -97,13 +99,7 @@ class Ship(QGraphicsRectItem):
 
         """
         super(Ship, self).__init__(QRectF(0, 0, 0, 0))
-        self.astar = Mapping.Astar(gameMap, mapSlicing)
-        self.geometrics = geo
-        self.cinematics = cin
-        self.controllers = con
-        self.turretData = tur_dat
-        self.projectileData = p_dat
-        self.techData = tech_dat
+        self.astar = astar(gameMap, mapSlicing)
 
         self.setAcceptHoverEvents(True)
         self.setFlag(QGraphicsItem.ItemIsSelectable, True)
@@ -212,7 +208,7 @@ class Ship(QGraphicsRectItem):
         Updates the position of the ship center.
 
         """
-        self.center = self.geometrics.parallelepiped_Center(self.pos(),
+        self.center = geo.parallelepiped_Center(self.pos(),
                                                             self.rect().width(),
                                                             self.rect().height())
 
@@ -228,7 +224,7 @@ class Ship(QGraphicsRectItem):
         Updates the position od the ship rotation centers.
 
         """
-        self.r_centers = self.cinematics.rotationCenters(self.center,
+        self.r_centers = cin.rotationCenters(self.center,
                                                          self.heading,
                                                          self.speed,
                                                          self.turn_rate)
@@ -257,7 +253,7 @@ class Ship(QGraphicsRectItem):
         else:
             targetSpeed = self.speed_options[speedOption]
 
-        self.speed += self.controllers.proportional(targetSpeed, self.speed, self.max_accel)
+        self.speed += con.proportional(targetSpeed, self.speed, self.max_accel)
 
     def setSpeed(self):
         """
@@ -279,10 +275,10 @@ class Ship(QGraphicsRectItem):
                 self.reachSpeed("STOP")
                 # print("No user override, using: STOP because no further checkpoints.")
         else:
-            # print("Remaining distance to checkpoint:", self.geometrics.distance_A_B(self.center,
+            # print("Remaining distance to checkpoint:", geo.distance_A_B(self.center,
             #                                                                         self.checkpoint))
-            brakeD = self.cinematics.brakeDistance(self.speed, -self.max_accel)
-            if self.geometrics.distance_A_B(self.center, self.checkpoint) <= brakeD:
+            brakeD = cin.brakeDistance(self.speed, -self.max_accel)
+            if geo.distance_A_B(self.center, self.checkpoint) <= brakeD:
                 self.reachSpeed("STOP")
             elif self.checkpointInTurnRadius() is False:
                 # print("Slowing down to match checkpoint")
@@ -307,7 +303,7 @@ class Ship(QGraphicsRectItem):
         Computes the rotation angle to apply in order to reach the next checkpoint.
 
         """
-        distance = self.geometrics.distance_A_B(self.center, self.checkpoint)
+        distance = geo.distance_A_B(self.center, self.checkpoint)
         a_h = (self.checkpoint.x() - self.center.x()) / distance
         if a_h > 1.:
             a_h = 1
@@ -330,14 +326,14 @@ class Ship(QGraphicsRectItem):
         to the target heading.
 
         """
-        diff = self.geometrics.smallestAngle(self.t_heading, self.heading)
+        diff = geo.smallestAngle(self.t_heading, self.heading)
         if diff < -0.5:
             self.rot_direction = -1
         elif diff > 0.5:
             self.rot_direction = 1
         else:
             self.rot_direction = 0
-        self.heading += self.controllers.proportional(self.t_heading,
+        self.heading += con.proportional(self.t_heading,
                                                       self.heading,
                                                       self.turn_rate, diff)
         self.setTransformOriginPoint(QPointF(self.rect().width() / 2,
@@ -475,8 +471,9 @@ class Ship(QGraphicsRectItem):
         else:
             return None
 
-        if self.geometrics.distance_A_B(rot_center, self.checkpoint) <\
-            self.cinematics.rotationRadius(self.speed, self.turn_rate):
+        if geo.distance_A_B(rot_center, self.checkpoint) <\
+            cin.rotationRadius(self.speed, self.turn_rate):
+            # print("Checkpoint is not reachable")
             return False
         else:
             return True
@@ -521,7 +518,7 @@ class Ship(QGraphicsRectItem):
             self.rotateToHeading()
         self.setSpeed()
         headingInRad = math.radians(self.heading)
-        nextPoint = self.cinematics.movementBy(self.pos(), self.speed,
+        nextPoint = cin.movementBy(self.pos(), self.speed,
                                                headingInRad)
         self.setPos(nextPoint)
         self.updateTurretPos()
@@ -583,18 +580,18 @@ class Ship(QGraphicsRectItem):
         if self.detected_ships is not None:
             if len(self.detected_ships) > 0:
                 for ship in self.detected_ships:
-                    detSCPos = self.geometrics.parallelepiped_Center(
+                    detSCPos = geo.parallelepiped_Center(
                         ship.pos(), ship.rect().width(), ship.rect().height())
-                    distance = self.geometrics.distance_A_B(self.center, detSCPos)
+                    distance = geo.distance_A_B(self.center, detSCPos)
                     if distance <= self.guns_range:
                         sIR.append(ship)
         if self.rcom_ships is not None:
             if len(self.rcom_ships) > 0:
                 for ship in self.rcom_ships:
                     if ship not in sIR:
-                        detSCPos = self.geometrics.parallelepiped_Center(
+                        detSCPos = geo.parallelepiped_Center(
                             ship.pos(), ship.rect().width(), ship.rect().height())
-                        distance = self.geometrics.distance_A_B(self.center, detSCPos)
+                        distance = geo.distance_A_B(self.center, detSCPos)
                         if distance <= self.guns_range:
                             sIR.append(ship)
         return sIR

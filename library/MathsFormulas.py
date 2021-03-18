@@ -53,7 +53,8 @@ class Geometrics():
 
     """
 
-    def parallelepiped_Center(self, p_topLeft, p_width, p_height):
+    @staticmethod
+    def parallelepiped_Center(p_topLeft, p_width, p_height):
         """
 
         Parameters
@@ -79,7 +80,8 @@ class Geometrics():
                            p_topLeft.y() + p_height / 2)
         return p_center
 
-    def distance_A_B(self, pointA, pointB):
+    @staticmethod
+    def distance_A_B(pointA, pointB):
         """
 
         Parameters
@@ -104,7 +106,8 @@ class Geometrics():
             pow(pointB.y() - pointA.y(), 2))
         return distance
 
-    def pythagore(self, sideB, sideC):
+    @staticmethod
+    def pythagore(sideB, sideC):
         """
 
         Parameters
@@ -128,7 +131,8 @@ class Geometrics():
         sideA = math.sqrt(pow(sideB, 2) + pow(sideC, 2))
         return sideA
 
-    def alKashi_side(self, sideB, sideC, angleInRad):
+    @staticmethod
+    def alKashi_side(sideB, sideC, angleInRad):
         """
 
         Parameters
@@ -153,7 +157,8 @@ class Geometrics():
         sideA = math.sqrt(sideB ** 2 + sideC ** 2 - 2 * sideB * sideC * math.cos(angleInRad))
         return sideA
 
-    def alKashi_angle_cos(self, sideA, sideB, sideC):
+    @staticmethod
+    def alKashi_angle_cos(sideA, sideB, sideC):
         """
 
         Parameters
@@ -178,7 +183,8 @@ class Geometrics():
         angleInRad = math.acos(-(sideA ** 2 - (sideB ** 2 + sideC ** 2)) / (2 * sideB * sideC))
         return angleInRad
 
-    def smallestAngle(self, targetAngleDeg, curAngleDeg):
+    @staticmethod
+    def smallestAngle(targetAngleDeg, curAngleDeg):
         """
 
         Parameters
@@ -204,7 +210,8 @@ class Geometrics():
         diff = diff1 if abs(diff1) < abs(diff2) else diff2
         return diff
 
-    def checkSegmentsIntersect(self, segmentAB, segmentCD):
+    @staticmethod
+    def checkSegmentsIntersect(segmentAB, segmentCD):
         """
 
         Parameters
@@ -309,7 +316,8 @@ class Cinematics():
 
     """
 
-    def movementBy(self, originPoint, moveDistance, angleInRad):
+    @staticmethod
+    def movementBy(originPoint, moveDistance, angleInRad):
         """
 
         Parameters
@@ -337,7 +345,8 @@ class Cinematics():
         newPoint = QPointF(newX, newY)
         return newPoint
 
-    def brakeDistance(self, vinit, deceleration):
+    @staticmethod
+    def brakeDistance(vinit, deceleration):
         """
 
         Parameters
@@ -361,7 +370,8 @@ class Cinematics():
         brakeD = int((deceleration / 2) * (-vinit / deceleration) ** 2 - ((vinit ** 2) / deceleration))
         return brakeD
 
-    def rotationRadius(self, speed, rotSpeedInD_s):
+    @staticmethod
+    def rotationRadius(speed, rotSpeedInD_s):
         """
 
         Parameters
@@ -385,7 +395,8 @@ class Cinematics():
         radius = int((180 * speed) / (math.pi * rotSpeedInD_s))
         return radius
 
-    def rotationCenters(self, centerPos, heading, speed, rotSpeedInD_s):
+    @classmethod
+    def rotationCenters(cls, centerPos, heading, speed, rotSpeedInD_s):
         """
 
         Parameters
@@ -410,7 +421,7 @@ class Cinematics():
         object, and returns a list with both of them.
 
         """
-        radius = self.rotationRadius(speed, rotSpeedInD_s)
+        radius = cls.rotationRadius(speed, rotSpeedInD_s)
 
         h_l = math.radians(heading - 90)
         h_r = math.radians(heading + 90)
@@ -444,7 +455,8 @@ class Controllers():
 
     """
 
-    def proportional(self, targetValue, currentValue, maxGain, customDiff=None):
+    @staticmethod
+    def proportional(targetValue, currentValue, maxGain, customDiff=None):
         """
 
         Parameters

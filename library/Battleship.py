@@ -5,13 +5,14 @@
     Author: Grégory LARGANGE
     Date created: 14/10/2020
     Last modified by: Grégory LARGANGE
-    Date last modified: 19/12/2020
+    Date last modified: 18/03/2020
     Python version: 3.8.1
 '''
 
 from PyQt5.QtCore import QRectF, QPointF
 
 from library import Ship, GunTurret
+from library.InGameData import ProjectileData as p_dat, TechsData as tech_dat
 
 
 class Battleship(Ship.Ship):
@@ -27,8 +28,8 @@ class Battleship(Ship.Ship):
 
     Methods
     -------
-    __init__(clock : MainClock, gameScene : GameScene, pos : QPointF,
-             gun_tech : int, fireControl_tech : int, pc_tech : int, radar_tech : int)
+    __init__(clock : MainClock, gameScene : GameScene, gameMap : list of lists,
+             mapSlicing : int, pos : QPointF, params : list of int)
         The constructor of the class.
 
     spawnWeapons()
@@ -36,7 +37,7 @@ class Battleship(Ship.Ship):
 
     """
 
-    def __init__(self, clock, gameScene, gameMap, mapSlicing, data_list, pos, params):
+    def __init__(self, clock, gameScene, gameMap, mapSlicing, pos, params):
         """
 
         Parameters
@@ -73,9 +74,7 @@ class Battleship(Ship.Ship):
         The constructor of the class.
 
         """
-        super(Battleship, self).__init__(clock, gameScene, gameMap, mapSlicing,
-                                         data_list[0], data_list[1], data_list[2],
-                                         data_list[3], data_list[4], data_list[5])
+        super(Battleship, self).__init__(clock, gameScene, gameMap, mapSlicing)
 
         rect = QRectF(0, 0, 1150, 250)
         self._type = "BB"
@@ -94,13 +93,13 @@ class Battleship(Ship.Ship):
         self.turn_rate = 0.13
         self.concealement = self.base_concealement = 0.1
         self.base_detection_range = 5000
-        self.guns_range = self.projectileData.ranges_shellSize[2]
+        self.guns_range = p_dat.ranges_shellSize[2]
         self.gun_tech = params[0]
         self.fc_tech = params[1]
         self.pc_tech = params[2]
         self.radar_tech = params[3]
         self.detection_range = self.base_detection_range +\
-            self.base_detection_range * self.techData.radar_tech_aug[self.radar_tech]
+            self.base_detection_range * tech_dat.radar_tech_aug[self.radar_tech]
 
         self.setRect(rect)
         self.setPos(pos)
