@@ -15,7 +15,7 @@ from PyQt5.QtCore import Qt, QRectF, QPointF
 from PyQt5.QtGui import QColor, QPen, QBrush, QCursor
 from PyQt5.QtWidgets import QGraphicsItem, QGraphicsRectItem
 
-from library import Mapping
+from library import Mapping, InGameData, MathsFormulas
 
 
 class Ship(QGraphicsRectItem):
