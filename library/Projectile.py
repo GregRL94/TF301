@@ -5,7 +5,7 @@
     Author: Grégory LARGANGE
     Date created: 07/10/2020
     Last modified by: Grégory LARGANGE
-    Date last modified: 14/12/2020
+    Date last modified: 18/03/2021
     Python version: 3.8.1
 '''
 
@@ -15,6 +15,8 @@ import random
 from PyQt5.QtCore import QRectF, QPointF
 from PyQt5.QtGui import QPen, QBrush
 from PyQt5.QtWidgets import QGraphicsRectItem
+
+from library.InGameData import ProjectileData as p_dat
 
 
 class Projectile(QGraphicsRectItem):
@@ -34,8 +36,8 @@ class Projectile(QGraphicsRectItem):
 
     Methods
     -------
-    __init__(clock : MainClock, gameScene : GameScene, p_data : ProjectileData,
-             _rotation : float, _range : int, _size : str, _type : str)
+    __init__(clock : MainClock, gameScene : GameScene, _rotation : float,
+             _range : int, _size : str, _type : str)
         The constructor of the class.
 
     rotate(_rotation : float)
@@ -62,7 +64,7 @@ class Projectile(QGraphicsRectItem):
     m_range = 0
     cur_d = 0
 
-    def __init__(self, clock, gameScene, p_data, _rotation, _range, _size="l", _type="AP"):
+    def __init__(self, clock, gameScene, _rotation, _range, _size="l", _type="AP"):
         """
 
         Parameters
@@ -71,8 +73,6 @@ class Projectile(QGraphicsRectItem):
             The main clock of the game.
         gameScene : gameScene.
             The main display of the game.
-        p_data : ProjectileData
-            A class holding projectile informations.
         _rotation : float
             A rotation to apply to the projectile.
         _range : int
@@ -103,27 +103,27 @@ class Projectile(QGraphicsRectItem):
         self._rotation = _rotation
         self._range = _range
 
-        # Sets projectile parameters from p_data according to passed _size #
+        # Sets projectile parameters from p_dat according to passed _size #
         if _size == "s":
-            rect = QRectF(0, 0, p_data.w_h_ratio * p_data.size_values[0],
-                          p_data.size_values[0])
-            self.thk = p_data.thk_values[0]
-            self.inacc = p_data.inaccuracy[0]
-            self.m_range = p_data.ranges_shellSize[0]
+            rect = QRectF(0, 0, p_dat.w_h_ratio * p_dat.size_values[0],
+                          p_dat.size_values[0])
+            self.thk = p_dat.thk_values[0]
+            self.inacc = p_dat.inaccuracy[0]
+            self.m_range = p_dat.ranges_shellSize[0]
             index = 0
         elif _size == "m":
-            rect = QRectF(0, 0, p_data.w_h_ratio * p_data.size_values[1],
-                          p_data.size_values[1])
-            self.thk = p_data.thk_values[1]
-            self.inacc = p_data.inaccuracy[1]
-            self.m_range = p_data.ranges_shellSize[1]
+            rect = QRectF(0, 0, p_dat.w_h_ratio * p_dat.size_values[1],
+                          p_dat.size_values[1])
+            self.thk = p_dat.thk_values[1]
+            self.inacc = p_dat.inaccuracy[1]
+            self.m_range = p_dat.ranges_shellSize[1]
             index = 1
         elif _size == "l":
-            rect = QRectF(0, 0, p_data.w_h_ratio * p_data.size_values[2],
-                          p_data.size_values[2])
-            self.thk = p_data.thk_values[2]
-            self.inacc = p_data.inaccuracy[2]
-            self.m_range = p_data.ranges_shellSize[2]
+            rect = QRectF(0, 0, p_dat.w_h_ratio * p_dat.size_values[2],
+                          p_dat.size_values[2])
+            self.thk = p_dat.thk_values[2]
+            self.inacc = p_dat.inaccuracy[2]
+            self.m_range = p_dat.ranges_shellSize[2]
             index = 2
 
         self.setRect(rect)
@@ -133,18 +133,18 @@ class Projectile(QGraphicsRectItem):
             self.rotate(self._rotation)
 
         self._type = _type
-        # Sets projectile parameters from p_data according to _type #
+        # Sets projectile parameters from p_dat according to _type #
         if self._type == "AP":
-            self.v = self.v0 = p_data.speeds_shellType[0]
-            self.dmg = p_data.damage_type[index][0]
-            self.pen = self.p0 = p_data.pen_values[index][0]
-            self.colors = [p_data.colors_values[0], p_data.colors_values[1]]
+            self.v = self.v0 = p_dat.speeds_shellType[0]
+            self.dmg = p_dat.damage_type[index][0]
+            self.pen = self.p0 = p_dat.pen_values[index][0]
+            self.colors = [p_dat.colors_values[0], p_dat.colors_values[1]]
         else:
-            self.v = self.v0 = p_data.speeds_shellType[1]
-            self.dmg = p_data.damage_type[index][1]
-            self.pen = self.p0 = p_data.pen_values[index][1]
-            self.colors = [p_data.colors_values[2], p_data.colors_values[3]]
-        self.v_dec = p_data.v_decreaseRate
+            self.v = self.v0 = p_dat.speeds_shellType[1]
+            self.dmg = p_dat.damage_type[index][1]
+            self.pen = self.p0 = p_dat.pen_values[index][1]
+            self.colors = [p_dat.colors_values[2], p_dat.colors_values[3]]
+        self.v_dec = p_dat.v_decreaseRate
 
         self.clock.clockSignal.connect(self.move)
 

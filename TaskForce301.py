@@ -15,7 +15,7 @@ from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QGraphicsView
 
-from library import MainClock, GameScene, Mapping, InGameData, MathsFormulas, Battleship
+from library import MainClock, GameScene, Mapping, InGameData, Battleship
 
 
 class Ui_TSKF301MainWindow(object):
@@ -96,15 +96,6 @@ class Ui_TSKF301MainWindow(object):
 
     def initGameData(self):
         self.mainClock = MainClock.MainClock(25)  #ms
-        self.tf_geometrics = MathsFormulas.Geometrics()
-        self.tf_cinematics = MathsFormulas.Cinematics()
-        self.tf_controllers = MathsFormulas.Controllers()
-        self.tf_turretData = InGameData.TurretData()
-        self.tf_projectileData = InGameData.ProjectileData()
-        self.tf_techData = InGameData.TechsData()
-        self.dataList = [self.tf_geometrics, self.tf_cinematics,
-                         self.tf_controllers, self.tf_turretData,
-                         self.tf_projectileData, self.tf_techData]
         self.mapGen = None
         self.mapExtPercentage = 0.25
         self.mapRes = 500
@@ -138,8 +129,7 @@ class Ui_TSKF301MainWindow(object):
         self.debugDisp(True, False)
         self.gameState = False
 
-        self.rComs = InGameData.RadioCommunications(self.mainClock,
-                                                    self.graphicsScene)
+        self.rComs = InGameData.RadioCommunications(self.mainClock, self.graphicsScene)
 
     def newGameMap(self):
         self.graphicsScene.clearMap()
@@ -150,8 +140,7 @@ class Ui_TSKF301MainWindow(object):
     def spawnShips(self):
         ship1 = Battleship.Battleship(self.mainClock, self.graphicsScene,
                                       self.mapGen.gameMap, self.mapGen.mapS,
-                                      self.dataList, QtCore.QPointF(7500, 7500),
-                                      [0, 0, 0, 0])
+                                      QtCore.QPointF(7500, 7500), [0, 0, 0, 0])
         self.graphicsScene.addShip(ship1, "ALLY")
 
         # ship2 = Battleship.Battleship(self.mainClock, self.graphicsScene,
