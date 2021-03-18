@@ -5,7 +5,7 @@
     Author: Grégory LARGANGE
     Date created: 25/11/2020
     Last modified by: Grégory LARGANGE
-    Date last modified: 10/12/2020
+    Date last modified: 18/03/2021
     Python version: 3.8.1
 '''
 
@@ -59,6 +59,9 @@ class MapGenerator():
     generateObstacle(ObsAsList : list of int)
         Generates an obstacle with the coordinates given by ObsAsList.
 
+    blurrMap(blurrSize : int)
+        Blurs the penalties value of the map using box blur technique, where blurrSize
+        is the range in nodes from box center to edge.
     generateMap()
         The main loop function to generate a procedural map.
 
@@ -125,9 +128,9 @@ class MapGenerator():
         maxObstWidth : int
             The maximum width of an obstacle..
         minObstHeight : int
-            The minimun height of an obstacle..
+            The minimun height of an obstacle.
         maxObstHeight : int
-            The maximum height of an obstacle..
+            The maximum height of an obstacle.
         minD2Obstacles : int
             The minimum distance between two distinct obstacles..
 
@@ -268,14 +271,14 @@ class MapGenerator():
         poly = QPolygonF()
 
         # Sets the value of each point within the polygon to one in the map grid.
-        for i in range(y, y + h + 1):
+        for i in range(y, y + h + 1): # +1 Because of the way the map is drawn (think about fence sections)
             for j in range(x, x + w + 1):
                 line, column = i, j
                 if line > len(self.gameMap) - 1:
                     line = len(self.gameMap) - 1
                 if column > len(self.gameMap[0]) - 1:
                     column = len(self.gameMap[0]) - 1
-                self.gameMap[line][column] = 1
+                self.gameMap[line][column] = 10
 
         # Creates the polygon that will be used for display
         polyTL = QPoint(x * self.mapS, y * self.mapS)
@@ -292,6 +295,71 @@ class MapGenerator():
         oA = w * h  # Obstacle area
         oP = oA / self.mapA  # the obstruction percentage of this obstacle on the map
         self.curO += oP
+
+    def blurrMap(self, blurrSize):
+        """
+
+        Parameters
+        ----------
+        blurrSize : int
+            The size of the blurringbox. The greater the value, the more cells will be
+            taken in the average cell value calculation.
+
+        Returns
+        -------
+        None
+
+        Summary
+        -------
+        A function to blurr the penatlies values in a box of size blurrSize.
+
+        """
+        penaltiesH = []
+        penaltiesV = []
+        kernelSize = blurrSize * 2 + 1
+        kernelExtent = int((kernelSize - 1) / 2)
+
+        for i in range(len(self.gameMap)):
+            penaltiesH.append([])
+            penaltiesV.append([])
+            for j in range(len(self.gameMap[0])):
+                penaltiesH[i].append(0)
+                penaltiesV[i].append(0)
+
+        # Horizontal Pass
+        for i in range(len(self.gameMap)):
+            # We first calculate average for nodes on the edges
+            for j in range(-kernelExtent + 1, kernelExtent):
+                sampleJ = min(kernelExtent, max(0, j))
+                penaltiesH[i][0] += self.gameMap[i][sampleJ]
+
+            # Then we move through the line
+            for j in range(1, len(self.gameMap[0])):
+                removedIndex = min(len(self.gameMap[0]) - 1, max(0, j - kernelExtent))
+                addedIndex = min(len(self.gameMap[0]) - 2, max(0, j + kernelExtent - 1))
+
+                penaltiesH[i][j] = penaltiesH[i][j - 1] - self.gameMap[i][removedIndex] + self.gameMap[i][addedIndex]
+
+        # Vertical Pass
+        for j in range(len(self.gameMap[0])):
+            # We first calculate average for nodes on the edges
+            for i in range(-kernelExtent + 1, kernelExtent):
+                sampleI = min(kernelExtent, max(0, i))
+                penaltiesV[0][j] += penaltiesH[sampleI][j]
+
+            # We assign the calculated values
+            blurredPenalty = round(penaltiesV[0][j] / (kernelSize * kernelSize))
+            self.gameMap[0][j] = max(0, min(9, blurredPenalty)) if self.gameMap[0][j] != 10 else 10
+
+            # Then we move through the column
+            for i in range(1, len(self.gameMap)):
+                removedIndex = min(len(self.gameMap) - 1, max(0, i - kernelExtent))
+                addedIndex = min(len(self.gameMap) - 2, max(0, i + kernelExtent - 1))
+
+                # We assign the calculated values
+                penaltiesV[i][j] = penaltiesV[i - 1][j] - penaltiesH[removedIndex][j] + penaltiesH[addedIndex][j]
+                blurredPenalty = round(penaltiesV[i][j] / (kernelSize * kernelSize))
+                self.gameMap[i][j] = max(0, min(9, blurredPenalty)) if self.gameMap[i][j] != 10 else 10
 
     def generateMap(self):
         """
@@ -325,11 +393,19 @@ class MapGenerator():
             # Safe break to break out of the loop
             if safeCounter > self.emergencyBreak:
                 break
+        self.blurrMap(3)
         print("** GENERATED GAME MAP IN %s SECONDS **" % (time.time() - sTime))
-        for line in range(len(self.gameMap)):
-                print(self.gameMap[line])
         # returns a list of polygon. This list is only used for display.
         return self.polygonsList
+
+    def getPenaltyMap(self):
+        penaltyMap = []
+
+        for i in range(len(self.gameMap)):
+            penaltyMap.append([])
+            for j in range(len(self.gameMap[0])):
+                penaltyMap[i].append(self.gameMap[i][j])
+        return penaltyMap
 
 
 class Node(HEAP.HEAPItem):
@@ -362,6 +438,9 @@ class Node(HEAP.HEAPItem):
     hCost : int
         The distance of this node to the target node.
 
+    movementPenalty : int
+        A penalty from moving through this node.
+
     parent : Node
         The node we moved from to reach this node.
 
@@ -388,9 +467,10 @@ class Node(HEAP.HEAPItem):
     traversible = True
     gCost = 0
     hCost = 0
+    movementPenalty = 0
     parent = None
 
-    def __init__(self, iGrid, jGrid, mapSlicing, traversible):
+    def __init__(self, iGrid, jGrid, mapSlicing, traversible, movementPenalty):
         """
 
         Parameters
@@ -403,6 +483,8 @@ class Node(HEAP.HEAPItem):
             The resolution of the map.
         traversible : bool
             True if the value of map[i][j] is 0, False otherwise.
+        movementPenalty : int
+            A penalty from moving through this node.
 
         Returns
         -------
@@ -420,6 +502,7 @@ class Node(HEAP.HEAPItem):
         self.xPos = self.jGrid * mapSlicing
         self.yPos = self.iGrid * mapSlicing
         self.traversible = traversible
+        self.movementPenalty = movementPenalty
 
     def fCost(self):
         """
@@ -482,7 +565,6 @@ class Node(HEAP.HEAPItem):
                 return 1
             else:
                 return -1
-            return 0
         # If the current node has a higher Fcost than the node's Fcost it is compared to.
         else:
             return -1
@@ -555,8 +637,8 @@ class Astar():
         for i in range(len(gameMap)):
             self.allNodes.append([])
             for j in range(len(gameMap[0])):
-                traversible = True if (gameMap[i][j] == 0) else False
-                self.allNodes[i].append(Node(i, j, self.gridS, traversible))
+                traversible = True if (gameMap[i][j] != 10) else False
+                self.allNodes[i].append(Node(i, j, self.gridS, traversible, gameMap[i][j]))
 
         print("***** INITIALIZED A* IN %s SECONDS *****" % (time.time() - sTime))
 
@@ -787,7 +869,7 @@ class Astar():
             if self.currentNode == targetNode:
                 # We retrace the path using each nodes parents
                 foundPath = self.retracePath(startNode, targetNode)
-                # print("***** FOUND PATH IN %s SECONDS *****" % (time.time() - sTime))
+                print("***** FOUND PATH IN %s SECONDS *****" % (time.time() - sTime))
                 return foundPath
             else:
                 # We get all neighbours of the node being evaluated
@@ -800,7 +882,7 @@ class Astar():
 
                     # This node gCost is the distance between him and the current
                     # node we are at
-                    newMoveCost = self.currentNode.gCost + self.distanceB2Nodes(self.currentNode, node)
+                    newMoveCost = self.currentNode.gCost + self.distanceB2Nodes(self.currentNode, node) + node.movementPenalty
                     # If the new move cost is lower than the node current gCost
                     # or if it is not in the openList, we update its data
                     if (newMoveCost < node.gCost) | (node not in self.openList.items):

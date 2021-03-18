@@ -5,7 +5,7 @@
     Author: Grégory LARGANGE
     Date created: 09/10/2020
     Last modified by: Grégory LARGANGE
-    Date last modified: 18/12/2020
+    Date last modified: 18/03/2021
     Python version: 3.8.1
 '''
 
@@ -46,7 +46,7 @@ class Ship(QGraphicsRectItem):
 
     #-------------- SCAN RATES -------------#
     refresh_rate = 9
-    print_point_rate = 99  # TO DELETE ONLY FOR VISU
+    print_point_rate = 74  # TO DELETE ONLY FOR VISU
     #---------------------------------------#
 
     #------ CRITICAL COMPONENT STATES ------#
@@ -63,6 +63,7 @@ class Ship(QGraphicsRectItem):
     #---------------------------------------#
 
     #-------------- PATHFINDING ------------#
+    pathUpdateRate = 99
     center = QPointF()
     r_centers = None
     trajectory = None
@@ -110,7 +111,7 @@ class Ship(QGraphicsRectItem):
 
         self.gameScene = gameScene
         self.clock = clock
-        self.next_Path_Update = self.refresh_rate
+        self.next_Path_Update = self.pathUpdateRate
         self.next_radarScan = 0
         self.next_targetAcquisition = 0
         self.next_point_print = 0  # TO DELETE ONLY FOR VISUALISATION
@@ -156,7 +157,7 @@ class Ship(QGraphicsRectItem):
         if self.targetPointReached() is False:
             if (self.next_Path_Update <= 0) & (self.targetPoint is not None):
                 self.updatePath()
-                self.next_Path_Update = self.refresh_rate
+                self.next_Path_Update = self.pathUpdateRate
             else:
                 self.next_Path_Update -= 1
 
@@ -364,7 +365,7 @@ class Ship(QGraphicsRectItem):
         self.targetPoint = targetPoint
         print("Coordinates received:", self.targetPoint.x(), self.targetPoint.y())
         self.astar.reset()
-        for node in self.astar.findPath(self.pos(), self.targetPoint):
+        for node in self.astar.findPath(self.center, self.targetPoint):
             self.trajectory.append(QPointF(node.xPos, node.yPos))
         for point in self.trajectory:
             self.gameScene.printPoint(point, 1000, "black")
@@ -420,9 +421,9 @@ class Ship(QGraphicsRectItem):
 
         """
         if self.targetPoint:
-            toleranceRect = QRectF(self.targetPoint.x() - 4 * self.cp_tolerance,
-                                   self.targetPoint.y() - 4 * self.cp_tolerance,
-                                   8 * self.cp_tolerance, 8 * self.cp_tolerance)
+            toleranceRect = QRectF(self.targetPoint.x() - 2 * self.cp_tolerance,
+                                   self.targetPoint.y() - 2 * self.cp_tolerance,
+                                   4 * self.cp_tolerance, 4 * self.cp_tolerance)
             if toleranceRect.contains(self.center):
                 return True
             return False

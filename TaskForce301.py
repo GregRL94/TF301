@@ -5,15 +5,14 @@
     Author: Grégory LARGANGE
     Date created: 07/10/2020
     Last modified by: Grégory LARGANGE
-    Date last modified: 14/12/2020
+    Date last modified: 18/03/2021
     Python version: 3.8.1
 '''
 
 import sys
 
 from PyQt5 import QtCore, QtWidgets
-from PyQt5.QtCore import Qt, QPointF
-from PyQt5.QtGui import QPen, QBrush, QColor
+from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QGraphicsView
 
 from library import MainClock, GameScene, Mapping, InGameData, MathsFormulas, Battleship
@@ -78,7 +77,6 @@ class Ui_TSKF301MainWindow(object):
         self.actionNew_GameMap.triggered.connect(self.newGameMap)
         self.actionSpawnShips.triggered.connect(self.spawnShips)
         self.actionStart_Pause_Game.triggered.connect(self.start_Pause_Game)
-        # self.actionAstar.triggered.connect(self.launchAstar)
 
     def retranslateUi(self, TSKF301MainWindow):
         _translate = QtCore.QCoreApplication.translate
@@ -108,20 +106,36 @@ class Ui_TSKF301MainWindow(object):
                          self.tf_controllers, self.tf_turretData,
                          self.tf_projectileData, self.tf_techData]
         self.mapGen = None
-        self.mapRes = 1000
+        self.mapExtPercentage = 0.25
+        self.mapRes = 500
+
+    def genRandomMap(self):
+        genObs = self.mapGen.generateMap()
+        self.graphicsScene.displayMap(genObs)
+
+    def debugDisp(self, gridOn=True, penalties=True):
+        if gridOn:
+            self.graphicsScene.dispGrid(self.mapRes)
+        if penalties:
+            _penaltyMap = self.mapGen.getPenaltyMap()
+            self.graphicsScene.dispPenalties(_penaltyMap, self.mapRes)
 
     def newGame(self):
-        self.graphicsScene.setSceneRect(0, 0, 20000, 20000)
-        self.graphicsView.fitInView(QtCore.QRectF(0, 0,
-                                                  self.graphicsScene.width(),
-                                                  self.graphicsScene.height()),
+        playableArea = 20000
+        self.graphicsScene.setSceneRect(0, 0, int(playableArea * (1 + self.mapExtPercentage)),
+                                              int(playableArea * (1 + self.mapExtPercentage)))
+        self.graphicsScene.setInnerMap(self.mapExtPercentage, playableArea)
+        self.graphicsView.fitInView(QtCore.QRectF(int(self.mapExtPercentage * playableArea),
+                                                  int(self.mapExtPercentage * playableArea),
+                                                  playableArea,
+                                                  playableArea),
                                     Qt.KeepAspectRatio)
-        self.graphicsScene.dispGrid(self.mapRes)
         self.mapGen = Mapping.MapGenerator(self.graphicsScene.width(),
                                            self.graphicsScene.height(),
                                            self.mapRes)
-        self.mapGen.setMapParameters(0.25, 2, 5, 2, 5, 2)
+        self.mapGen.setMapParameters(0.25, 4, 10, 4, 10, 4)
         self.genRandomMap()
+        self.debugDisp(True, False)
         self.gameState = False
 
         self.rComs = InGameData.RadioCommunications(self.mainClock,
@@ -131,15 +145,12 @@ class Ui_TSKF301MainWindow(object):
         self.graphicsScene.clearMap()
         self.mapGen.resetMap()
         self.genRandomMap()
-
-    def genRandomMap(self):
-        genObs = self.mapGen.generateMap()
-        self.graphicsScene.displayMap(genObs)
+        self.debugDisp(True, False)
 
     def spawnShips(self):
         ship1 = Battleship.Battleship(self.mainClock, self.graphicsScene,
                                       self.mapGen.gameMap, self.mapGen.mapS,
-                                      self.dataList, QtCore.QPointF(0, 0),
+                                      self.dataList, QtCore.QPointF(7500, 7500),
                                       [0, 0, 0, 0])
         self.graphicsScene.addShip(ship1, "ALLY")
 
@@ -160,13 +171,6 @@ class Ui_TSKF301MainWindow(object):
         # self.graphicsScene.addShip(ship3, "ENNEMY")
 
         self.rComs.updateShipLists()
-
-    # def launchAstar(self):
-    #     aStar = Mapping.Astar(self.mapGen.gameMap, self.mapGen.mapS)
-    #     nodesPath = aStar.findPath(QPointF(0, 0), QPointF(19000, 19000))
-    #     for node in nodesPath:
-    #         self.graphicsScene.addRect(node.xPos, node.yPos, self.mapRes, self.mapRes,
-    #                                     QPen(QColor("blue")), QBrush(QColor("blue")))
 
     def start_Pause_Game(self):
         if self.gameState:
