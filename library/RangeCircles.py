@@ -9,18 +9,34 @@
     Python version: 3.8.1
 '''
 
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QColor, QPen, QBrush, QCursor
+from PyQt5.QtCore import Qt, QRectF
+from PyQt5.QtGui import QColor, QPen
 from PyQt5.QtWidgets import QGraphicsEllipseItem
 
 
 class RangeCircles(QGraphicsEllipseItem):
 
-    def __init__(self, _pos, r1, r2, color1, color2):
-        super(RangeCircles, self).__init__(_pos.x() - r1, _pos.y() - r1, 2 * r1, 2 * r1)
-        self.innerR = r2
-        self.innerColor = color2
-        self.outerColor = color1
+    thicknessCircle = 20
+    outerColor = "black"
+    innerColor = "black"
+
+    def __init__(self, r1, r2):
+        super(RangeCircles, self).__init__(0, 0, 0, 0)
+        self.outerR = max(r1, r2)
+        self.innerR = min(r1, r2)
+        self.setRect(QRectF(0, 0, 5000, 5000))
+        #self.innerRect = QRectF(self.rect().top() + self.outerR - self.innerR,
+        #                        self.rect().left() + self.outerR - self.innerR,
+        #                        2 * self.innerR, 2 * self. innerR)
+        self.innerRect = QRectF(0, 0, 2500, 2500)
+
+    def setColors(self, _outerColor, _innerColor):
+        self.outerColor = _outerColor
+        self.innerColor = _innerColor
 
     def paint(self, painter, option, widget=None):
-        True
+        painter.setPen(QPen(QColor(self.outerColor), self.thicknessCircle, Qt.SolidLine))
+        painter.drawEllipse(self.rect())
+
+        painter.setPen(QPen(QColor(self.innerColor), self.thicknessCircle, Qt.SolidLine))
+        painter.drawEllipse(self.innerRect)

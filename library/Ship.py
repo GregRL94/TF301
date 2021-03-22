@@ -33,11 +33,11 @@ class Ship(QGraphicsRectItem):
     turn_rate = 0
     base_concealement = 0
     base_detection_range = 0
+    detection_range = 0
     #---------------------------------------#
 
     #-------- WEAPONS CHARACTERISTICS ------#
     gun_turrets_list = None
-    gun_turrets_pos = None
     laser_turrets_list = None
     laser_turrets_pos = None
     guns_range = 0
@@ -77,6 +77,10 @@ class Ship(QGraphicsRectItem):
     heading = 0
     t_heading = 0
     rot_direction = 0
+    #---------------------------------------#
+
+    #---------------- DISPLAWS -------------#
+    rangeCirclesDisp = None
     #---------------------------------------#
 
     def __init__(self, clock, gameScene, gameMap, mapSlicing):
@@ -347,7 +351,7 @@ class Ship(QGraphicsRectItem):
         ----------
         targetPoint : QPointF
             The world point the unit must move to.
-        
+
         Returns
         -------
         None
@@ -522,6 +526,8 @@ class Ship(QGraphicsRectItem):
                                                headingInRad)
         self.setPos(nextPoint)
         self.updateTurretPos()
+        #self.rangeCirclesDisp.setPos(self.center.x() - self.detection_range,
+        #                             self.center.y() - self.detection_range)
 
         if self.checkpointReached(self.checkpoint):
             self.selectNextCheckpoint()
