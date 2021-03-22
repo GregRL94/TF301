@@ -97,7 +97,7 @@ class Ui_TSKF301MainWindow(object):
     def initGameData(self):
         self.mainClock = MainClock.MainClock(25)  #ms
         self.mapGen = None
-        self.mapExtPercentage = 0.25
+        self.mapExtPercentage = 0.10
         self.mapRes = 500
 
     def genRandomMap(self):
@@ -112,12 +112,12 @@ class Ui_TSKF301MainWindow(object):
             self.graphicsScene.dispPenalties(_penaltyMap, self.mapRes)
 
     def newGame(self):
-        playableArea = 20000
+        playableArea = 40000
         self.graphicsScene.setSceneRect(0, 0, int(playableArea * (1 + self.mapExtPercentage)),
                                               int(playableArea * (1 + self.mapExtPercentage)))
         self.graphicsScene.setInnerMap(self.mapExtPercentage, playableArea)
-        self.graphicsView.fitInView(QtCore.QRectF(int(self.mapExtPercentage * playableArea),
-                                                  int(self.mapExtPercentage * playableArea),
+        self.graphicsView.fitInView(QtCore.QRectF(0,
+                                                  0,
                                                   playableArea,
                                                   playableArea),
                                     Qt.KeepAspectRatio)
@@ -140,7 +140,7 @@ class Ui_TSKF301MainWindow(object):
     def spawnShips(self):
         ship1 = Battleship.Battleship(self.mainClock, self.graphicsScene,
                                       self.mapGen.gameMap, self.mapGen.mapS,
-                                      QtCore.QPointF(7500, 7500), [0, 0, 0, 0])
+                                      QtCore.QPointF(15000, 15000), [0, 0, 0, 0])
         self.graphicsScene.addShip(ship1, "ALLY")
 
         # ship2 = Battleship.Battleship(self.mainClock, self.graphicsScene,

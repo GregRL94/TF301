@@ -148,7 +148,15 @@ class Battleship(Ship.Ship):
     def setRangeCirclesDisp(self):
         """
 
+        Returns
+        -------
+        None.
+
+        Summary
+        -------
+        Spawns the ranges circles displays.
+
         """
-        self.rangeCirclesDisp = RangeCircles.RangeCircles(self.guns_range, self.detection_range)
-        self.rangeCirclesDisp.setPos(self.x(), self.y())
+        c = QPointF(self.pos().x() + self.rect().width() / 2, self.pos().y() + self.rect().height() / 2)
+        self.rangeCirclesDisp = RangeCircles.RangeCircles(c, self.detection_range, self.guns_range)
         self.gameScene.addItem(self.rangeCirclesDisp)

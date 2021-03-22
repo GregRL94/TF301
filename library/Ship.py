@@ -526,8 +526,7 @@ class Ship(QGraphicsRectItem):
                                                headingInRad)
         self.setPos(nextPoint)
         self.updateTurretPos()
-        #self.rangeCirclesDisp.setPos(self.center.x() - self.detection_range,
-        #                             self.center.y() - self.detection_range)
+        self.rangeCirclesDisp._updatePos(self.center)
 
         if self.checkpointReached(self.checkpoint):
             self.selectNextCheckpoint()
