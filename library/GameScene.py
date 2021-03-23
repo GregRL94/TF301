@@ -5,7 +5,7 @@
     Author: Grégory LARGANGE
     Date created: 12/10/2020
     Last modified by: Grégory LARGANGE
-    Date last modified: 18/03/2021
+    Date last modified: 23/03/2021
     Python version: 3.8.1
 '''
 
@@ -38,11 +38,10 @@ class GameScene(QGraphicsScene):
         self.islandsList = []
 
     def mousePressEvent(self, mouseDown):
-        print(mouseDown.scenePos())
         if ((int(mouseDown.scenePos().x()) >= self.innerBL) & (int(mouseDown.scenePos().x()) <= self.innerBR)) &\
             ((int(mouseDown.scenePos().y()) >= self.innerBT) & (int(mouseDown.scenePos().y()) <= self.innerBB)):
             itemSelected = self.itemAt(mouseDown.scenePos(),
-                                    self.attachedGView.transform())
+                                       self.attachedGView.transform())
             if (mouseDown.button() == Qt.RightButton) and not itemSelected:
                 for item in self.selectedItems():
                     point = QPointF(int(mouseDown.scenePos().x()),
@@ -121,10 +120,9 @@ class GameScene(QGraphicsScene):
             self.removeItem(item)
         self.waypoints.clear()
 
-    def addShip(self, shipObject, tag):
+    def addShip(self, shipObject):
         thisShipId = self.nextShipID
         shipObject.setData(0, thisShipId)
-        shipObject.setData(1, tag)
         shipObject.setZValue(2)
         self.shipList[thisShipId] = shipObject
         self.nextShipID += 1

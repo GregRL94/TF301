@@ -5,7 +5,7 @@
     Author: Grégory LARGANGE
     Date created: 14/10/2020
     Last modified by: Grégory LARGANGE
-    Date last modified: 18/03/2020
+    Date last modified: 23/03/2020
     Python version: 3.8.1
 '''
 
@@ -35,9 +35,12 @@ class Battleship(Ship.Ship):
     spawnWeapons()
         Spawn the ships turrets.
 
+    setRangeCirclesDisp()
+        Sets the gun and detection range visualistaion circles.
+
     """
 
-    def __init__(self, clock, gameScene, gameMap, mapSlicing, pos, params):
+    def __init__(self, clock, gameScene, gameMap, mapSlicing, tag, pos, params):
         """
 
         Parameters
@@ -77,6 +80,7 @@ class Battleship(Ship.Ship):
         super(Battleship, self).__init__(clock, gameScene, gameMap, mapSlicing)
 
         rect = QRectF(0, 0, 1150, 250)
+        self.setData(1, tag)
         self._type = "BB"
         self.hp = self.max_hp = 10000
         self.armor = 300
@@ -158,5 +162,10 @@ class Battleship(Ship.Ship):
 
         """
         c = QPointF(self.pos().x() + self.rect().width() / 2, self.pos().y() + self.rect().height() / 2)
-        self.rangeCirclesDisp = RangeCircles.RangeCircles(c, self.detection_range, self.guns_range)
+
+        if self.data(1) == "ALLY":
+            self.rangeCirclesDisp = RangeCircles.RangeCircles(c, self.detection_range, self.guns_range, "cyan", "blue")
+        else:
+            self.rangeCirclesDisp = RangeCircles.RangeCircles(c, self.detection_range, self.guns_range, "yellow", "red")
+
         self.gameScene.addItem(self.rangeCirclesDisp)

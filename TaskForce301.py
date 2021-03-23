@@ -139,15 +139,14 @@ class Ui_TSKF301MainWindow(object):
 
     def spawnShips(self):
         ship1 = Battleship.Battleship(self.mainClock, self.graphicsScene,
-                                      self.mapGen.gameMap, self.mapGen.mapS,
+                                      self.mapGen.gameMap, self.mapGen.mapS, "ALLY",
                                       QtCore.QPointF(15000, 15000), [0, 0, 0, 0])
-        self.graphicsScene.addShip(ship1, "ALLY")
+        self.graphicsScene.addShip(ship1)
 
-        # ship2 = Battleship.Battleship(self.mainClock, self.graphicsScene,
-        #                               self.mapGen.gameMap, self.mapGen.mapS,
-        #                               self.dataList, QtCore.QPointF(0, 5000),
-        #                               [0, 0, 0, 0])
-        # self.graphicsScene.addShip(ship2, "ALLY")
+        ship2 = Battleship.Battleship(self.mainClock, self.graphicsScene,
+                                      self.mapGen.gameMap, self.mapGen.mapS, "ENNEMY",
+                                      QtCore.QPointF(20000, 25000), [0, 0, 0, 0])
+        self.graphicsScene.addShip(ship2)
 
         # ship3 = Battleship.Battleship(self.mainClock, self.graphicsScene,
         #                               self.mapGen.gameMap, self.mapGen.mapS,

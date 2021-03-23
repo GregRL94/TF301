@@ -5,7 +5,7 @@
     Author: Grégory LARGANGE
     Date created: 19/03/2021
     Last modified by: Grégory LARGANGE
-    Date last modified: 22/03/2021
+    Date last modified: 23/03/2021
     Python version: 3.8.1
 '''
 
@@ -15,26 +15,84 @@ from PyQt5.QtWidgets import QGraphicsItem, QGraphicsEllipseItem
 
 
 class RangeCircles(QGraphicsEllipseItem):
+    """
 
-    thicknessCircle = 20
+    A class to draw visualisation circles for a ship gun range and detection range.
+
+    ...
+
+    Attributes
+    ----------
+    thkC : int
+        Thickness of the circles.
+
+    outerColor : string
+        The color of the outer circle.
+
+    innerColor : string
+        The color of the inner circle.
+
+    Methods
+    -------
+    __init__(_pos : QPointF, det_range : int, guns_range : int,
+             d_circle_color["black"] : string, d_gr_color["black"] : string)
+        Constructor of the class.
+
+    _updatePos(newPos : QPointF)
+        Sets the current position of the item to newPos.
+
+    paint(painter : QPainter, option : QOption, widget : QWidget)
+        Instructions to draw the circle item on the main game scene.
+
+    """
+
+    thkC = 20
     outerColor = "black"
     innerColor = "black"
 
-    def __init__(self, _pos, detectionRange, gunsRange, d_circle_color="black", d_gr_color="black"):
+    def __init__(self, _pos, det_range, guns_range, d_circle_color="black", d_gr_color="black"):
+        """
+
+        Parameters
+        ----------
+        _pos : QPointF
+            The center of the ship the range circles are attached to.
+
+        det_range : int
+            The detection range of the ship the range circles are attached to.
+
+        guns_range : int
+            The detection range of the ship the range circles are attached to.
+
+        d_circle_color : string
+            The color of the detection circle as a string.
+
+        d_gr_color : string
+            The color of the guns range circle as a string.
+
+        Returns
+        -------
+        None.
+
+        Summary
+        -------
+        Constructor of the class.
+
+        """
         super(RangeCircles, self).__init__(0, 0, 0, 0)
 
         self.setAcceptHoverEvents(False)
         self.setFlag(QGraphicsItem.ItemIsSelectable, False)
         self.setFlag(QGraphicsItem.ItemIsFocusable, False)
 
-        if max(detectionRange, gunsRange) is detectionRange:
-            self.outerR = detectionRange
-            self.innerR = gunsRange
+        if max(det_range, guns_range) is det_range:
+            self.outerR = det_range
+            self.innerR = guns_range
             self.outerColor = d_circle_color
             self.innerColor = d_gr_color
         else:
-            self.outerR = gunsRange
-            self.innerR = detectionRange
+            self.outerR = guns_range
+            self.innerR = det_range
             self.outerColor = d_gr_color
             self.innerColor = d_circle_color
 
@@ -43,7 +101,6 @@ class RangeCircles(QGraphicsEllipseItem):
                                 self.rect().left() + self.outerR - self.innerR,
                                 2 * self.innerR, 2 * self. innerR)
         self.setPos(_pos.x() - self.outerR, _pos.y() - self.outerR)
-        print(self.pos())
 
     def _updatePos(self, newPos):
         """
@@ -85,8 +142,8 @@ class RangeCircles(QGraphicsEllipseItem):
         Instructions to draw the item on the game scene.
 
         """
-        painter.setPen(QPen(QColor(self.outerColor), self.thicknessCircle, Qt.SolidLine))
+        painter.setPen(QPen(QColor(self.outerColor), self.thkC, Qt.SolidLine))
         painter.drawEllipse(self.rect())
 
-        painter.setPen(QPen(QColor(self.innerColor), self.thicknessCircle, Qt.SolidLine))
+        painter.setPen(QPen(QColor(self.innerColor), self.thkC, Qt.SolidLine))
         painter.drawEllipse(self.innerRect)
