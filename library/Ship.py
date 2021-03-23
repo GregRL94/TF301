@@ -5,7 +5,7 @@
     Author: Grégory LARGANGE
     Date created: 09/10/2020
     Last modified by: Grégory LARGANGE
-    Date last modified: 18/03/2021
+    Date last modified: 19/03/2021
     Python version: 3.8.1
 '''
 
@@ -22,6 +22,95 @@ from library.Mapping import Astar as astar
 
 
 class Ship(QGraphicsRectItem):
+    """
+
+    The core class for all ship untis.
+
+    ...
+
+    Attributes
+    ----------
+    Go in class to see all attributes.
+
+    Methods
+    -------
+    __init__(clock : Mainclock, gameScene : GameScene, gameMap : list of lists,
+             mapSlicing : int)
+        Constructor of the class.
+
+    fixedUpdate()
+        Updates the ship state.
+
+    hoverMoveEvent(mousePos)
+        Changes the appearance of the cursor, display hp informations.
+
+    mousePressEvent(mousePos)
+        Prints the position of the ship at click.
+
+    updateCenter()
+        Gets the current position of the ship center and stores it.
+
+    updateRCenters()
+        Updates the rotation centers (left and right) positions.
+
+    reachSpeed(speedOption : string)
+        Applies a controller to reach the speed indicated by SpeedOption.
+
+    setSpeed()
+        Sets the speed for the ship to reach.
+
+    computeHeading()
+        Computes the angle for the ship to reach.
+
+    rotateToHeading()
+        Applies a controller to rotate the ship until self.t_heading is reached.
+
+    setDestination(targetPoint)
+        Sets the destination of the ship to target point. Calculates a path to targetPoint
+        via an Astar algorithm and sets the trajectory to follow as a list of points.
+
+    updatePath()
+        Updates the trajectory by calling the Astar with the new position of th ship.
+
+    checkpointReached(checkpoint : QPointF, targetPoint[False] : bool)
+        Check if the ship center is within a tolerance rectangle of checkpoint. Passing
+        True for targetpoint checks if the checkpoint to check is the target destination point.
+
+    selectNextCheckpoint()
+        Selects the next checkpoint to be reached in the trajectory list.
+
+    checkpointInTurnRadius()
+        Checks if the next checkpoint to reach is within the hardest turn radius.
+
+    updateTurretPos()
+        Update the ships turrets positions according to its position and rotation in the game scene.
+
+    move()
+        Updates the ship position in the game scene according to its speed and rotation.
+
+    scan()
+        Callback to GameScene shipsIndetectionRange function. Gets a list of all ships within
+        detection range who have a different tag.
+
+    receiveRadioComm(infosList : list)
+        Sets rcom_ships to infosList. Receives a list of all ennemy ships detected by all allied ships.
+
+    computeShipsInRange()
+        Computes the list list of all detected ships which are withing the ships gun range.
+
+    autoSelectTarget()
+        Uses an algorithm to determine the best target to shoot at.
+
+    repair()
+        Repairs a ship core component.
+
+    printInfos()
+        Print all infos about the ship.
+
+    paint()
+        Paints the ship on the game scene
+
+    """
 
     #--------- HULL CHARACTERISTICS --------#
     _type = ""
@@ -92,6 +181,9 @@ class Ship(QGraphicsRectItem):
             The main clock of the game.
         gameScene : GameScene
             The main display of the game.
+        gameMap : list of lists
+            The game map as a square matrix.
+        mapSlicing : The resolution of the map.
 
         Returns
         -------
@@ -114,7 +206,7 @@ class Ship(QGraphicsRectItem):
         self.next_Path_Update = self.pathUpdateRate
         self.next_radarScan = 0
         self.next_targetAcquisition = 0
-        self.next_point_print = 0  # TO DELETE ONLY FOR VISUALISATION
+        self.next_point_print = 0  # Debug print
 
         self.speed_user_override = None
         self.default_speed = "FAST"
@@ -143,7 +235,7 @@ class Ship(QGraphicsRectItem):
         self.updateRCenters()
         self.move()
 
-        # TO BE DELETED WHEN NOT NEEDED #
+        # Debug display #
         if self.next_point_print <= 0:
             self.gameScene.printPoint(self.center, 100, "blue", True)
             if self.rot_direction < 0:
@@ -153,7 +245,8 @@ class Ship(QGraphicsRectItem):
             self.next_point_print = self.print_point_rate
         else:
             self.next_point_print -= 1
-        #################################
+        ##################
+        # Test if the target point of the pathfinding has been reached
         if self.checkpointReached(self.targetPoint, True) is False:
             if (self.next_Path_Update <= 0) & (self.targetPoint is not None):
                 self.updatePath()
@@ -161,6 +254,7 @@ class Ship(QGraphicsRectItem):
             else:
                 self.next_Path_Update -= 1
 
+        # Test to launch a radar scan (gets all ships in detection range)
         if self.next_radarScan <= 0:
             self.scan()
             self.ships_in_range = self.computeShipsInRange()
@@ -168,6 +262,7 @@ class Ship(QGraphicsRectItem):
         else:
             self.next_radarScan -= 1
 
+        # Test to acquire the best target
         if self.next_targetAcquisition <= 0:
             for turret in self.gun_turrets_list:
                 turret.setTarget(self.autoSelectTarget())
@@ -198,6 +293,21 @@ class Ship(QGraphicsRectItem):
         super().setToolTip(info)
 
     def mousePressEvent(self, mouseDown):
+        """
+        Parameters
+        ----------
+        mouseDown: QMouseEvent
+            A signal indicating that a mouse button was pressed.
+
+        Returns
+        -------
+        None.
+
+        Summary
+        -------
+        Prints the postion of the item.
+
+        """
         print(self._type + str(self.data(0)), "selected at:", mouseDown.pos())
 
     def updateCenter(self):
@@ -228,10 +338,8 @@ class Ship(QGraphicsRectItem):
         Updates the position od the ship rotation centers.
 
         """
-        self.r_centers = cin.rotationCenters(self.center,
-                                                         self.heading,
-                                                         self.speed,
-                                                         self.turn_rate)
+        self.r_centers = cin.rotationCenters(self.center, self.heading,
+                                             self.speed, self.turn_rate)
 
     def reachSpeed(self, speedOption):
         """
@@ -366,6 +474,7 @@ class Ship(QGraphicsRectItem):
         self.astar.reset()
         for node in self.astar.findPath(self.center, self.targetPoint):
             self.trajectory.append(QPointF(node.xPos, node.yPos))
+        # Debug display
         for point in self.trajectory:
             self.gameScene.printPoint(point, 1000, "black")
 
@@ -381,8 +490,7 @@ class Ship(QGraphicsRectItem):
         Updates the trajectory by calling the Astar pathfinding algorithm.
 
         """
-        # Debug display
-        self.gameScene.clearWaypoints()
+        self.gameScene.clearWaypoints() # Debug display
         self.trajectory.clear()
         self.sel_checkpoint_id = None
         self.astar.reset()
@@ -395,6 +503,13 @@ class Ship(QGraphicsRectItem):
 
     def checkpointReached(self, checkpoint, targetPoint=False):
         """
+
+        Parameters
+        ----------
+        checkpoint : QPointF
+            The point to check if the ship has reached.
+        targetPoint[Default=Fasle] : bool
+            Determines if the passed checkpoint is also the targetPoint.
 
         Returns
         -------
@@ -432,7 +547,7 @@ class Ship(QGraphicsRectItem):
         Summary
         -------
         Selects the next point in the trajectory list to be reached. If there
-        is no more points, resets the trajectory and current checkpoint.
+        is no more points, resets the trajectory, current checkpoint and targetpoint.
 
         """
         if self.trajectory is None:
@@ -462,7 +577,7 @@ class Ship(QGraphicsRectItem):
 
         Summary
         -------
-        Calculates if a point is reachable with a turn. returns True if yes,
+        Calculates if a point is reachable with the hardest turn. returns True if yes,
         False otherwise.
 
         """
@@ -477,7 +592,6 @@ class Ship(QGraphicsRectItem):
 
         if geo.distance_A_B(rot_center, self.checkpoint) <\
             cin.rotationRadius(self.speed, self.turn_rate):
-            # print("Checkpoint is not reachable")
             return False
         else:
             return True
@@ -554,7 +668,7 @@ class Ship(QGraphicsRectItem):
         Parameters
         ----------
         infosList : list
-            Q list of Ship object.
+            A list of Ship objects.
 
         Returns
         -------
@@ -577,12 +691,12 @@ class Ship(QGraphicsRectItem):
 
         Summary
         -------
-        Computes and returns a list of all enney detected ships zithin gun range.
+        Computes and returns a list of all enney detected ships within gun range.
 
         """
         sIR = []
 
-        if self.detected_ships is not None:
+        if self.detected_ships:
             if len(self.detected_ships) > 0:
                 for ship in self.detected_ships:
                     detSCPos = geo.parallelepiped_Center(
@@ -590,7 +704,7 @@ class Ship(QGraphicsRectItem):
                     distance = geo.distance_A_B(self.center, detSCPos)
                     if distance <= self.guns_range:
                         sIR.append(ship)
-        if self.rcom_ships is not None:
+        if self.rcom_ships:
             if len(self.rcom_ships) > 0:
                 for ship in self.rcom_ships:
                     if ship not in sIR:
@@ -633,7 +747,7 @@ class Ship(QGraphicsRectItem):
 
         Summary
         -------
-        Print onfos about the ship.
+        Print infos about the ship.
 
         """
         txt = ""
