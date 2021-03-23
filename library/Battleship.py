@@ -5,13 +5,13 @@
     Author: Grégory LARGANGE
     Date created: 14/10/2020
     Last modified by: Grégory LARGANGE
-    Date last modified: 18/03/2020
+    Date last modified: 23/03/2020
     Python version: 3.8.1
 '''
 
 from PyQt5.QtCore import QRectF, QPointF
 
-from library import Ship, GunTurret
+from library import Ship, GunTurret, RangeCircles
 from library.InGameData import ProjectileData as p_dat, TechsData as tech_dat
 
 
@@ -35,9 +35,12 @@ class Battleship(Ship.Ship):
     spawnWeapons()
         Spawn the ships turrets.
 
+    setRangeCirclesDisp()
+        Sets the gun and detection range visualistaion circles.
+
     """
 
-    def __init__(self, clock, gameScene, gameMap, mapSlicing, pos, params):
+    def __init__(self, clock, gameScene, gameMap, mapSlicing, tag, pos, params):
         """
 
         Parameters
@@ -77,6 +80,7 @@ class Battleship(Ship.Ship):
         super(Battleship, self).__init__(clock, gameScene, gameMap, mapSlicing)
 
         rect = QRectF(0, 0, 1150, 250)
+        self.setData(1, tag)
         self._type = "BB"
         self.hp = self.max_hp = 10000
         self.armor = 300
@@ -105,6 +109,7 @@ class Battleship(Ship.Ship):
         self.setPos(pos)
 
         self.spawnWeapons()
+        self.setRangeCirclesDisp()
         self.printInfos()
 
     def spawnWeapons(self):
@@ -120,27 +125,47 @@ class Battleship(Ship.Ship):
         for further informations.
 
         """
-        self.gun_turrets_pos = [QPointF(self.x() + 175, self.y() + 75),
-                                 QPointF(self.x() + 625, self.y() + 75),
-                                 QPointF(self.x() + 800, self.y() + 75)]
+        gun_turrets_pos = [QPointF(self.x() + 175, self.y() + 75),
+                           QPointF(self.x() + 625, self.y() + 75),
+                           QPointF(self.x() + 800, self.y() + 75)]
 
         turretC = GunTurret.GunTurret(self.clock, self.gameScene, "l", self)
-        turretC.setPos(self.gun_turrets_pos[0])
+        turretC.setPos(gun_turrets_pos[0])
         turretC.setDFromShipCenter(175 - self.rect().width() / 2)
         turretC.setZValue(3)
         self.gameScene.addItem(turretC)
 
-
         turretB = GunTurret.GunTurret(self.clock, self.gameScene, "l", self)
-        turretB.setPos(self.gun_turrets_pos[1])
+        turretB.setPos(gun_turrets_pos[1])
         turretB.setDFromShipCenter(625 - self.rect().width() / 2)
         turretB.setZValue(3)
         self.gameScene.addItem(turretB)
 
         turretA = GunTurret.GunTurret(self.clock, self.gameScene, "l", self)
-        turretA.setPos(self.gun_turrets_pos[2])
+        turretA.setPos(gun_turrets_pos[2])
         turretA.setDFromShipCenter(800 - self.rect().width() / 2)
         turretA.setZValue(3)
         self.gameScene.addItem(turretA)
 
         self.gun_turrets_list = [turretC, turretB, turretA]
+
+    def setRangeCirclesDisp(self):
+        """
+
+        Returns
+        -------
+        None.
+
+        Summary
+        -------
+        Spawns the ranges circles displays.
+
+        """
+        c = QPointF(self.pos().x() + self.rect().width() / 2, self.pos().y() + self.rect().height() / 2)
+
+        if self.data(1) == "ALLY":
+            self.rangeCirclesDisp = RangeCircles.RangeCircles(c, self.detection_range, self.guns_range, "cyan", "blue")
+        else:
+            self.rangeCirclesDisp = RangeCircles.RangeCircles(c, self.detection_range, self.guns_range, "yellow", "red")
+
+        self.gameScene.addItem(self.rangeCirclesDisp)

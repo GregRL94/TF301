@@ -112,17 +112,13 @@ class Ui_TSKF301MainWindow(object):
             self.graphicsScene.dispPenalties(_penaltyMap, self.mapRes)
 
     def newGame(self):
-        playableArea = 20000
+        playableArea = 10000
         self.graphicsScene.setSceneRect(0, 0, int(playableArea * (1 + self.mapExtPercentage)),
                                               int(playableArea * (1 + self.mapExtPercentage)))
         self.graphicsScene.setInnerMap(self.mapExtPercentage, playableArea)
-        self.graphicsView.fitInView(QtCore.QRectF(int(self.mapExtPercentage * playableArea),
-                                                  int(self.mapExtPercentage * playableArea),
-                                                  playableArea,
-                                                  playableArea),
+        self.graphicsView.fitInView(QtCore.QRectF(0, 0, playableArea, playableArea),
                                     Qt.KeepAspectRatio)
-        self.mapGen = Mapping.MapGenerator(self.graphicsScene.width(),
-                                           self.graphicsScene.height(),
+        self.mapGen = Mapping.MapGenerator(self.graphicsScene.width(), self.graphicsScene.height(),
                                            self.mapRes)
         self.mapGen.setMapParameters(0.25, 4, 10, 4, 10, 4)
         self.genRandomMap()
@@ -139,25 +135,14 @@ class Ui_TSKF301MainWindow(object):
 
     def spawnShips(self):
         ship1 = Battleship.Battleship(self.mainClock, self.graphicsScene,
-                                      self.mapGen.gameMap, self.mapGen.mapS,
-                                      QtCore.QPointF(7500, 7500), [0, 0, 0, 0])
-        self.graphicsScene.addShip(ship1, "ALLY")
+                                      self.mapGen.gameMap, self.mapGen.mapS, "ALLY",
+                                      QtCore.QPointF(0, 0), [0, 0, 0, 0])
+        self.graphicsScene.addShip(ship1)
 
-        # ship2 = Battleship.Battleship(self.mainClock, self.graphicsScene,
-        #                               self.mapGen.gameMap, self.mapGen.mapS,
-        #                               self.dataList, QtCore.QPointF(0, 5000),
-        #                               [0, 0, 0, 0])
-        # self.graphicsScene.addShip(ship2, "ALLY")
-
-        # ship3 = Battleship.Battleship(self.mainClock, self.graphicsScene,
-        #                               self.mapGen.gameMap, self.mapGen.mapS,
-        #                               self.dataList, QtCore.QPointF(0, 10000),
-        #                               [0, 0, 0, 0])
-        # self.graphicsScene.addShip(ship3, "ALLY")
-
-        # ship3 = Battleship.Battleship(self.mainClock, self.graphicsScene, self.dataList,
-        #                               QtCore.QPointF(12000, 17000), 0, 0, 0, 0)
-        # self.graphicsScene.addShip(ship3, "ENNEMY")
+        ship2 = Battleship.Battleship(self.mainClock, self.graphicsScene,
+                                      self.mapGen.gameMap, self.mapGen.mapS, "ENNEMY",
+                                      QtCore.QPointF(5000, 5000), [0, 0, 0, 0])
+        self.graphicsScene.addShip(ship2)
 
         self.rComs.updateShipLists()
 

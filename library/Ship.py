@@ -5,7 +5,7 @@
     Author: Grégory LARGANGE
     Date created: 09/10/2020
     Last modified by: Grégory LARGANGE
-    Date last modified: 19/03/2021
+    Date last modified: 23/03/2021
     Python version: 3.8.1
 '''
 
@@ -122,11 +122,11 @@ class Ship(QGraphicsRectItem):
     turn_rate = 0
     base_concealement = 0
     base_detection_range = 0
+    detection_range = 0
     #---------------------------------------#
 
     #-------- WEAPONS CHARACTERISTICS ------#
     gun_turrets_list = None
-    gun_turrets_pos = None
     laser_turrets_list = None
     laser_turrets_pos = None
     guns_range = 0
@@ -166,6 +166,10 @@ class Ship(QGraphicsRectItem):
     heading = 0
     t_heading = 0
     rot_direction = 0
+    #---------------------------------------#
+
+    #---------------- DISPLAWS -------------#
+    rangeCirclesDisp = None
     #---------------------------------------#
 
     def __init__(self, clock, gameScene, gameMap, mapSlicing):
@@ -266,6 +270,10 @@ class Ship(QGraphicsRectItem):
         else:
             self.next_targetAcquisition -= 1
 
+        # Test to hide the range circles
+        if self.isSelected() is False:
+            self.rangeCirclesDisp.hide()
+
     def hoverMoveEvent(self, mousePos):
         """
 
@@ -301,10 +309,11 @@ class Ship(QGraphicsRectItem):
 
         Summary
         -------
-        Prints the postion of the item.
+        Prints the postion of the item. Displays the range circles.
 
         """
         print(self._type + str(self.data(0)), "selected at:", mouseDown.pos())
+        self.rangeCirclesDisp.show()
 
     def updateCenter(self):
         """
@@ -319,8 +328,8 @@ class Ship(QGraphicsRectItem):
 
         """
         self.center = geo.parallelepiped_Center(self.pos(),
-                                                            self.rect().width(),
-                                                            self.rect().height())
+                                                self.rect().width(),
+                                                self.rect().height())
 
     def updateRCenters(self):
         """
@@ -636,6 +645,7 @@ class Ship(QGraphicsRectItem):
                                                headingInRad)
         self.setPos(nextPoint)
         self.updateTurretPos()
+        self.rangeCirclesDisp._updatePos(self.center)
 
         if self.checkpointReached(self.checkpoint):
             self.selectNextCheckpoint()
