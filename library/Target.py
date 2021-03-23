@@ -5,7 +5,7 @@
     Author: Grégory LARGANGE
     Date created: 15/10/2020
     Last modified by: Grégory LARGANGE
-    Date last modified: 15/10/2020
+    Date last modified: 19/03/2020
     Python version: 3.8.1
 '''
 
@@ -14,6 +14,11 @@ from PyQt5.QtWidgets import QGraphicsRectItem
 
 
 class Target(QGraphicsRectItem):
+    """
+
+    ##### THIS CLASS IS OBSOLETE #####
+
+    """
 
     shipID = 0
     shipTag = "ENNEMY"
