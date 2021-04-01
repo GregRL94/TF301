@@ -5,7 +5,7 @@
     Author: Grégory LARGANGE
     Date created: 12/10/2020
     Last modified by: Grégory LARGANGE
-    Date last modified: 23/03/2021
+    Date last modified: 01/04/2021
     Python version: 3.8.1
 '''
 
@@ -13,7 +13,8 @@ from PyQt5.QtCore import Qt, QPointF
 from PyQt5.QtGui import QPen, QBrush, QColor
 from PyQt5.QtWidgets import QGraphicsScene
 
-from library import MathsFormulas, Island, Waypoint
+from library import Island, Waypoint
+from library.MathsFormulas import Geometrics as geo
 
 
 class GameScene(QGraphicsScene):
@@ -27,7 +28,6 @@ class GameScene(QGraphicsScene):
 
     def __init__(self, parent=None):
         super(GameScene, self).__init__(parent)
-        self.geometrics = MathsFormulas.Geometrics()
 
         self.innerBL = 0
         self.innerBR = 0
@@ -46,7 +46,7 @@ class GameScene(QGraphicsScene):
                 for item in self.selectedItems():
                     point = QPointF(int(mouseDown.scenePos().x()),
                                     int(mouseDown.scenePos().y()))
-                    item.setDestination(point)
+                    item.updatePath(point)
                 mouseDown.accept()
             else:
                 super(GameScene, self).mousePressEvent(mouseDown)
@@ -77,10 +77,9 @@ class GameScene(QGraphicsScene):
         for ship in self.shipList.values():
             if (ship.data(0) != ship0ID) & (ship.data(1) != ship0Tag):
                 effS0ScanRange = ship0ScanRange - (ship0ScanRange - 1000) * ship.concealement
-                shipNCenterSPos = self.geometrics.parallelepiped_Center(
-                    ship.pos(), ship.rect().width(), ship.rect().height())
-                dSNS0 = self.geometrics.distance_A_B(ship0CenterSPos,
-                                                     shipNCenterSPos)
+                shipNCenterSPos = geo.parallelepiped_Center(ship.pos(), ship.rect().width(),
+                                                            ship.rect().height())
+                dSNS0 = geo.distance_A_B(ship0CenterSPos, shipNCenterSPos)
                 if dSNS0 <= effS0ScanRange:
                     shipsInDRange.append(ship)
         return shipsInDRange
