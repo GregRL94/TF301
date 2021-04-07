@@ -5,7 +5,7 @@
     Author: Grégory LARGANGE
     Date created: 09/10/2020
     Last modified by: Grégory LARGANGE
-    Date last modified: 23/03/2021
+    Date last modified: 01/04/2021
     Python version: 3.8.1
 '''
 
@@ -64,10 +64,6 @@ class Ship(QGraphicsRectItem):
 
     rotateToHeading()
         Applies a controller to rotate the ship until self.t_heading is reached.
-
-    setDestination(targetPoint)
-        Sets the destination of the ship to target point. Calculates a path to targetPoint
-        via an Astar algorithm and sets the trajectory to follow as a list of points.
 
     updatePath()
         Updates the trajectory by calling the Astar with the new position of th ship.
@@ -168,7 +164,7 @@ class Ship(QGraphicsRectItem):
     rot_direction = 0
     #---------------------------------------#
 
-    #---------------- DISPLAWS -------------#
+    #---------------- DISPLAYS -------------#
     rangeCirclesDisp = None
     #---------------------------------------#
 
@@ -392,8 +388,7 @@ class Ship(QGraphicsRectItem):
                 self.reachSpeed("STOP")
                 # print("No user override, using: STOP because no further checkpoints.")
         else:
-            # print("Remaining distance to checkpoint:", geo.distance_A_B(self.center,
-            #                                                                         self.checkpoint))
+            # print("Remaining distance to checkpoint:", geo.distance_A_B(self.center, self.checkpoint))
             brakeD = cin.brakeDistance(self.speed, -self.max_accel)
             if geo.distance_A_B(self.center, self.checkpoint) <= brakeD:
                 self.reachSpeed("STOP")
@@ -450,40 +445,11 @@ class Ship(QGraphicsRectItem):
             self.rot_direction = 1
         else:
             self.rot_direction = 0
-        self.heading += con.proportional(self.t_heading,
-                                                      self.heading,
-                                                      self.turn_rate, diff)
-        self.setTransformOriginPoint(QPointF(self.rect().width() / 2,
-                                             self.rect().height() / 2))
+        self.heading += con.proportional(self.t_heading, self.heading, self.turn_rate, diff)
+        self.setTransformOriginPoint(QPointF(self.rect().width() / 2, self.rect().height() / 2))
         self.setRotation(self.heading)
 
-    def setDestination(self, targetPoint):
-        """
-
-        Parameters
-        ----------
-        targetPoint : QPointF
-            The world point the unit must move to.
-
-        Returns
-        -------
-        None
-
-        Summary
-        -------
-        Sets the end point of the pathfinding algorithm to targetPoint.
-
-        """
-        self.trajectory = []
-        self.targetPoint = targetPoint
-        self.astar.reset()
-        for node in self.astar.findPath(self.center, self.targetPoint):
-            self.trajectory.append(QPointF(node.xPos, node.yPos))
-        # Debug display
-        for point in self.trajectory:
-            self.gameScene.printPoint(point, 1000, "black")
-
-    def updatePath(self):
+    def updatePath(self, targetPoint=None):
         """
 
         Returns
@@ -496,7 +462,14 @@ class Ship(QGraphicsRectItem):
 
         """
         self.gameScene.clearWaypoints() # Debug display
-        self.trajectory.clear()
+        if self.trajectory:
+            self.trajectory.clear()
+        else:
+            self.trajectory = []
+
+        if targetPoint:
+            self.targetPoint = targetPoint
+
         self.sel_checkpoint_id = None
         self.astar.reset()
         for node in self.astar.findPath(self.center, self.targetPoint):

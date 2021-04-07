@@ -5,7 +5,7 @@
     Author: Grégory LARGANGE
     Date created: 19/10/2020
     Last modified by: Grégory LARGANGE
-    Date last modified: 14/12/2020
+    Date last modified: 07/04/2021
     Python version: 3.8.1
 '''
 
@@ -211,10 +211,6 @@ class RadioCommunications():
 
     """
 
-    alliedShips = []
-    ennemyShips = []
-    alliedDetectedShips = []
-    ennemyDetectedShips = []
     radioCommsRate = 19
 
     def __init__(self, mainClock, gameScene):
@@ -239,6 +235,11 @@ class RadioCommunications():
         self.gameScene = gameScene
         self.clock = mainClock
         self.next_radioComm = self.radioCommsRate
+
+        self.alliedShips = []
+        self.ennemyShips = []
+        self.alliedDetectedShips = []
+        self.ennemyDetectedShips = []
 
         self.clock.clockSignal.connect(self.fixedUpdate)
 
@@ -304,7 +305,7 @@ class RadioCommunications():
         for ship in self.ennemyShips:
             shipDSList = ship.detected_ships
             tmpEDS = tmpEDS + shipDSList
-        tmpEDS = list(dict.fromkeys(tmpADS))
+        tmpEDS = list(dict.fromkeys(tmpEDS))
 
         self.alliedDetectedShips = tmpADS
         self.ennemyDetectedShips = tmpEDS
