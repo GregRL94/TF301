@@ -15,8 +15,8 @@ from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QGraphicsView
 
-from library import MainClock, GameScene, Mapping, InGameData, Battleship
-
+from library import MainClock, GameScene, Mapping, InGameData
+from library.Ship import Ship
 
 class Ui_TSKF301MainWindow(object):
 
@@ -134,17 +134,20 @@ class Ui_TSKF301MainWindow(object):
         self.debugDisp(True, False)
 
     def spawnShips(self):
-        ship1 = Battleship.Battleship(self.mainClock, self.graphicsScene,
-                                      self.mapGen.gameMap, self.mapGen.mapS, "ALLY",
-                                      QtCore.QPointF(0, 0), [0, 0, 0, 0])
+        ship1 = Ship._battleShip(self.mainClock, self.graphicsScene, self.mapGen.gameMap, self.mapGen.mapS, "ALLY", QtCore.QPointF(7500, 7500), [0, 0, 0, 0])
+        print(ship1._type)
         self.graphicsScene.addShip(ship1)
+        #ship1 = Battleship.Battleship(self.mainClock, self.graphicsScene,
+        #                              self.mapGen.gameMap, self.mapGen.mapS, "ALLY",
+        #                              QtCore.QPointF(0, 0), [0, 0, 0, 0])
+        #self.graphicsScene.addShip(ship1)
 
         #ship2 = Battleship.Battleship(self.mainClock, self.graphicsScene,
         #                              self.mapGen.gameMap, self.mapGen.mapS, "ENNEMY",
         #                              QtCore.QPointF(5000, 5000), [0, 0, 0, 0])
         #self.graphicsScene.addShip(ship2)
 
-        self.rComs.updateShipLists()
+        #self.rComs.updateShipLists()
 
     def start_Pause_Game(self):
         if self.gameState:

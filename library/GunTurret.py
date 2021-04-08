@@ -190,8 +190,8 @@ class GunTurret(QGraphicsRectItem):
             self.reloadTime = tur_dat.reload_t_values[2]
             self.shell_s = p_dat.size_tags[2]
 
-        # Sets gun_acc parameters from tech_dat according to parent gun_tech #
-        self.gun_acc = round(tech_dat.gun_tech_acc[self.parentShip.gun_tech] * self.acc_f, 4)
+        # Sets gun_acc parameters from tech_dat according to parent guns_tech #
+        self.gun_acc = round(tech_dat.gun_tech_acc[self.parentShip.guns_tech] * self.acc_f, 4)
 
         # Sets base_fc_error parameters from tech_dat according to parent fc_tech #
         self.base_fc_error = tech_dat.fc_tech_e[self.parentShip.fc_tech]

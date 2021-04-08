@@ -15,10 +15,11 @@ from PyQt5.QtCore import Qt, QRectF, QPointF
 from PyQt5.QtGui import QColor, QPen, QBrush, QCursor
 from PyQt5.QtWidgets import QGraphicsItem, QGraphicsRectItem
 
+from library import GunTurret, RangeCircles
+from library.InGameData import ProjectileData as p_dat, TechsData as tech_dat
 from library.MathsFormulas import Geometrics as geo, Cinematics as cin,\
     Controllers as con
 from library.Mapping import Astar as astar
-
 
 
 class Ship(QGraphicsRectItem):
@@ -118,7 +119,6 @@ class Ship(QGraphicsRectItem):
     turn_rate = 0
     base_concealement = 0
     base_detection_range = 0
-    detection_range = 0
     #---------------------------------------#
 
     #-------- WEAPONS CHARACTERISTICS ------#
@@ -132,7 +132,7 @@ class Ship(QGraphicsRectItem):
     radar_tech = 0
     #---------------------------------------#
 
-    #-------------- SCAN RATES -------------#
+    #------------- SCAN RATES --------------#
     refresh_rate = 9
     print_point_rate = 74  # TO DELETE ONLY FOR VISU
     #---------------------------------------#
@@ -150,7 +150,7 @@ class Ship(QGraphicsRectItem):
     ships_in_range = None
     #---------------------------------------#
 
-    #-------------- PATHFINDING ------------#
+    #------------- PATHFINDING -------------#
     pathUpdateRate = 99
     center = QPointF()
     r_centers = None
@@ -164,8 +164,17 @@ class Ship(QGraphicsRectItem):
     rot_direction = 0
     #---------------------------------------#
 
-    #---------------- DISPLAYS -------------#
+    #-------------- DISPLAYS ---------------#
     rangeCirclesDisp = None
+    #---------------------------------------#
+
+    #----------- UPDATED IN GAME -----------#
+    hp = 0
+    shield = 0
+    concealement = 0
+    detection_range = 0
+    speed = 0
+    accel = 0
     #---------------------------------------#
 
     def __init__(self, clock, gameScene, gameMap, mapSlicing):
@@ -214,6 +223,62 @@ class Ship(QGraphicsRectItem):
             }
 
         self.clock.clockSignal.connect(self.fixedUpdate)
+
+    @classmethod
+    def _battleShip(cls, clock, gameScene, gameMap, mapSlicing, tag, pos, params):
+        bb = cls(clock, gameScene, gameMap, mapSlicing)
+
+        rect = QRectF(0, 0, 1150, 250)
+        bb.setData(1, tag)
+        bb._type = "BB"
+        bb.hp = bb.max_hp = 10000
+        bb.armor = 300
+        bb.shield = bb.max_shield = 10000
+        bb.max_speed = 9
+        bb.speed_options = {
+            "AHEAD_FULL": bb.max_speed,
+            "FAST": int(2 * bb.max_speed / 3),
+            "SLOW": int(bb.max_speed / 3),
+            "STOP": 0
+            }
+        bb.max_accel = 0.5
+        bb.turn_rate = 0.13
+        bb.concealement = bb.base_concealement = 0.1
+        bb.base_detection_range = 5000
+        bb.guns_range = p_dat.ranges_shellSize[2]
+        bb.guns_tech = params[0]
+        bb.fc_tech = params[1]
+        bb.pc_tech = params[2]
+        bb.radar_tech = params[3]
+        bb.detection_range = bb.base_detection_range +\
+            bb.base_detection_range * tech_dat.radar_tech_aug[bb.radar_tech]
+
+        bb.setRect(rect)
+        bb.setPos(pos)
+
+        bb.spawnWeapons()
+        bb.setRangeCirclesDisp()
+        bb.printInfos()
+
+        return bb
+
+    @classmethod
+    def _cruiser(cls, clock, gameScene, gameMap, mapSlicing):
+        ca = cls(clock, gameScene, gameMap, mapSlicing)
+        ca._type = "CA"
+        return ca
+
+    @classmethod
+    def _frigate(cls, clock, gameScene, gameMap, mapSlicing):
+        ff = cls(clock, gameScene, gameMap, mapSlicing)
+        ff._type = "FF"
+        return ff
+
+    @classmethod
+    def _corvette(cls, clock, gameScene, gameMap, mapSlicing):
+        pt = cls(clock, gameScene, gameMap, mapSlicing)
+        pt._type = "PT"
+        return pt
 
     def fixedUpdate(self):
         """
@@ -716,6 +781,43 @@ class Ship(QGraphicsRectItem):
     def repair(self):
         True
 
+    def spawnWeapons(self):
+        """
+
+        Returns
+        -------
+        None.
+
+        Summary
+        -------
+        Spawns the turrets of the battlship at predefined places. See documentation
+        for further informations.
+
+        """
+        gun_turrets_pos = [QPointF(self.x() + 175, self.y() + 75),
+                           QPointF(self.x() + 625, self.y() + 75),
+                           QPointF(self.x() + 800, self.y() + 75)]
+
+        turretC = GunTurret.GunTurret(self.clock, self.gameScene, "l", self)
+        turretC.setPos(gun_turrets_pos[0])
+        turretC.setDFromShipCenter(175 - self.rect().width() / 2)
+        turretC.setZValue(3)
+        self.gameScene.addItem(turretC)
+
+        turretB = GunTurret.GunTurret(self.clock, self.gameScene, "l", self)
+        turretB.setPos(gun_turrets_pos[1])
+        turretB.setDFromShipCenter(625 - self.rect().width() / 2)
+        turretB.setZValue(3)
+        self.gameScene.addItem(turretB)
+
+        turretA = GunTurret.GunTurret(self.clock, self.gameScene, "l", self)
+        turretA.setPos(gun_turrets_pos[2])
+        turretA.setDFromShipCenter(800 - self.rect().width() / 2)
+        turretA.setZValue(3)
+        self.gameScene.addItem(turretA)
+
+        self.gun_turrets_list = [turretC, turretB, turretA]
+
     def printInfos(self):
         """
 
@@ -755,7 +857,7 @@ class Ship(QGraphicsRectItem):
         print("TURNING RATE", str(self.turn_rate) + "°/s")
         print("")
         print("--------- TECHNOLOGIES ------------")
-        print("GUN TECHNOLOGY:", "Mk", str(self.gun_tech))
+        print("GUN TECHNOLOGY:", "Mk", str(self.guns_tech))
         print("FIRE CONTROL TECHNOLOGY:", "Mk", str(self.fc_tech))
         print("TARGETING COMPUTER TECHNOLOGY:", "Mk", str(self.pc_tech))
         print("RADAR TECHNOLOGY:", "Mk", str(self.radar_tech))
@@ -780,6 +882,27 @@ class Ship(QGraphicsRectItem):
         print("")
         print("**************** END ****************")
         print("")
+
+    def setRangeCirclesDisp(self):
+        """
+
+        Returns
+        -------
+        None.
+
+        Summary
+        -------
+        Spawns the ranges circles displays.
+
+        """
+        c = QPointF(self.pos().x() + self.rect().width() / 2, self.pos().y() + self.rect().height() / 2)
+
+        if self.data(1) == "ALLY":
+            self.rangeCirclesDisp = RangeCircles.RangeCircles(c, self.detection_range, self.guns_range, "cyan", "blue")
+        else:
+            self.rangeCirclesDisp = RangeCircles.RangeCircles(c, self.detection_range, self.guns_range, "yellow", "red")
+
+        self.gameScene.addItem(self.rangeCirclesDisp)
 
     def paint(self, painter, option, widget=None):
         """
