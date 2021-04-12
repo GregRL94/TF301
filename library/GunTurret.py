@@ -191,14 +191,14 @@ class GunTurret(QGraphicsRectItem):
             self.shell_s = p_dat.size_tags[2]
 
         # Sets gun_acc parameters from tech_dat according to parent guns_tech #
-        self.gun_acc = round(tech_dat.gun_tech_acc[self.parentShip.guns_tech] * self.acc_f, 4)
+        self.gun_acc = round(tech_dat.gun_tech_acc[self.parentShip.techs["guns_tech"]] * self.acc_f, 4)
 
         # Sets base_fc_error parameters from tech_dat according to parent fc_tech #
-        self.base_fc_error = tech_dat.fc_tech_e[self.parentShip.fc_tech]
+        self.base_fc_error = tech_dat.fc_tech_e[self.parentShip.techs["fc_tech"]]
         self.fc_error = self.base_fc_error
 
         # Sets fc_e_reduc_rate parameters from tech_dat according to parent pc_tech #
-        self.fc_e_reduc_rate = tech_dat.pc_tech_reduc[self.parentShip.pc_tech]
+        self.fc_e_reduc_rate = tech_dat.pc_tech_reduc[self.parentShip.techs["pc_tech"]]
 
         self.setRect(rect)
         self.nextShot = self.reloadTime
@@ -237,7 +237,7 @@ class GunTurret(QGraphicsRectItem):
                     self.shoot()
                     self.nextShot = self.reloadTime
         else:
-            self.t_azimut = self.parentShip.heading
+            self.t_azimut = self.parentShip.coordinates["heading"]
             self.rotateToTAzimut()
 
     def setTarget(self, targetObject):
@@ -292,7 +292,7 @@ class GunTurret(QGraphicsRectItem):
 
         """
         shellSpeed = p_dat.speeds_shellType[0] if self.shell_t == "AP" else p_dat.speeds_shellType[1]
-        shellSpeed *= self.parentShip.refresh_rate  # We accomodate for the fact that the firing soluting is not computed every frame
+        shellSpeed *= self.parentShip.refresh["refresh_rate"]  # We accomodate for the fact that the firing soluting is not computed every frame
         estimatedFlightTime = round(self.t_range / shellSpeed, 4)
         estimated_t_speed_x = self.fcREG(self.t_v_x)
         estimated_t_speed_y = self.fcREG(self.t_v_y)

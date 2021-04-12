@@ -9,53 +9,31 @@
     Python version: 3.8.1
 '''
 
-#-------------- GEOMETRY ---------------#
-_width = 1150
-_height = 250
-#---------------------------------------#
 
-#--------- HULL CHARACTERISTICS --------#
-_type = "BB"
-max_hp = 10000
-armor = 300
-max_shield = 10000
-max_speed = 9
-max_accel = 0.5
-turn_rate = 0.13
-base_concealement = 0.1
-base_detection_range = 5000
-#---------------------------------------#
+naming = {
+    "_type" : "BB",
+    "_name" : "Monitor"
+}
 
-#-------- WEAPONS CHARACTERISTICS ------#
-gun_turrets_list = None
-laser_turrets_list = None
-laser_turrets_pos = None
-guns_range = 0
-guns_tech = 0
-fc_tech = 0
-pc_tech = 0
-radar_tech = 0
-#---------------------------------------#
+geometry = {
+    "_width" : 1150,
+    "_height" : 250,
+}
 
-#-------- DETECTION AND RANGING --------#
-detected_ships = None
-rcom_ships = None
-ships_in_range = None
-#---------------------------------------#
+hull = {
+    "max_hp" : 10000,
+    "armor" : 300,
+    "max_shield" : 10000,
+    "max_speed" : 9,
+    "max_accel" : 0.5,
+    "turn_rate" : 0.13,
+    "base_concealement" : 0.1,
+    "base_detection_range" : 5000,
+}
 
-#------------ PATHFINDING --------------#
-pathUpdateRate = 99
-r_centers = None
-trajectory = None
-checkpoint = None
-sel_checkpoint_id = None
-targetPoint = None
-cp_tolerance = 500
-heading = 0
-t_heading = 0
-rot_direction = 0
-#---------------------------------------#
-
-#-------------- DISPLAYS ---------------#
-rangeCirclesDisp = None
-#---------------------------------------#
+weapons = {
+    "turrets_list" : None,
+    "laser_turrets_list" : None,
+    "laser_turrets_pos" : None,
+    "guns_range" : 21000
+}

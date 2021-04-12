@@ -298,12 +298,12 @@ class RadioCommunications():
         tmpEDS = []
 
         for ship in self.alliedShips:
-            shipDSList = ship.detected_ships
+            shipDSList = ship.det_and_range["detected_ships"]
             tmpADS = tmpADS + shipDSList
         tmpADS = list(dict.fromkeys(tmpADS))
 
         for ship in self.ennemyShips:
-            shipDSList = ship.detected_ships
+            shipDSList = ship.det_and_range["detected_ships"]
             tmpEDS = tmpEDS + shipDSList
         tmpEDS = list(dict.fromkeys(tmpEDS))
 

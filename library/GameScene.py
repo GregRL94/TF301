@@ -76,7 +76,7 @@ class GameScene(QGraphicsScene):
 
         for ship in self.shipList.values():
             if (ship.data(0) != ship0ID) & (ship.data(1) != ship0Tag):
-                effS0ScanRange = ship0ScanRange - (ship0ScanRange - 1000) * ship.concealement
+                effS0ScanRange = ship0ScanRange - (ship0ScanRange - 1000) * ship.instant_vars["concealement"]
                 shipNCenterSPos = geo.parallelepiped_Center(ship.pos(), ship.rect().width(),
                                                             ship.rect().height())
                 dSNS0 = geo.distance_A_B(ship0CenterSPos, shipNCenterSPos)
