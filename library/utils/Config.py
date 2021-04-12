@@ -2,8 +2,17 @@
 
 '''
     File name: Config.py
-    I AM NOT THE AUTHOR OF THIS FILE
+    ****** I AM NOT THE AUTHOR OF THIS FILE *******
     ALL CREDITS TO THE ORIGINAL AUTHOR OF THIS FILE
+    ***********************************************
+
+    This module allows for an efficient config files
+    gestion (load from file, edition). It is perfect
+    when used in symbiosis with the __dict__ member
+    of python objects, which can be easily setup with
+    the update(dict) function, by providing the said
+    function with a dict generated from a config file
+    for example.
 '''
 
 import json

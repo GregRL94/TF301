@@ -1,40 +1,45 @@
 # -*- coding: utf-8 -*-
 
 '''
-    File name: default_cfg.py
+    File name: bb_cfg.py
     Author: Grégory LARGANGE
-    Date created: 09/04/2021
+    Date created: 07/04/2021
     Last modified by: Grégory LARGANGE
-    Date last modified: 09/04/2021
+    Date last modified: 12/04/2021
     Python version: 3.8.1
+
+    THIS FILE IS THE DEFAULT CONFIGURATION
+    FOR BATTLESHIPS OBJECTS OF SHIP CLASS.
+    MODIFICATIONS ARE NOT ADVICED.
 '''
 
 
 naming = {
-    "_type" : "",
-    "_name" : ""
+    "_type" : "BB",
+    "_name" : "Monitor"
 }
 
 geometry = {
-    "_width" : 0,
-    "_height" : 0,
+    "_width" : 1150,
+    "_height" : 250,
 }
 
 hull = {
-    "max_hp" : 0,
-    "armor" : 0,
-    "max_shield" : 0,
-    "max_speed" : 0,
-    "max_accel" : 0,
-    "turn_rate" : 0,
-    "base_concealement" : 0,
-    "base_detection_range" : 0,
+    "max_hp" : 10000,
+    "armor" : 300,
+    "max_shield" : 10000,
+    "max_speed" : 9,
+    "max_accel" : 0.5,
+    "turn_rate" : 0.13,
+    "base_concealement" : 0.1,
+    "base_detection_range" : 5000,
 }
 
 weapons = {
     "turrets_list" : None,
     "laser_turrets_list" : None,
-    "guns_range" : 0
+    "laser_turrets_pos" : None,
+    "guns_range" : 21000
 }
 
 techs = {

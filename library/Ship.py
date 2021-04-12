@@ -18,7 +18,7 @@ from PyQt5.QtGui import QColor, QPen, QBrush, QCursor
 from PyQt5.QtWidgets import QGraphicsItem, QGraphicsRectItem
 
 from library import GunTurret, RangeCircles
-from library.InGameData import ProjectileData as p_dat, TechsData as tech_dat
+from library.InGameData import TechsData as tech_dat
 from library.MathsFormulas import Geometrics as geo, Cinematics as cin,\
     Controllers as con
 from library.Mapping import Astar as astar
@@ -112,9 +112,6 @@ class Ship(QGraphicsRectItem):
 
     """
 
-    _default_cfg = path.join(path.dirname(path.realpath(__file__)), "configs/default_cfg.py")
-    _default_dict, _default_txt = Config._file2dict(_default_cfg)
-
     def __init__(self, clock, gameScene, gameMap, mapSlicing):
         """
 
@@ -146,77 +143,38 @@ class Ship(QGraphicsRectItem):
         self.setFlag(QGraphicsItem.ItemIsSelectable, True)
         self.setFlag(QGraphicsItem.ItemIsFocusable, True)
 
-        self.__dict__.update(self._default_dict)
-
-        self.coordinates["center"] = QPointF()
-        self.iterators["next_path_update"] = self.refresh["path_update_rate"]
-        self.iterators["next_radar_scan"] = 0
-        self.iterators["next_target_lock"] = 0
-        self.iterators["next_point_print"] = 0
-
         self.clock.clockSignal.connect(self.fixedUpdate)
 
-    def print(self):
-        print("Values in dict:")
-        for key, value in self.__dict__.items():
-            print(f'    {key}: {value}')
-            print("\n")
-
-    @classmethod
-    def _battleShip(cls, clock, gameScene, gameMap, mapSlicing, tag, pos, params):
-        bb = cls(clock, gameScene, gameMap, mapSlicing)
-
-        rect = QRectF(0, 0, 1150, 250)
-        bb.setData(1, tag)
-        bb.naming["_type"] = "BB"
-        bb.instant_vars["hp"] = bb.hull["max_hp"] = 10000
-        bb.hull["armor"] = 300
-        bb.instant_vars["shield"] = bb.hull["max_shield"] = 10000
-        bb.hull["max_speed"] = 9
-        bb.speed_params["speed_options"] = {
-            "AHEAD_FULL": bb.hull["max_speed"],
-            "FAST": int(2 * bb.hull["max_speed"] / 3),
-            "SLOW": int(bb.hull["max_speed"] / 3),
+    def __init_instance__(self, pos, tag):
+        rect = QRectF(0, 0, self.geometry["_width"], self.geometry["_height"])
+        self.coordinates["center"] = QPointF()
+        self.instant_vars["hp"] = self.hull["max_hp"]
+        self.instant_vars["shield"] = self.hull["max_shield"]
+        self.instant_vars["concealement"] = self.hull["base_concealement"]
+        self.instant_vars["detection_range"] = self.hull["base_detection_range"] +\
+            self.hull["base_detection_range"] * tech_dat.radar_tech_aug[self.techs["radar_tech"]]
+        self.speed_params["speed_options"] = {
+            "AHEAD_FULL": self.hull["max_speed"],
+            "FAST": int(2 * self.hull["max_speed"] / 3),
+            "SLOW": int(self.hull["max_speed"] / 3),
             "STOP": 0
             }
-        bb.hull["max_accel"] = 0.5
-        bb.hull["turn_rate"] = 0.13
-        bb.instant_vars["concealement"] = bb.hull["base_concealement"] = 0.1
-        bb.hull["base_detection_range"] = 5000
-        bb.weapons["guns_range"] = p_dat.ranges_shellSize[2]
-        bb.techs["guns_tech"] = params[0]
-        bb.techs["fc_tech"] = params[1]
-        bb.techs["pc_tech"] = params[2]
-        bb.techs["radar_tech"] = params[3]
-        bb.instant_vars["detection_range"] = bb.hull["base_detection_range"] +\
-            bb.hull["base_detection_range"] * tech_dat.radar_tech_aug[bb.techs["radar_tech"]]
 
-        bb.setRect(rect)
-        bb.setPos(pos)
+        self.setData(1, tag)
+        self.setRect(rect)
+        self.setPos(pos)
 
-        bb.spawnWeapons()
-        bb.setRangeCirclesDisp()
-        bb.printInfos()
+        self.spawnWeapons()
+        self.setRangeCirclesDisp()
+        self.printInfos()
+
+    @classmethod
+    def _battleShip(cls, clock, gameScene, gameMap, mapSlicing, pos, tag, _config):
+        bb = cls(clock, gameScene, gameMap, mapSlicing)
+        bb.__dict__.update(_config)
+        bb.__init_instance__(pos, tag)
 
         return bb
-
-    @classmethod
-    def _cruiser(cls, clock, gameScene, gameMap, mapSlicing):
-        ca = cls(clock, gameScene, gameMap, mapSlicing)
-        ca._type = "CA"
-        return ca
-
-    @classmethod
-    def _frigate(cls, clock, gameScene, gameMap, mapSlicing):
-        ff = cls(clock, gameScene, gameMap, mapSlicing)
-        ff._type = "FF"
-        return ff
-
-    @classmethod
-    def _corvette(cls, clock, gameScene, gameMap, mapSlicing):
-        pt = cls(clock, gameScene, gameMap, mapSlicing)
-        pt._type = "PT"
-        return pt
 
     def fixedUpdate(self):
         """
@@ -871,6 +829,10 @@ class Ship(QGraphicsRectItem):
                 painter.setBrush(QBrush(QColor("blue")))
                 painter.setPen(QPen(QColor("darkBlue"), 10))
         if self.data(1) == "ENNEMY":
-            painter.setBrush(QBrush(QColor("red")))
-            painter.setPen(QPen(QColor("darkred"), 10))
+            if self.isSelected():
+                painter.setBrush(QBrush(QColor("yellow")))
+                painter.setPen(QPen(QColor("red"), 10))
+            else:
+                painter.setBrush(QBrush(QColor("red")))
+                painter.setPen(QPen(QColor("darkred"), 10))
         painter.drawEllipse(self.rect())

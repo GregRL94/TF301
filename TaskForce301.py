@@ -5,18 +5,22 @@
     Author: Grégory LARGANGE
     Date created: 07/10/2020
     Last modified by: Grégory LARGANGE
-    Date last modified: 18/03/2021
+    Date last modified: 12/04/2021
     Python version: 3.8.1
 '''
 
 import sys
 
+from os import path
+
 from PyQt5 import QtCore, QtWidgets
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QPointF
 from PyQt5.QtWidgets import QGraphicsView
 
 from library import MainClock, GameScene, Mapping, InGameData
 from library.Ship import Ship
+from library.utils.Config import Config
+
 
 class Ui_TSKF301MainWindow(object):
 
@@ -120,7 +124,7 @@ class Ui_TSKF301MainWindow(object):
                                     Qt.KeepAspectRatio)
         self.mapGen = Mapping.MapGenerator(self.graphicsScene.width(), self.graphicsScene.height(),
                                            self.mapRes)
-        self.mapGen.setMapParameters(0.25, 4, 10, 4, 10, 4)
+        self.mapGen.setMapParameters(0.0, 4, 10, 4, 10, 4)
         self.genRandomMap()
         self.debugDisp(True, False)
         self.gameState = False
@@ -134,21 +138,28 @@ class Ui_TSKF301MainWindow(object):
         self.debugDisp(True, False)
 
     def spawnShips(self):
-        #ship1 = Ship(self.mainClock, self.graphicsScene, self.mapGen.gameMap, self.mapGen.mapS)
-        #ship1.print()
-        ship1 = Ship._battleShip(self.mainClock, self.graphicsScene, self.mapGen.gameMap, self.mapGen.mapS, "ALLY", QtCore.QPointF(7500, 7500), [0, 0, 0, 0])
+        _bb_cfg = path.join(path.dirname(path.realpath(__file__)), "library/configs/battleshipConfig.py")
+        _bb_dict, _bb_txt = Config._file2dict(_bb_cfg)
+        ship1 = Ship._battleShip(self.mainClock, self.graphicsScene, self.mapGen.gameMap, self.mapGen.mapS, QPointF(2500, 2500), "ALLY", _bb_dict)
         self.graphicsScene.addShip(ship1)
-        #ship1 = Battleship.Battleship(self.mainClock, self.graphicsScene,
-        #                              self.mapGen.gameMap, self.mapGen.mapS, "ALLY",
-        #                              QtCore.QPointF(0, 0), [0, 0, 0, 0])
-        #self.graphicsScene.addShip(ship1)
+        _bb_dict, _bb_txt = None, None
 
-        #ship2 = Battleship.Battleship(self.mainClock, self.graphicsScene,
-        #                              self.mapGen.gameMap, self.mapGen.mapS, "ENNEMY",
-        #                              QtCore.QPointF(5000, 5000), [0, 0, 0, 0])
-        #self.graphicsScene.addShip(ship2)
+        _bb_dict, _bb_txt = Config._file2dict(_bb_cfg)
+        ship2 = Ship._battleShip(self.mainClock, self.graphicsScene, self.mapGen.gameMap, self.mapGen.mapS, QPointF(2500, 5000), "ALLY", _bb_dict)
+        self.graphicsScene.addShip(ship2)
+        _bb_dict, _bb_txt = None, None
 
-        #self.rComs.updateShipLists()
+        _bb_dict, _bb_txt = Config._file2dict(_bb_cfg)
+        ship3 = Ship._battleShip(self.mainClock, self.graphicsScene, self.mapGen.gameMap, self.mapGen.mapS, QPointF(12500, 10000), "ENNEMY", _bb_dict)
+        self.graphicsScene.addShip(ship3)
+        _bb_dict, _bb_txt = None, None
+
+        _bb_dict, _bb_txt = Config._file2dict(_bb_cfg)
+        ship4 = Ship._battleShip(self.mainClock, self.graphicsScene, self.mapGen.gameMap, self.mapGen.mapS, QPointF(12500, 12500), "ENNEMY", _bb_dict)
+        self.graphicsScene.addShip(ship4)
+        _bb_dict, _bb_txt = None, None
+
+        self.rComs.updateShipLists()
 
     def start_Pause_Game(self):
         if self.gameState:
