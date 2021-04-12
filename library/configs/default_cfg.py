@@ -46,6 +46,7 @@ techs = {
 
 refresh = {
     "refresh_rate" : 9,
+    "path_update_rate" : 99,
     "print_point_rate" : 74
 }
 
@@ -70,7 +71,6 @@ coordinates = {
 }
 
 pathfinding = {
-    "pathUpdateRate" : 99,
     "trajectory" : None,
     "checkpoint" : None,
     "sel_checkpoint_id" : None,
@@ -93,11 +93,11 @@ instant_vars = {
 }
 
 iterators = {
-    "next_Path_Update" : 99,
-    "next_radarScan" : 0,
-    "next_targetAcquisition" : 0,
-    "next_point_print" : 0,  # Debug print
-},
+    "next_path_update" : 99,
+    "next_radar_scan" : 0,
+    "next_target_lock" : 0,
+    "next_point_print" : 0,
+}
 
 speed_params = {
     "speed_user_override" : None,

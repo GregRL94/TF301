@@ -22,7 +22,7 @@ from library.InGameData import ProjectileData as p_dat, TechsData as tech_dat
 from library.MathsFormulas import Geometrics as geo, Cinematics as cin,\
     Controllers as con
 from library.Mapping import Astar as astar
-from library.utils import Config
+from library.utils.Config import Config
 
 
 class Ship(QGraphicsRectItem):
@@ -112,109 +112,8 @@ class Ship(QGraphicsRectItem):
 
     """
 
-    _defaults = {
-        "naming" : {
-            "_type" : "",
-            "_name" : ""
-        },
-
-        "geometry" : {
-            "_width" : 0,
-            "_height" : 0,
-        },
-
-        "hull" : {
-            "max_hp" : 0,
-            "armor" : 0,
-            "max_shield" : 0,
-            "max_speed" : 0,
-            "max_accel" : 0,
-            "turn_rate" : 0,
-            "base_concealement" : 0,
-            "base_detection_range" : 0,
-        },
-
-        "weapons" : {
-            "turrets_list" : None,
-            "laser_turrets_list" : None,
-            "guns_range" : 0
-        },
-
-        "techs" : {
-            "guns_tech" : 0,
-            "fc_tech" : 0,
-            "pc_tech" : 0,
-            "radar_tech" : 0
-        },
-
-        "refresh" : {
-            "refresh_rate" : 9,
-            "print_point_rate" : 74
-        },
-
-        "crit_components" : {
-            "bridge_state" : "OK",
-            "engine_state" : "OK",
-            "radar_state" : "OK",
-            "shield_generator_state" : "OK"
-        },
-
-        "det_and_range" : {
-            "detected_ships" : None,
-            "rcom_ships" : None,
-            "ships_in_range" : None,
-        },
-
-        "coordinates" : {
-            "center" : QPointF(),
-            "r_centers" : None,
-            "heading" : 0,
-            "rot_direction" : 0
-        },
-
-        "pathfinding" : {
-            "pathUpdateRate" : 99,
-            "trajectory" : None,
-            "checkpoint" : None,
-            "sel_checkpoint_id" : None,
-            "targetPoint" : None,
-            "cp_tolerance" : 500,
-            "t_heading" : 0
-        },
-
-        "displays" : {
-            "rangeCirclesDisp" : None
-        },
-
-        "instant_vars" : {
-            "hp" : 0,
-            "shield" : 0,
-            "concealement" : 0,
-            "detection_range" : 0,
-            "speed" : 0,
-            "accel" : 0
-        },
-
-        "iterators" : {
-            "next_Path_Update" : 99,
-            "next_radarScan" : 0,
-            "next_targetAcquisition" : 0,
-            "next_point_print" : 0,  # Debug print
-        },
-
-        "speed_params" : {
-            "speed_user_override" : None,
-            "default_speed" : "FAST",
-            "speed_options" : {
-                "AHEAD_FULL": 0,
-                "FAST": 0,
-                "SLOW": 0,
-                "STOP": 0
-            }
-        }
-    }
-
     _default_cfg = path.join(path.dirname(path.realpath(__file__)), "configs/default_cfg.py")
+    _default_dict, _default_txt = Config._file2dict(_default_cfg)
 
     def __init__(self, clock, gameScene, gameMap, mapSlicing):
         """
@@ -247,13 +146,13 @@ class Ship(QGraphicsRectItem):
         self.setFlag(QGraphicsItem.ItemIsSelectable, True)
         self.setFlag(QGraphicsItem.ItemIsFocusable, True)
 
-        self.__dict__.update(self._defaults)
+        self.__dict__.update(self._default_dict)
 
         self.coordinates["center"] = QPointF()
-        self.iterators["next_Path_Update"] = self.pathfinding["pathUpdateRate"]
-        self.iterators["next_radarScan"] = 0
-        self.iterators["next_targetAcquisition"] = 0
-        self.iterators["next_point_print"] = 0  # Debug print
+        self.iterators["next_path_update"] = self.refresh["path_update_rate"]
+        self.iterators["next_radar_scan"] = 0
+        self.iterators["next_target_lock"] = 0
+        self.iterators["next_point_print"] = 0
 
         self.clock.clockSignal.connect(self.fixedUpdate)
 
@@ -348,27 +247,27 @@ class Ship(QGraphicsRectItem):
         ##################
         # Test if the target point of the pathfinding has been reached
         if self.checkpointReached(self.pathfinding["targetPoint"], True) is False:
-            if (self.iterators["next_Path_Update"] <= 0) & (self.pathfinding["targetPoint"] is not None):
+            if (self.iterators["next_path_update"] <= 0) & (self.pathfinding["targetPoint"] is not None):
                 self.updatePath()
-                self.iterators["next_Path_Update"] = self.pathfinding["pathUpdateRate"]
+                self.iterators["next_path_update"] = self.refresh["path_update_rate"]
             else:
-                self.iterators["next_Path_Update"] -= 1
+                self.iterators["next_path_update"] -= 1
 
         # Test to launch a radar scan (gets all ships in detection range)
-        if self.iterators["next_radarScan"] <= 0:
+        if self.iterators["next_radar_scan"] <= 0:
             self.scan()
             self.det_and_range["ships_in_range"] = self.computeShipsInRange()
-            self.iterators["next_radarScan"] = self.refresh["refresh_rate"]
+            self.iterators["next_radar_scan"] = self.refresh["refresh_rate"]
         else:
-            self.iterators["next_radarScan"] -= 1
+            self.iterators["next_radar_scan"] -= 1
 
         # Test to acquire the best target
-        if self.iterators["next_targetAcquisition"] <= 0:
+        if self.iterators["next_target_lock"] <= 0:
             for turret in self.weapons["turrets_list"]:
                 turret.setTarget(self.autoSelectTarget())
-            self.iterators["next_targetAcquisition"] = self.refresh["refresh_rate"]
+            self.iterators["next_target_lock"] = self.refresh["refresh_rate"]
         else:
-            self.iterators["next_targetAcquisition"] -= 1
+            self.iterators["next_target_lock"] -= 1
 
         # Test to hide the range circles
         if self.isSelected() is False:

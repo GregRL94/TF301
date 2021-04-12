@@ -1,3 +1,11 @@
+# -*- coding: utf-8 -*-
+
+'''
+    File name: Config.py
+    I AM NOT THE AUTHOR OF THIS FILE
+    ALL CREDITS TO THE ORIGINAL AUTHOR OF THIS FILE
+'''
+
 import json
 import os.path as osp
 import shutil
