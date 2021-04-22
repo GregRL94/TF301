@@ -112,6 +112,8 @@ class Ship(QGraphicsRectItem):
 
     """
 
+    configs_path = path.join(path.dirname(path.realpath(__file__)), "configs")
+
     def __init__(self, clock, gameScene, gameMap, mapSlicing):
         """
 
@@ -170,11 +172,47 @@ class Ship(QGraphicsRectItem):
 
     @classmethod
     def _battleShip(cls, clock, gameScene, gameMap, mapSlicing, pos, tag, _config):
+        # bb_default, bb_txt = Config._file2dict(path.join(cls.configs_path, "battleshipConfig.py"))
+        # bb_cfg = Config._merge_a_into_b(_config, bb_default)
         bb = cls(clock, gameScene, gameMap, mapSlicing)
         bb.__dict__.update(_config)
+        # bb.__dict__.update(bb_cfg)
         bb.__init_instance__(pos, tag)
 
         return bb
+
+    @classmethod
+    def cruiser(cls, clock, gameScene, gameMap, mapSlicing, pos, tag, _config):
+        # ca_default, ca_txt = Config._file2dict(path.join(cls.configs_path, "cruiserConfig.py"))
+        # ca_cfg = Config._merge_a_into_b(_config, ca_default)
+        ca = cls(clock, gameScene, gameMap, mapSlicing)
+        ca.__dict__.update(_config)
+        # ca.__dict__.update(ca_cfg)
+        ca.__init_instance__(pos, tag)
+
+        return ca
+
+    @classmethod
+    def frigate(cls, clock, gameScene, gameMap, mapSlicing, pos, tag, _config):
+        # ff_default, ff_txt = Config._file2dict(path.join(cls.configs_path, "frigateConfig.py"))
+        # ff_cfg = Config._merge_a_into_b(_config, ff_default)
+        ff = cls(clock, gameScene, gameMap, mapSlicing)
+        ff.__dict__.update(_config)
+        # ff.__dict__.update(ff_cfg)
+        ff.__init_instance__(pos, tag)
+
+        return ff
+
+    @classmethod
+    def corvette(cls, clock, gameScene, gameMap, mapSlicing, pos, tag, _config):
+        # pt_default, pt_txt = Config._file2dict(path.join(cls.configs_path, "corvetteConfig.py"))
+        # pt_cfg = Config._merge_a_into_b(_config, pt_default)
+        pt = cls(clock, gameScene, gameMap, mapSlicing)
+        pt.__dict__.update(_config)
+        # ff.__dict__.update(pt_cfg)
+        pt.__init_instance__(pos, tag)
+
+        return pt
 
     def fixedUpdate(self):
         """
