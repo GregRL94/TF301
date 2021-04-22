@@ -1,0 +1,937 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>FleetSetUp</class>
+ <widget class="QDialog" name="FleetSetUp">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>812</width>
+    <height>660</height>
+   </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>812</width>
+    <height>660</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>812</width>
+    <height>660</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>Set up your fleet</string>
+  </property>
+  <widget class="QWidget" name="verticalLayoutWidget">
+   <property name="geometry">
+    <rect>
+     <x>470</x>
+     <y>10</y>
+     <width>331</width>
+     <height>601</height>
+    </rect>
+   </property>
+   <layout class="QVBoxLayout" name="fleet_lyt">
+    <property name="sizeConstraint">
+     <enum>QLayout::SetDefaultConstraint</enum>
+    </property>
+    <item>
+     <widget class="QLabel" name="fleet_lbl">
+      <property name="font">
+       <font>
+        <pointsize>12</pointsize>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>FLEET</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout_7">
+      <item>
+       <widget class="QLabel" name="ships_in_fleet_lbl">
+        <property name="font">
+         <font>
+          <pointsize>10</pointsize>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>SHIPS IN FLEET</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="cur_fleet_cost_lbl">
+        <property name="text">
+         <string>COST / MAX COST</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <widget class="QListView" name="listView"/>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="del_ship_lyt">
+      <item>
+       <spacer name="horizontalSpacer_3">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QPushButton" name="del_ship_but">
+        <property name="text">
+         <string>Delete</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_4">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QWidget" name="horizontalLayoutWidget_2">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>630</y>
+     <width>791</width>
+     <height>25</height>
+    </rect>
+   </property>
+   <layout class="QHBoxLayout" name="main_choices_lyt">
+    <item>
+     <spacer name="horizontalSpacer">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>40</width>
+        <height>20</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+    <item>
+     <widget class="QPushButton" name="clear_fleet_but">
+      <property name="text">
+       <string>Reset Fleet</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="load_fleet_but">
+      <property name="text">
+       <string>Load Fleet</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="save_fleet_but">
+      <property name="text">
+       <string>Save Fleet</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="battle_but">
+      <property name="text">
+       <string>BATTLE !</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QWidget" name="verticalLayoutWidget_2">
+   <property name="geometry">
+    <rect>
+     <x>9</x>
+     <y>9</y>
+     <width>434</width>
+     <height>601</height>
+    </rect>
+   </property>
+   <layout class="QVBoxLayout" name="ship_creator_lyt">
+    <item>
+     <widget class="QLabel" name="ship_creator_lbl">
+      <property name="font">
+       <font>
+        <pointsize>12</pointsize>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>SHIP CREATOR</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <layout class="QVBoxLayout" name="type_select_lyt">
+      <item>
+       <widget class="QLabel" name="type_lbl">
+        <property name="font">
+         <font>
+          <pointsize>10</pointsize>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>SHIP TYPE:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <layout class="QVBoxLayout" name="type_choices_lyt">
+        <item>
+         <layout class="QHBoxLayout" name="type_buttons_lyt">
+          <property name="sizeConstraint">
+           <enum>QLayout::SetDefaultConstraint</enum>
+          </property>
+          <item>
+           <widget class="QPushButton" name="pt_but">
+            <property name="text">
+             <string>CORVETTE</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="ff_but">
+            <property name="text">
+             <string>FRIGATE</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="ca_but">
+            <property name="text">
+             <string>CRUISER</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="bb_but">
+            <property name="text">
+             <string>BATTLESHIP</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </item>
+      <item>
+       <widget class="QLabel" name="cur_type_lbl">
+        <property name="text">
+         <string>Type:</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <spacer name="verticalSpacer">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>20</width>
+        <height>40</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+    <item>
+     <layout class="QVBoxLayout" name="tech_lyt">
+      <item>
+       <widget class="QLabel" name="techs_lbl">
+        <property name="font">
+         <font>
+          <pointsize>10</pointsize>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>TECHNOLOGIES LEVEL</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <layout class="QGridLayout" name="gridLayout">
+        <item row="0" column="0">
+         <widget class="QLabel" name="gun_tech_lbl">
+          <property name="font">
+           <font>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>Gun tech</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QRadioButton" name="rdr_tech_0">
+          <property name="text">
+           <string>Mk I</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QRadioButton" name="fc_tech_0">
+          <property name="text">
+           <string>Mk I</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2">
+         <widget class="QRadioButton" name="gun_tech_1">
+          <property name="text">
+           <string>Mk II</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="2">
+         <widget class="QRadioButton" name="rdr_tech_1">
+          <property name="text">
+           <string>Mk II</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="2">
+         <widget class="QRadioButton" name="fc_tech_1">
+          <property name="text">
+           <string>Mk II</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QLabel" name="radar_tech_lbl">
+          <property name="font">
+           <font>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>Radar tech</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="fc_tech_lbl">
+          <property name="font">
+           <font>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>Fire Control tech</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QRadioButton" name="gun_tech_0">
+          <property name="text">
+           <string>Mk I</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="3">
+         <widget class="QRadioButton" name="gun_tech_2">
+          <property name="text">
+           <string>Mk III</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="3">
+         <widget class="QRadioButton" name="fc_tech_2">
+          <property name="text">
+           <string>Mk III</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="3">
+         <widget class="QRadioButton" name="rdr_tech_2">
+          <property name="text">
+           <string>Mk III</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <spacer name="verticalSpacer_2">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>20</width>
+        <height>40</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+    <item>
+     <layout class="QVBoxLayout" name="ship_stats_lyt">
+      <item>
+       <widget class="QLabel" name="ship_stats_lbl">
+        <property name="font">
+         <font>
+          <pointsize>10</pointsize>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>SHIP CHARACTERISTICS</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <layout class="QHBoxLayout" name="ship_stats_lyt_2">
+        <item>
+         <layout class="QVBoxLayout" name="ship_stats_lyt_3">
+          <item>
+           <widget class="QLabel" name="general_label">
+            <property name="font">
+             <font>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>GENERAL</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="type_lyt">
+            <item>
+             <widget class="QLabel" name="type_label">
+              <property name="text">
+               <string>Type:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="ship_type_label">
+              <property name="text">
+               <string>TextLabel</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="name_lyt">
+            <item>
+             <widget class="QLabel" name="name_label">
+              <property name="text">
+               <string>Name:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="ship_name_label">
+              <property name="text">
+               <string>TextLabel</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="len_lyt">
+            <item>
+             <widget class="QLabel" name="length_lbl">
+              <property name="text">
+               <string>Length</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="ship_length_lbl">
+              <property name="text">
+               <string>TextLabel</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="widht_layout">
+            <item>
+             <widget class="QLabel" name="width_lbl">
+              <property name="text">
+               <string>Width</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="ship_width_lbl">
+              <property name="text">
+               <string>TextLabel</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="Line" name="line">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="weapons_lbl">
+            <property name="font">
+             <font>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>WEAPONS</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="main_guns_lyt">
+            <item>
+             <widget class="QLabel" name="ship_mg_lbl">
+              <property name="text">
+               <string>main guns</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="ship_w_lbl">
+              <property name="text">
+               <string>TextLabel</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="acc_lyt">
+            <item>
+             <widget class="QLabel" name="acc_lbl">
+              <property name="text">
+               <string>guns accuracy</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="ship_acc_lbl">
+              <property name="text">
+               <string>TextLabel</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="fc_lyt">
+            <item>
+             <widget class="QLabel" name="fc_lbl">
+              <property name="text">
+               <string>fire control error</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="ship_fc_lbl">
+              <property name="text">
+               <string>TextLabel</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="err_reduc_lyt">
+            <item>
+             <widget class="QLabel" name="err_reduc_lbl">
+              <property name="text">
+               <string>error reduction rate</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="ship_errreduc_lbl">
+              <property name="text">
+               <string>TextLabel</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="Line" name="line_4">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <layout class="QVBoxLayout" name="hull_stats_lyt">
+          <item>
+           <widget class="QLabel" name="hull_label">
+            <property name="font">
+             <font>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>HULL</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="hp_lyt">
+            <item>
+             <widget class="QLabel" name="max_hp_lbl">
+              <property name="text">
+               <string>hp:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="ship_max_hp_lbl">
+              <property name="text">
+               <string>TextLabel</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="armor_lyt">
+            <item>
+             <widget class="QLabel" name="armor_lbl">
+              <property name="text">
+               <string>armor:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="ship_armor_lbl">
+              <property name="text">
+               <string>TextLabel</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="shield_lyt">
+            <item>
+             <widget class="QLabel" name="shield_lbl">
+              <property name="text">
+               <string>shield</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="ship_shield_lbl">
+              <property name="text">
+               <string>TextLabel</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="Line" name="line_2">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="mobility_lbl">
+            <property name="font">
+             <font>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>MOBILITY</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="speed_lyt">
+            <item>
+             <widget class="QLabel" name="v_lbl">
+              <property name="text">
+               <string>speed</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="ship_v_lbl">
+              <property name="text">
+               <string>TextLabel</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="accel_lyt">
+            <item>
+             <widget class="QLabel" name="accel_lbl">
+              <property name="text">
+               <string>acceleration</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="ship_accel_lbl">
+              <property name="text">
+               <string>TextLabel</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="t_rate_lyt">
+            <item>
+             <widget class="QLabel" name="t_rate_lbl">
+              <property name="text">
+               <string>turn rate</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="ship_t_rate_lbl">
+              <property name="text">
+               <string>TextLabel</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="Line" name="line_3">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="vnc_label">
+            <property name="font">
+             <font>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>VISION &amp; CONCEALMENT</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="vision_lyt">
+            <item>
+             <widget class="QLabel" name="vision_lbl">
+              <property name="text">
+               <string>vision range</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="ship_vision_lbl">
+              <property name="text">
+               <string>TextLabel</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="concl_lyt">
+            <item>
+             <widget class="QLabel" name="concl_lbl">
+              <property name="text">
+               <string>concealment</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="ship_concl_lbl">
+              <property name="text">
+               <string>TextLabel</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </item>
+    <item>
+     <spacer name="verticalSpacer_3">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>20</width>
+        <height>40</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="clear_add_but_lyt">
+      <item>
+       <widget class="QLabel" name="ship_cost_lbl">
+        <property name="text">
+         <string>SHIP COST</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QPushButton" name="clear_ship_but">
+        <property name="text">
+         <string>Reset</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="add_ship_but">
+        <property name="text">
+         <string>Add Ship</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
