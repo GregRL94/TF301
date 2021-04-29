@@ -1,18 +1,18 @@
 # -*- coding: utf-8 -*-
 
-'''
+"""
     File name: InGameData.py
     Author: Grégory LARGANGE
     Date created: 19/10/2020
     Last modified by: Grégory LARGANGE
     Date last modified: 07/04/2021
     Python version: 3.8.1
-'''
+"""
 
 from PyQt5.QtGui import QColor
 
 
-class TurretData():
+class TurretData:
     """
 
     A class holding turrets parameters.
@@ -53,12 +53,16 @@ class TurretData():
     thk_values = [5, 10, 10]
     n_guns = [1, 2, 3]  # Number of guns
     reload_t_values = [50, 75, 150]  # The lower the value the faster the turret reloads
-    rot_rate_values = [3.6, 2.4, 1.2]  # The higher the value the faster the turret rotates
+    rot_rate_values = [
+        3.6,
+        2.4,
+        1.2,
+    ]  # The higher the value the faster the turret rotates
     acc_f_values = [0.6, 0.8, 1]  # The lower the value the better the accuracy
     w_h_ratio = 1.25
 
 
-class ProjectileData():
+class ProjectileData:
     """
 
     A class holding projectiles parameters.
@@ -108,7 +112,7 @@ class ProjectileData():
 
     ##### INFORMATIONS ON LIST CONTRUCTION #####
     # For simple lists: ordered regarding the size of the shells
-    # [0] -> small, [2] -> large 
+    # [0] -> small, [2] -> large
     # For nested lists, the subelements of the list gives the type of the shell
     # [0]-> AP [1] -> HE
     # Hence [1][0] gives the value of a "Medium" size "AP" shell
@@ -120,15 +124,27 @@ class ProjectileData():
     ranges_shellSize = [9000, 15000, 21000]
     inaccuracy = [0.025, 0.0325, 0.0375]
     speeds_shellType = [150, 125]  # Element 0 is AP, 1 is HE
-    colors_values = [QColor("lightGray"), QColor("gray"),
-                     QColor("yellow"), QColor(255, 165, 0)]  # RGB value is orange
-    damage_type = [[240, 360], [480, 720], [800, 1200]]  # A shell of size can always be of type AP or HE
-    pen_values = [[150, 50], [300, 75], [400, 100]]  # HE shells have much lower penetration power than AP shells
+    colors_values = [
+        QColor("lightGray"),
+        QColor("gray"),
+        QColor("yellow"),
+        QColor(255, 165, 0),
+    ]  # RGB value is orange
+    damage_type = [
+        [240, 360],
+        [480, 720],
+        [800, 1200],
+    ]  # A shell of size can always be of type AP or HE
+    pen_values = [
+        [150, 50],
+        [300, 75],
+        [400, 100],
+    ]  # HE shells have much lower penetration power than AP shells
     v_decreaseRate = 0.2
     w_h_ratio = 2
 
 
-class TechsData():
+class TechsData:
     """
 
     A class holding technologies parameters.
@@ -158,14 +174,33 @@ class TechsData():
     # The higher the index in the lists the higher is the associated tech level #
 
     # The formula is: acc(deg) = tan-1(disp(units)/range(units))
-    gun_tech_acc = [5.7106, 4.2891, 2.8624]  # The higher the tech, the more accurate the guns
-    fc_tech_e = [0.3, 0.2, 0.1]  # The higher the tech, the lower the error on target speed
-    pc_tech_reduc = [0.1, 0.25, 0.5]  # The higher the tech, the faster the fc error is reduced
-    radar_tech_aug = [0, 0.25, 0.37, 0.5]  # The higher the tech, the higher the boost on the base radar range
-    fc_correction_rate = 150  # The rate at which the error on target speed estimation is reduced.
+    gun_tech_acc = [
+        1.0,
+        0.8,
+        0.6,
+    ]  # The higher the tech, the more accurate the guns
+    fc_tech_e = [
+        0.3,
+        0.2,
+        0.1,
+    ]  # The higher the tech, the lower the error on target speed
+    pc_tech_reduc = [
+        0.1,
+        0.25,
+        0.5,
+    ]  # The higher the tech, the faster the fc error is reduced
+    radar_tech_aug = [
+        0,
+        0.25,
+        0.37,
+        0.5,
+    ]  # The higher the tech, the higher the boost on the base radar range
+    fc_correction_rate = (
+        150  # The rate at which the error on target speed estimation is reduced.
+    )
 
 
-class RadioCommunications():
+class RadioCommunications:
     """
 
     A class implementing a form of 'radio communication' between ships of the

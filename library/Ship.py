@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-'''
+"""
     File name: Ship.py
     Author: Grégory LARGANGE
     Date created: 09/10/2020
     Last modified by: Grégory LARGANGE
     Date last modified: 01/04/2021
     Python version: 3.8.1
-'''
+"""
 
 import math
 
@@ -17,10 +17,14 @@ from PyQt5.QtCore import Qt, QRectF, QPointF
 from PyQt5.QtGui import QColor, QPen, QBrush, QCursor
 from PyQt5.QtWidgets import QGraphicsItem, QGraphicsRectItem
 
-from library import GunTurret, RangeCircles
+from library import RangeCircles
+from library.GunTurret import GunTurret as turret
 from library.InGameData import TechsData as tech_dat
-from library.MathsFormulas import Geometrics as geo, Cinematics as cin,\
-    Controllers as con
+from library.MathsFormulas import (
+    Geometrics as geo,
+    Cinematics as cin,
+    Controllers as con,
+)
 from library.Mapping import Astar as astar
 from library.utils.Config import Config
 
@@ -153,14 +157,17 @@ class Ship(QGraphicsRectItem):
         self.instant_vars["hp"] = self.hull["max_hp"]
         self.instant_vars["shield"] = self.hull["max_shield"]
         self.instant_vars["concealement"] = self.hull["base_concealement"]
-        self.instant_vars["detection_range"] = self.hull["base_detection_range"] +\
-            self.hull["base_detection_range"] * tech_dat.radar_tech_aug[self.techs["radar_tech"]]
+        self.instant_vars["detection_range"] = (
+            self.hull["base_detection_range"]
+            + self.hull["base_detection_range"]
+            * tech_dat.radar_tech_aug[self.techs["radar_tech"]]
+        )
         self.speed_params["speed_options"] = {
             "AHEAD_FULL": self.hull["max_speed"],
             "FAST": int(2 * self.hull["max_speed"] / 3),
             "SLOW": int(self.hull["max_speed"] / 3),
-            "STOP": 0
-            }
+            "STOP": 0,
+        }
 
         self.setData(1, tag)
         self.setRect(rect)
@@ -234,16 +241,22 @@ class Ship(QGraphicsRectItem):
         if self.iterators["next_point_print"] <= 0:
             self.gameScene.printPoint(self.coordinates["center"], 100, "blue", True)
             if self.coordinates["rot_direction"] < 0:
-                self.gameScene.printPoint(self.coordinates["r_centers"][0], 100, "blue", True)
+                self.gameScene.printPoint(
+                    self.coordinates["r_centers"][0], 100, "blue", True
+                )
             elif self.coordinates["rot_direction"] > 0:
-                self.gameScene.printPoint(self.coordinates["r_centers"][1], 100, "blue", True)
+                self.gameScene.printPoint(
+                    self.coordinates["r_centers"][1], 100, "blue", True
+                )
             self.iterators["next_point_print"] = self.refresh["print_point_rate"]
         else:
             self.iterators["next_point_print"] -= 1
         ##################
         # Test if the target point of the pathfinding has been reached
         if self.checkpointReached(self.pathfinding["targetPoint"], True) is False:
-            if (self.iterators["next_path_update"] <= 0) & (self.pathfinding["targetPoint"] is not None):
+            if (self.iterators["next_path_update"] <= 0) & (
+                self.pathfinding["targetPoint"] is not None
+            ):
                 self.updatePath()
                 self.iterators["next_path_update"] = self.refresh["path_update_rate"]
             else:
@@ -288,7 +301,13 @@ class Ship(QGraphicsRectItem):
         """
         self.setCursor(QCursor(Qt.PointingHandCursor))
         # Display an information bubble
-        info = self.naming["_type"] + str(self.data(0)) + "  " + "HP: " + str(self.instant_vars["hp"])
+        info = (
+            self.naming["_type"]
+            + str(self.data(0))
+            + "  "
+            + "HP: "
+            + str(self.instant_vars["hp"])
+        )
         super().setToolTip(info)
 
     def mousePressEvent(self, mouseDown):
@@ -322,9 +341,9 @@ class Ship(QGraphicsRectItem):
         Updates the position of the ship center.
 
         """
-        self.coordinates["center"] = geo.parallelepiped_Center(self.pos(),
-                                                               self.rect().width(),
-                                                               self.rect().height())
+        self.coordinates["center"] = geo.parallelepiped_Center(
+            self.pos(), self.rect().width(), self.rect().height()
+        )
 
     def updateRCenters(self):
         """
@@ -338,8 +357,12 @@ class Ship(QGraphicsRectItem):
         Updates the position od the ship rotation centers.
 
         """
-        self.coordinates["r_centers"] = cin.rotationCenters(self.coordinates["center"], self.coordinates["heading"],
-                                                            self.instant_vars["speed"], self.hull["turn_rate"])
+        self.coordinates["r_centers"] = cin.rotationCenters(
+            self.coordinates["center"],
+            self.coordinates["heading"],
+            self.instant_vars["speed"],
+            self.hull["turn_rate"],
+        )
 
     def reachSpeed(self, speedOption):
         """
@@ -361,11 +384,15 @@ class Ship(QGraphicsRectItem):
         targetSpeed = 0
 
         if speedOption is None:
-            targetSpeed = self.speed_params["speed_options"][self.speed_params["default_speed"]]
+            targetSpeed = self.speed_params["speed_options"][
+                self.speed_params["default_speed"]
+            ]
         else:
             targetSpeed = self.speed_params["speed_options"][speedOption]
 
-        self.instant_vars["speed"] += con.proportional(targetSpeed, self.instant_vars["speed"], self.hull["max_accel"])
+        self.instant_vars["speed"] += con.proportional(
+            targetSpeed, self.instant_vars["speed"], self.hull["max_accel"]
+        )
 
     def setSpeed(self):
         """
@@ -388,8 +415,15 @@ class Ship(QGraphicsRectItem):
                 # print("No user override, using: STOP because no further checkpoints.")
         else:
             # print("Remaining distance to checkpoint:", geo.distance_A_B(self.center, self.checkpoint))
-            brakeD = cin.brakeDistance(self.instant_vars["speed"], -self.hull["max_accel"])
-            if geo.distance_A_B(self.coordinates["center"], self.pathfinding["checkpoint"]) <= brakeD:
+            brakeD = cin.brakeDistance(
+                self.instant_vars["speed"], -self.hull["max_accel"]
+            )
+            if (
+                geo.distance_A_B(
+                    self.coordinates["center"], self.pathfinding["checkpoint"]
+                )
+                <= brakeD
+            ):
                 self.reachSpeed("STOP")
             elif self.checkpointInTurnRadius() is False:
                 # print("Slowing down to match checkpoint")
@@ -414,9 +448,13 @@ class Ship(QGraphicsRectItem):
         Computes the rotation angle to apply in order to reach the next checkpoint.
 
         """
-        distance = geo.distance_A_B(self.coordinates["center"], self.pathfinding["checkpoint"])
-        a_h = (self.pathfinding["checkpoint"].x() - self.coordinates["center"].x()) / distance
-        if a_h > 1.:
+        distance = geo.distance_A_B(
+            self.coordinates["center"], self.pathfinding["checkpoint"]
+        )
+        a_h = (
+            self.pathfinding["checkpoint"].x() - self.coordinates["center"].x()
+        ) / distance
+        if a_h > 1.0:
             a_h = 1
         elif a_h < -1:
             a_h = -1
@@ -437,15 +475,24 @@ class Ship(QGraphicsRectItem):
         to the target heading.
 
         """
-        diff = geo.smallestAngle(self.pathfinding["t_heading"], self.coordinates["heading"])
+        diff = geo.smallestAngle(
+            self.pathfinding["t_heading"], self.coordinates["heading"]
+        )
         if diff < -0.5:
             self.coordinates["rot_direction"] = -1
         elif diff > 0.5:
             self.coordinates["rot_direction"] = 1
         else:
             self.coordinates["rot_direction"] = 0
-        self.coordinates["heading"] += con.proportional(self.pathfinding["t_heading"], self.coordinates["heading"], self.hull["turn_rate"], diff)
-        self.setTransformOriginPoint(QPointF(self.rect().width() / 2, self.rect().height() / 2))
+        self.coordinates["heading"] += con.proportional(
+            self.pathfinding["t_heading"],
+            self.coordinates["heading"],
+            self.hull["turn_rate"],
+            diff,
+        )
+        self.setTransformOriginPoint(
+            QPointF(self.rect().width() / 2, self.rect().height() / 2)
+        )
         self.setRotation(self.coordinates["heading"])
 
     def updatePath(self, targetPoint=None):
@@ -460,7 +507,7 @@ class Ship(QGraphicsRectItem):
         Updates the trajectory by calling the Astar pathfinding algorithm.
 
         """
-        self.gameScene.clearWaypoints() # Debug display
+        self.gameScene.clearWaypoints()  # Debug display
         if self.pathfinding["trajectory"]:
             self.pathfinding["trajectory"].clear()
         else:
@@ -471,7 +518,9 @@ class Ship(QGraphicsRectItem):
 
         self.pathfinding["sel_checkpoint_id"] = None
         self.astar.reset()
-        for node in self.astar.findPath(self.coordinates["center"], self.pathfinding["targetPoint"]):
+        for node in self.astar.findPath(
+            self.coordinates["center"], self.pathfinding["targetPoint"]
+        ):
             self.pathfinding["trajectory"].append(QPointF(node.xPos, node.yPos))
         self.selectNextCheckpoint()
         # Debug display
@@ -500,9 +549,12 @@ class Ship(QGraphicsRectItem):
 
         """
         if checkpoint:
-            toleranceRect = QRectF(checkpoint.x() - self.pathfinding["cp_tolerance"],
-                                   checkpoint.y() - self.pathfinding["cp_tolerance"],
-                                   2 * self.pathfinding["cp_tolerance"], 2 * self.pathfinding["cp_tolerance"])
+            toleranceRect = QRectF(
+                checkpoint.x() - self.pathfinding["cp_tolerance"],
+                checkpoint.y() - self.pathfinding["cp_tolerance"],
+                2 * self.pathfinding["cp_tolerance"],
+                2 * self.pathfinding["cp_tolerance"],
+            )
             if toleranceRect.contains(self.coordinates["center"]):
                 if targetPoint:
                     self.pathfinding["targetPoint"] = None
@@ -535,9 +587,14 @@ class Ship(QGraphicsRectItem):
                 self.pathfinding["checkpoint"] = self.pathfinding["trajectory"][0]
                 self.pathfinding["sel_checkpoint_id"] = 0
             else:
-                if self.pathfinding["sel_checkpoint_id"] + 1 <= len(self.pathfinding["trajectory"]) - 1:
+                if (
+                    self.pathfinding["sel_checkpoint_id"] + 1
+                    <= len(self.pathfinding["trajectory"]) - 1
+                ):
                     self.pathfinding["sel_checkpoint_id"] += 1
-                    self.pathfinding["checkpoint"] = self.pathfinding["trajectory"][self.pathfinding["sel_checkpoint_id"]]
+                    self.pathfinding["checkpoint"] = self.pathfinding["trajectory"][
+                        self.pathfinding["sel_checkpoint_id"]
+                    ]
                 else:
                     self.pathfinding["trajectory"] = None
                     self.pathfinding["checkpoint"] = None
@@ -566,8 +623,9 @@ class Ship(QGraphicsRectItem):
         else:
             return None
 
-        if geo.distance_A_B(rot_center, self.pathfinding["checkpoint"]) <\
-            cin.rotationRadius(self.instant_vars["speed"], self.hull["turn_rate"]):
+        if geo.distance_A_B(
+            rot_center, self.pathfinding["checkpoint"]
+        ) < cin.rotationRadius(self.instant_vars["speed"], self.hull["turn_rate"]):
             return False
         else:
             return True
@@ -636,8 +694,8 @@ class Ship(QGraphicsRectItem):
             self.data(0),
             self.data(1),
             self.coordinates["center"],
-            self.instant_vars["detection_range"]
-            )
+            self.instant_vars["detection_range"],
+        )
 
     def receiveRadioComm(self, infosList):
         """
@@ -677,7 +735,8 @@ class Ship(QGraphicsRectItem):
             if len(self.det_and_range["detected_ships"]) > 0:
                 for ship in self.det_and_range["detected_ships"]:
                     detSCPos = geo.parallelepiped_Center(
-                        ship.pos(), ship.rect().width(), ship.rect().height())
+                        ship.pos(), ship.rect().width(), ship.rect().height()
+                    )
                     distance = geo.distance_A_B(self.coordinates["center"], detSCPos)
                     if distance <= self.weapons["guns_range"]:
                         sIR.append(ship)
@@ -686,8 +745,11 @@ class Ship(QGraphicsRectItem):
                 for ship in self.det_and_range["rcom_ships"]:
                     if ship not in sIR:
                         detSCPos = geo.parallelepiped_Center(
-                            ship.pos(), ship.rect().width(), ship.rect().height())
-                        distance = geo.distance_A_B(self.coordinates["center"], detSCPos)
+                            ship.pos(), ship.rect().width(), ship.rect().height()
+                        )
+                        distance = geo.distance_A_B(
+                            self.coordinates["center"], detSCPos
+                        )
                         if distance <= self.weapons["guns_range"]:
                             sIR.append(ship)
         return sIR
@@ -728,29 +790,69 @@ class Ship(QGraphicsRectItem):
         for further informations.
 
         """
-        gun_turrets_pos = [QPointF(self.x() + 175, self.y() + 75),
-                           QPointF(self.x() + 625, self.y() + 75),
-                           QPointF(self.x() + 800, self.y() + 75)]
+        gun_turrets_pos = [
+            QPointF(self.x() + 175, self.y() + 75),
+            QPointF(self.x() + 625, self.y() + 75),
+            QPointF(self.x() + 800, self.y() + 75),
+        ]
 
-        turretC = GunTurret.GunTurret(self.clock, self.gameScene, "l", self)
+        turretC = turret.large(self.clock, self.gameScene, self)
         turretC.setPos(gun_turrets_pos[0])
         turretC.setDFromShipCenter(175 - self.rect().width() / 2)
         turretC.setZValue(3)
         self.gameScene.addItem(turretC)
 
-        turretB = GunTurret.GunTurret(self.clock, self.gameScene, "l", self)
+        turretB = turret.large(self.clock, self.gameScene, self)
         turretB.setPos(gun_turrets_pos[1])
         turretB.setDFromShipCenter(625 - self.rect().width() / 2)
         turretB.setZValue(3)
         self.gameScene.addItem(turretB)
 
-        turretA = GunTurret.GunTurret(self.clock, self.gameScene, "l", self)
+        turretA = turret.large(self.clock, self.gameScene, self)
         turretA.setPos(gun_turrets_pos[2])
         turretA.setDFromShipCenter(800 - self.rect().width() / 2)
         turretA.setZValue(3)
         self.gameScene.addItem(turretA)
 
         self.weapons["turrets_list"] = [turretC, turretB, turretA]
+
+    def spawnWeaponsProto(self):
+        """
+
+        Returns
+        -------
+        None.
+
+        Summary
+        -------
+        Spawns the turrets of the ship at predefined places. See documentation
+        for further informations.
+
+        """
+        spawnPosList = [
+            QPointF(self.x() + coord[0], self.y() + coord[1])
+            for coord in self.gun_turrets_pos
+        ]
+
+        for i, spawnPos in enumerate(spawnPosList):
+            if self.weapons["turrets_size"] == "s":
+                currentTurret = turret.small(self.clock, self.gameScene, self)
+            elif self.weapons["turrets_size"] == "m":
+                currentTurret = turret.medium(self.clock, self.gameScene, self)
+            elif self.weapons["turrets_size"] == "l":
+                currentTurret = turret.large(self.clock, self.gameScene, self)
+            try:
+                currentTurret.setPos(spawnPos)
+                currentTurret.d_shipCenter = (
+                    self.gun_turrets_pos[i][0] - self.rect().width() / 2
+                )
+                currentTurret.setZValue(3)
+                self.gameScene.addItem(currentTurret)
+                self.weapons["turrets_list"].append(currentTurret)
+                currentTurret = None
+            except Exception as e:
+                print(e)
+                print("Could not generate turret")
 
     def printInfos(self):
         """
@@ -829,12 +931,27 @@ class Ship(QGraphicsRectItem):
         Spawns the ranges circles displays.
 
         """
-        c = QPointF(self.pos().x() + self.rect().width() / 2, self.pos().y() + self.rect().height() / 2)
+        c = QPointF(
+            self.pos().x() + self.rect().width() / 2,
+            self.pos().y() + self.rect().height() / 2,
+        )
 
         if self.data(1) == "ALLY":
-            self.displays["rangeCirclesDisp"] = RangeCircles.RangeCircles(c, self.instant_vars["detection_range"], self.weapons["guns_range"], "cyan", "blue")
+            self.displays["rangeCirclesDisp"] = RangeCircles.RangeCircles(
+                c,
+                self.instant_vars["detection_range"],
+                self.weapons["guns_range"],
+                "cyan",
+                "blue",
+            )
         else:
-            self.displays["rangeCirclesDisp"] = RangeCircles.RangeCircles(c, self.instant_vars["detection_range"], self.weapons["guns_range"], "yellow", "red")
+            self.displays["rangeCirclesDisp"] = RangeCircles.RangeCircles(
+                c,
+                self.instant_vars["detection_range"],
+                self.weapons["guns_range"],
+                "yellow",
+                "red",
+            )
 
         self.gameScene.addItem(self.displays["rangeCirclesDisp"])
 

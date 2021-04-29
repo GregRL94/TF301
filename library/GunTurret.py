@@ -1,16 +1,18 @@
 # -*- coding: utf-8 -*-
 
-'''
+"""
     File name: Gun_Turret.py
     Author: Grégory LARGANGE
     Date created: 12/10/2020
     Last modified by: Grégory LARGANGE
     Date last modified: 18/03/2020
     Python version: 3.8.1
-'''
+"""
 
 import math
 import random
+
+from os import path
 
 from PyQt5.QtCore import QRectF, QPointF
 from PyQt5.QtGui import QColor, QPen, QBrush
@@ -18,8 +20,11 @@ from PyQt5.QtWidgets import QGraphicsRectItem
 
 from library import Projectile
 from library.MathsFormulas import Geometrics as geo, Controllers as con
-from library.InGameData import ProjectileData as p_dat, TurretData as tur_dat,\
-    TechsData as tech_dat
+from library.InGameData import (
+    ProjectileData as p_dat,
+    TechsData as tech_dat,
+)
+from library.utils.Config import Config
 
 
 class GunTurret(QGraphicsRectItem):
@@ -34,7 +39,7 @@ class GunTurret(QGraphicsRectItem):
     d_shipCenter : int
         The distance between the turret center and its parent ship center.
 
-    shell_t : string
+    shot : string
         The tag defining which shell type to fire.
 
     azimut : float
@@ -68,9 +73,20 @@ class GunTurret(QGraphicsRectItem):
 
     Methods
     -------
-    __init__(clock : MainClock, gameScene : GameScene, tur_size : string,
-             parent[None] : Ship)
+    __init__(clock : MainClock, gameScene : GameScene, parent[None] : Ship)
         The constructor of the class.
+
+    __init_instance__()
+        Initialize the variables of a new object of class GunTurret.
+
+    small(clock : MainClock, gameScene : GameScene, parent[None] : Ship)
+        Creates a small turret.
+
+    medium(clock : MainClock, gameScene : GameScene, parent[None] : Ship)
+        Creates a medium turret.
+
+    large(clock : MainClock, gameScene : GameScene, parent[None] : Ship)
+        Creates a large turret.
 
     fixedUpdate()
         Called every clock signal, this function updates every aspect of the
@@ -88,8 +104,8 @@ class GunTurret(QGraphicsRectItem):
     rotateToTAzimut()
         Rotates the turret towards target angle.
 
-    chooseShellType(shell_type : string)
-        Selects the type of shell to shoot depending on shell_type.
+    chooseShot(shot : string)
+        Selects the type of shell to shoot depending on shot.
 
     gunDispersion()
         Applies a random dispersion depending on gun_acc to the azimut of an
@@ -121,8 +137,12 @@ class GunTurret(QGraphicsRectItem):
 
     """
 
+    cfg_dict, cfg_txt = Config._file2dict(
+        path.join(path.dirname(path.realpath(__file__)), "configs", "turretConfig.py")
+    )
+
     d_shipCenter = 0
-    shell_t = "HE"
+    shot = "HE"
     azimut = 0
 
     target = None
@@ -132,7 +152,7 @@ class GunTurret(QGraphicsRectItem):
     t_x_1 = t_v_x = 0
     t_y_1 = t_v_y = 0
 
-    def __init__(self, clock, gameScene, tur_size, parent=None):
+    def __init__(self, clock, gameScene, parent=None):
         """
 
         Parameters
@@ -141,8 +161,6 @@ class GunTurret(QGraphicsRectItem):
             The main clock of the game.
         gameScene : GameScene
             The main display of the game.
-        tur_size : str
-            The size of the turret. See InGameData.py file for further informations.
         parent : Ship, optional
             The parent Ship object of the turret. The default is None.
 
@@ -161,52 +179,123 @@ class GunTurret(QGraphicsRectItem):
         self.gameScene = gameScene
         self.parentShip = parent
 
-        # Sets turret parameters from tur_dat according to passed tur_size #
-        if tur_size == "s":
-            rect = QRectF(0, 0, tur_dat.rect_values[0] * tur_dat.w_h_ratio,
-                          tur_dat.rect_values[0])
-            self.thickness = tur_dat.thk_values[0]
-            self.rot_speed = tur_dat.rot_rate_values[0]
-            self.acc_f = tur_dat.acc_f_values[0]
-            self.gun_number = tur_dat.n_guns[0]
-            self.reloadTime = tur_dat.reload_t_values[0]
-            self.shell_s = p_dat.size_tags[0]
-        elif tur_size == "m":
-            rect = QRectF(0, 0, tur_dat.rect_values[1] * tur_dat.w_h_ratio,
-                          tur_dat.rect_values[1])
-            self.thickness = tur_dat.thk_values[1]
-            self.rot_speed = tur_dat.rot_rate_values[1]
-            self.acc_f = tur_dat.acc_f_values[1]
-            self.gun_number = tur_dat.n_guns[1]
-            self.reloadTime = tur_dat.reload_t_values[1]
-            self.shell_s = p_dat.size_tags[1]
-        elif tur_size == "l":
-            rect = QRectF(0, 0, tur_dat.rect_values[2] * tur_dat.w_h_ratio,
-                          tur_dat.rect_values[2])
-            self.thickness = tur_dat.thk_values[2]
-            self.rot_speed = tur_dat.rot_rate_values[2]
-            self.acc_f = tur_dat.acc_f_values[2]
-            self.gun_number = tur_dat.n_guns[2]
-            self.reloadTime = tur_dat.reload_t_values[2]
-            self.shell_s = p_dat.size_tags[2]
+        self.clock.clockSignal.connect(self.fixedUpdate)
 
+    def __init_instance__(self):
+        """
+
+        Returns
+        -------
+        None.
+
+        Summary
+        -------
+        Initialize variables for instanciation.
+
+        """
+        rect = QRectF(0, 0, self._width, self._height)
         # Sets gun_acc parameters from tech_dat according to parent guns_tech #
-        self.gun_acc = round(tech_dat.gun_tech_acc[self.parentShip.techs["guns_tech"]] * self.acc_f, 4)
-
+        self.gun_acc = round(
+            self.gun_disp * tech_dat.gun_tech_acc[self.parentShip.techs["guns_tech"]], 4
+        )
         # Sets base_fc_error parameters from tech_dat according to parent fc_tech #
-        self.base_fc_error = tech_dat.fc_tech_e[self.parentShip.techs["fc_tech"]]
-        self.fc_error = self.base_fc_error
-
+        self.fc_error = self.base_fc_error = tech_dat.fc_tech_e[
+            self.parentShip.techs["fc_tech"]
+        ]
         # Sets fc_e_reduc_rate parameters from tech_dat according to parent pc_tech #
         self.fc_e_reduc_rate = tech_dat.pc_tech_reduc[self.parentShip.techs["pc_tech"]]
-
-        self.setRect(rect)
-        self.nextShot = self.reloadTime
-        self.fc_corr_rate = tech_dat.fc_correction_rate
+        self.nextShot = self.reload_t
         self.next_fc_correction = self.fc_corr_rate
 
-        self.clock.clockSignal.connect(self.fixedUpdate)
-        self.printInfos(tur_size)
+        self.setRect(rect)
+        self.printInfos()
+
+    @classmethod
+    def small(cls, clock, gameScene, parent=None):
+        """
+
+        Parameters
+        ----------
+        clock : QTimer
+            The main clock of the game.
+        gameScene : GameScene
+            The main scene of the game.
+        parent : QObject
+            The parent item of that item.
+
+        Returns
+        -------
+        s_tur : GunTurret()
+
+        Summary
+        -------
+        Create a turret using the 'small' configuration setup.
+
+        """
+        cfg_s = cls.cfg_dict["small"].copy()
+        s_tur = cls(clock, gameScene, parent)
+        s_tur.__dict__.update(cfg_s)
+        s_tur.__init_instance__()
+
+        return s_tur
+
+    @classmethod
+    def medium(cls, clock, gameScene, parent=None):
+        """
+
+        Parameters
+        ----------
+        clock : QTimer
+            The main clock of the game.
+        gameScene : GameScene
+            The main scene of the game.
+        parent : QObject
+            The parent item of that item.
+
+        Returns
+        -------
+        m_tur : GunTurret()
+
+        Summary
+        -------
+        Create a turret using the 'medium' configuration setup.
+
+        """
+        cfg_m = cls.cfg_dict["medium"].copy()
+        m_tur = cls(clock, gameScene, parent)
+        m_tur.__dict__.update(cfg_m)
+        m_tur.__init_instance__()
+
+        return m_tur
+
+    @classmethod
+    def large(cls, clock, gameScene, parent=None):
+        """
+
+        Parameters
+        ----------
+        clock : QTimer
+            The main clock of the game.
+        gameScene : GameScene
+            The main scene of the game.
+        parent : QObject
+            The parent item of that item.
+
+        Returns
+        -------
+        l_tur : GunTurret()
+
+        Summary
+        -------
+        Create a turret using the 'large' configuration setup.
+
+        """
+        cfg_l = cls.cfg_dict["large"].copy()
+        l_tur = cls(clock, gameScene, parent)
+        l_tur.__dict__.update(cfg_l)
+        l_tur.__init_instance__()
+
+        return l_tur
 
     def fixedUpdate(self):
         """
@@ -231,11 +320,13 @@ class GunTurret(QGraphicsRectItem):
                 self.next_fc_correction -= 1
             self.computeFiringSolution()
             self.rotateToTAzimut()
-            if (self.t_azimut - self.azimut < 1) |\
-                ((self.t_azimut - self.azimut > 359) & (self.t_azimut - self.azimut < 361)):
+            if (self.t_azimut - self.azimut < 1) | (
+                (self.t_azimut - self.azimut > 359)
+                & (self.t_azimut - self.azimut < 361)
+            ):
                 if self.nextShot <= 0:
                     self.shoot()
-                    self.nextShot = self.reloadTime
+                    self.nextShot = self.reload_t
         else:
             self.t_azimut = self.parentShip.coordinates["heading"]
             self.rotateToTAzimut()
@@ -291,19 +382,29 @@ class GunTurret(QGraphicsRectItem):
         target.
 
         """
-        shellSpeed = p_dat.speeds_shellType[0] if self.shell_t == "AP" else p_dat.speeds_shellType[1]
-        shellSpeed *= self.parentShip.refresh["refresh_rate"]  # We accomodate for the fact that the firing soluting is not computed every frame
+        shellSpeed = (
+            p_dat.speeds_shellType[0]
+            if self.shot == "AP"
+            else p_dat.speeds_shellType[1]
+        )
+        shellSpeed *= self.parentShip.refresh[
+            "refresh_rate"
+        ]  # We accomodate for the fact that the firing soluting is not computed every frame
         estimatedFlightTime = round(self.t_range / shellSpeed, 4)
         estimated_t_speed_x = self.fcREG(self.t_v_x)
         estimated_t_speed_y = self.fcREG(self.t_v_y)
         # See docs for more infos on the maths
-        estimatedPos = QPointF(self.target.pos().x() + estimated_t_speed_x * estimatedFlightTime,
-                               self.target.pos().y() + estimated_t_speed_y * estimatedFlightTime)
-        estimatedCenter = geo.parallelepiped_Center(estimatedPos, self.target.rect().width(), self.target.rect().height())
+        estimatedPos = QPointF(
+            self.target.pos().x() + estimated_t_speed_x * estimatedFlightTime,
+            self.target.pos().y() + estimated_t_speed_y * estimatedFlightTime,
+        )
+        estimatedCenter = geo.parallelepiped_Center(
+            estimatedPos, self.target.rect().width(), self.target.rect().height()
+        )
         self.t_range = int(geo.distance_A_B(self.pos(), estimatedCenter))
         a_h = (estimatedCenter.x() - self.pos().x()) / self.t_range
         # Avoid non definition errors
-        if a_h > 1.:
+        if a_h > 1.0:
             a_h = 1
         elif a_h < -1:
             a_h = -1
@@ -327,16 +428,20 @@ class GunTurret(QGraphicsRectItem):
         """
         diff = geo.smallestAngle(self.t_azimut, self.azimut)
 
-        self.azimut += con.proportional(self.t_azimut, self.azimut, self.rot_speed, diff)
-        self.setTransformOriginPoint(QPointF(self.rect().width() / 2, self.rect().height() / 2))
+        self.azimut += con.proportional(
+            self.t_azimut, self.azimut, self.rot_speed, diff
+        )
+        self.setTransformOriginPoint(
+            QPointF(self.rect().width() / 2, self.rect().height() / 2)
+        )
         self.setRotation(self.azimut)
 
-    def chooseShellType(self, shell_type):
+    def chooseShot(self, shot):
         """
 
         Parameters
         ----------
-        shell_type : string
+        shot : string
             The type of the shell.
 
         Returns
@@ -348,7 +453,7 @@ class GunTurret(QGraphicsRectItem):
         Sets the type of shell to be used by the turret.
 
         """
-        self.shell_t = shell_type
+        self.shot = shot
 
     def gunDispersion(self):
         """
@@ -450,27 +555,30 @@ class GunTurret(QGraphicsRectItem):
 
         # Appliable to all: setZValue defines which item will be drawn on top of another.
         # The item with the highest Z value will be on top.
-        if self.gun_number == 1:
+        if self.n_guns == 1:
             a = self.gunDispersion()
-            shell = Projectile.Projectile(self.clock, self.gameScene, a, self.t_range,
-                                          self.shell_s, self.shell_t)
+            shell = Projectile.Projectile(
+                self.clock, self.gameScene, a, self.t_range, self.shot_s, self.shot
+            )
             spawnPos = self.computeSpawnPos(13, az_rad)
             shell.setZValue(4)
             shell.setPos(spawnPos)
 
             self.gameScene.addItem(shell)
 
-        elif self.gun_number == 2:
+        elif self.n_guns == 2:
             a = self.gunDispersion()
-            shell0 = Projectile.Projectile(self.clock, self.gameScene, a, self.t_range,
-                                           self.shell_s, self.shell_t)
+            shell0 = Projectile.Projectile(
+                self.clock, self.gameScene, a, self.t_range, self.shot_s, self.shot
+            )
             spawnPos = self.computeSpawnPos(10, az_rad)
             shell0.setZValue(4)
             shell0.setPos(spawnPos)
 
             a = self.gunDispersion()
-            shell1 = Projectile.Projectile(self.clock, self.gameScene, a, self.t_range,
-                                           self.shell_s, self.shell_t)
+            shell1 = Projectile.Projectile(
+                self.clock, self.gameScene, a, self.t_range, self.shot_s, self.shot
+            )
             spawnPos = self.computeSpawnPos(40, az_rad)
             shell1.setZValue(4)
             shell1.setPos(spawnPos)
@@ -478,24 +586,27 @@ class GunTurret(QGraphicsRectItem):
             self.gameScene.addItem(shell0)
             self.gameScene.addItem(shell1)
 
-        elif self.gun_number == 3:
+        elif self.n_guns == 3:
             a = self.gunDispersion()
-            shell0 = Projectile.Projectile(self.clock, self.gameScene, a, self.t_range,
-                                           self.shell_s, self.shell_t)
+            shell0 = Projectile.Projectile(
+                self.clock, self.gameScene, a, self.t_range, self.shot_s, self.shot
+            )
             spawnPos = self.computeSpawnPos(5, az_rad)
             shell0.setZValue(4)
             shell0.setPos(spawnPos)
 
             a = self.gunDispersion()
-            shell1 = Projectile.Projectile(self.clock, self.gameScene, a, self.t_range,
-                                           self.shell_s, self.shell_t)
+            shell1 = Projectile.Projectile(
+                self.clock, self.gameScene, a, self.t_range, self.shot_s, self.shot
+            )
             spawnPos = self.computeSpawnPos(50, az_rad)
             shell1.setZValue(4)
             shell1.setPos(spawnPos)
 
             a = self.gunDispersion()
-            shell2 = Projectile.Projectile(self.clock, self.gameScene, a, self.t_range,
-                                           self.shell_s, self.shell_t)
+            shell2 = Projectile.Projectile(
+                self.clock, self.gameScene, a, self.t_range, self.shot_s, self.shot
+            )
             spawnPos = self.computeSpawnPos(95, az_rad)
             shell2.setZValue(4)
             shell2.setPos(spawnPos)
@@ -524,7 +635,7 @@ class GunTurret(QGraphicsRectItem):
         """
         self.d_shipCenter = distanceFromCenter
 
-    def printInfos(self, turretSize):
+    def printInfos(self):
         """
 
         Parameters
@@ -542,16 +653,16 @@ class GunTurret(QGraphicsRectItem):
 
         """
         print("********* GENERATED TURRET: *********")
-        if turretSize == "s":
+        if self._size == "s":
             txt = "Small"
-        elif turretSize == "m":
+        elif self._size == "m":
             txt = "Medium"
-        elif turretSize == "l":
+        elif self._size == "l":
             txt = "Large"
         print("SIZE:", txt)
-        print("GUNS:", str(self.gun_number))
+        print("GUNS:", str(self.n_guns))
         print("ROTATION SPEED:", str(self.rot_speed) + "°/s")
-        print("RELOAD SPEED:", str(self.reloadTime) + "s")
+        print("RELOAD SPEED:", str(self.reload_t) + "s")
         print("GUNS ACCURACY:", str(self.gun_acc) + "°")
         print("BASE FIRE CONTROL ERROR:", str(100 * self.base_fc_error) + "%")
         print("FC ERROR REDUCTION RATE:", str(100 * self.fc_e_reduc_rate) + "%")
@@ -580,5 +691,5 @@ class GunTurret(QGraphicsRectItem):
 
         """
         painter.setBrush(QBrush(QColor("darkGray")))
-        painter.setPen(QPen(QColor("black"), self.thickness))
+        painter.setPen(QPen(QColor("black"), self.thk))
         painter.drawRect(self.rect())

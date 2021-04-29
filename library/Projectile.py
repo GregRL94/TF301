@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-'''
+"""
     File name: Projectile.py
     Author: Grégory LARGANGE
     Date created: 07/10/2020
     Last modified by: Grégory LARGANGE
     Date last modified: 18/03/2021
     Python version: 3.8.1
-'''
+"""
 
 import math
 import random
@@ -105,22 +105,25 @@ class Projectile(QGraphicsRectItem):
 
         # Sets projectile parameters from p_dat according to passed _size #
         if _size == "s":
-            rect = QRectF(0, 0, p_dat.w_h_ratio * p_dat.size_values[0],
-                          p_dat.size_values[0])
+            rect = QRectF(
+                0, 0, p_dat.w_h_ratio * p_dat.size_values[0], p_dat.size_values[0]
+            )
             self.thk = p_dat.thk_values[0]
             self.inacc = p_dat.inaccuracy[0]
             self.m_range = p_dat.ranges_shellSize[0]
             index = 0
         elif _size == "m":
-            rect = QRectF(0, 0, p_dat.w_h_ratio * p_dat.size_values[1],
-                          p_dat.size_values[1])
+            rect = QRectF(
+                0, 0, p_dat.w_h_ratio * p_dat.size_values[1], p_dat.size_values[1]
+            )
             self.thk = p_dat.thk_values[1]
             self.inacc = p_dat.inaccuracy[1]
             self.m_range = p_dat.ranges_shellSize[1]
             index = 1
         elif _size == "l":
-            rect = QRectF(0, 0, p_dat.w_h_ratio * p_dat.size_values[2],
-                          p_dat.size_values[2])
+            rect = QRectF(
+                0, 0, p_dat.w_h_ratio * p_dat.size_values[2], p_dat.size_values[2]
+            )
             self.thk = p_dat.thk_values[2]
             self.inacc = p_dat.inaccuracy[2]
             self.m_range = p_dat.ranges_shellSize[2]
@@ -165,8 +168,9 @@ class Projectile(QGraphicsRectItem):
         Sets the rotation of the projectile to _rotation.
 
         """
-        self.setTransformOriginPoint(QPointF(self.rect().width() / 2,
-                                             self.rect().height() / 2))
+        self.setTransformOriginPoint(
+            QPointF(self.rect().width() / 2, self.rect().height() / 2)
+        )
         self.setRotation(_rotation)
 
     def move(self):
@@ -183,10 +187,11 @@ class Projectile(QGraphicsRectItem):
 
         """
         rot_rad = math.radians(self._rotation)
-        nextX = round(self.pos().x() + self.v*math.cos(rot_rad), 4)
-        nextY = round(self.pos().y() + self.v*math.sin(rot_rad), 4)
-        self.cur_d += int(math.sqrt(pow(nextX - self.pos().x(), 2) +\
-                                pow(nextY - self.pos().y(), 2)))
+        nextX = round(self.pos().x() + self.v * math.cos(rot_rad), 4)
+        nextY = round(self.pos().y() + self.v * math.sin(rot_rad), 4)
+        self.cur_d += int(
+            math.sqrt(pow(nextX - self.pos().x(), 2) + pow(nextY - self.pos().y(), 2))
+        )
         if (self.cur_d >= self.m_range) | (self.cur_d >= self.eff_range):
             self.gameScene.destroyObject(self)
         else:
