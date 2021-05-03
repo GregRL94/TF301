@@ -168,6 +168,7 @@ class Ship(QGraphicsRectItem):
             "SLOW": int(self.hull["max_speed"] / 3),
             "STOP": 0,
         }
+        self.currentTurret = None
 
         self.setData(1, tag)
         self.setRect(rect)
@@ -646,10 +647,11 @@ class Ship(QGraphicsRectItem):
         """
         for turret in self.weapons["turrets_list"]:
             tur_angle = 180 if turret.d_shipCenter < 0 else 0
-            teta = math.radians(self.coordinates["heading"] + tur_angle)
             r = abs(turret.d_shipCenter)
+            # gamma = round(math.degrees(math.atan((turret._height / 2) / r)), 4)
+            teta = math.radians(self.coordinates["heading"] + tur_angle)
             nextTurPosX = self.coordinates["center"].x() + r * math.cos(teta)
-            nextTurPosY = self.coordinates["center"].y() - 25 + r * math.sin(teta)
+            nextTurPosY = self.coordinates["center"].y() - 75 + r * math.sin(teta)
 
             turret.setPos(nextTurPosX, nextTurPosY)
 
@@ -786,52 +788,13 @@ class Ship(QGraphicsRectItem):
 
         Summary
         -------
-        Spawns the turrets of the battlship at predefined places. See documentation
-        for further informations.
-
-        """
-        gun_turrets_pos = [
-            QPointF(self.x() + 175, self.y() + 75),
-            QPointF(self.x() + 625, self.y() + 75),
-            QPointF(self.x() + 800, self.y() + 75),
-        ]
-
-        turretC = turret.large(self.clock, self.gameScene, self)
-        turretC.setPos(gun_turrets_pos[0])
-        turretC.setDFromShipCenter(175 - self.rect().width() / 2)
-        turretC.setZValue(3)
-        self.gameScene.addItem(turretC)
-
-        turretB = turret.large(self.clock, self.gameScene, self)
-        turretB.setPos(gun_turrets_pos[1])
-        turretB.setDFromShipCenter(625 - self.rect().width() / 2)
-        turretB.setZValue(3)
-        self.gameScene.addItem(turretB)
-
-        turretA = turret.large(self.clock, self.gameScene, self)
-        turretA.setPos(gun_turrets_pos[2])
-        turretA.setDFromShipCenter(800 - self.rect().width() / 2)
-        turretA.setZValue(3)
-        self.gameScene.addItem(turretA)
-
-        self.weapons["turrets_list"] = [turretC, turretB, turretA]
-
-    def spawnWeaponsProto(self):
-        """
-
-        Returns
-        -------
-        None.
-
-        Summary
-        -------
         Spawns the turrets of the ship at predefined places. See documentation
         for further informations.
 
         """
         spawnPosList = [
             QPointF(self.x() + coord[0], self.y() + coord[1])
-            for coord in self.gun_turrets_pos
+            for coord in self.weapons["turrets_pos"]
         ]
 
         for i, spawnPos in enumerate(spawnPosList):
@@ -844,7 +807,7 @@ class Ship(QGraphicsRectItem):
             try:
                 currentTurret.setPos(spawnPos)
                 currentTurret.d_shipCenter = (
-                    self.gun_turrets_pos[i][0] - self.rect().width() / 2
+                    self.weapons["turrets_pos"][i][0] - self.rect().width() / 2
                 )
                 currentTurret.setZValue(3)
                 self.gameScene.addItem(currentTurret)
@@ -908,7 +871,7 @@ class Ship(QGraphicsRectItem):
         if self.weapons["turrets_list"] is not None:
             for turret in self.weapons["turrets_list"]:
                 num_turr += 1
-                num_guns = turret.gun_number
+                num_guns = turret.n_guns
         if self.weapons["laser_turrets_list"] is not None:
             for laser in self.weapons["laser_turrets_list"]:
                 num_laser += 1

@@ -12,11 +12,14 @@
 import math
 import random
 
+from os import path
+
 from PyQt5.QtCore import QRectF, QPointF
 from PyQt5.QtGui import QPen, QBrush
 from PyQt5.QtWidgets import QGraphicsRectItem
 
 from library.InGameData import ProjectileData as p_dat
+from library.utils.Config import Config
 
 
 class Projectile(QGraphicsRectItem):
@@ -61,6 +64,11 @@ class Projectile(QGraphicsRectItem):
 
     """
 
+    cfg_dict, cfg_text = Config._file2dict(
+        path.join(
+            path.dirname(path.realpath(__file__)), "configs", "projectileConfig.py"
+        )
+    )
     m_range = 0
     cur_d = 0
 

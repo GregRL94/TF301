@@ -125,10 +125,6 @@ class GunTurret(QGraphicsRectItem):
     shoot()
         Spawn projectiles.
 
-    setDFromShipCenter(distanceFromCenter : float)
-        Sets the distance between the center of the turret and its parent ship
-        center.
-
     printInfos()
         Print onfos about the turret.
 
@@ -553,87 +549,16 @@ class GunTurret(QGraphicsRectItem):
         """
         az_rad = math.radians(self.azimut)
 
-        # Appliable to all: setZValue defines which item will be drawn on top of another.
-        # The item with the highest Z value will be on top.
-        if self.n_guns == 1:
+        for pos in self.guns_pos:
             a = self.gunDispersion()
-            shell = Projectile.Projectile(
+            shot = Projectile.Projectile(
                 self.clock, self.gameScene, a, self.t_range, self.shot_s, self.shot
             )
-            spawnPos = self.computeSpawnPos(13, az_rad)
-            shell.setZValue(4)
-            shell.setPos(spawnPos)
-
-            self.gameScene.addItem(shell)
-
-        elif self.n_guns == 2:
-            a = self.gunDispersion()
-            shell0 = Projectile.Projectile(
-                self.clock, self.gameScene, a, self.t_range, self.shot_s, self.shot
-            )
-            spawnPos = self.computeSpawnPos(10, az_rad)
-            shell0.setZValue(4)
-            shell0.setPos(spawnPos)
-
-            a = self.gunDispersion()
-            shell1 = Projectile.Projectile(
-                self.clock, self.gameScene, a, self.t_range, self.shot_s, self.shot
-            )
-            spawnPos = self.computeSpawnPos(40, az_rad)
-            shell1.setZValue(4)
-            shell1.setPos(spawnPos)
-
-            self.gameScene.addItem(shell0)
-            self.gameScene.addItem(shell1)
-
-        elif self.n_guns == 3:
-            a = self.gunDispersion()
-            shell0 = Projectile.Projectile(
-                self.clock, self.gameScene, a, self.t_range, self.shot_s, self.shot
-            )
-            spawnPos = self.computeSpawnPos(5, az_rad)
-            shell0.setZValue(4)
-            shell0.setPos(spawnPos)
-
-            a = self.gunDispersion()
-            shell1 = Projectile.Projectile(
-                self.clock, self.gameScene, a, self.t_range, self.shot_s, self.shot
-            )
-            spawnPos = self.computeSpawnPos(50, az_rad)
-            shell1.setZValue(4)
-            shell1.setPos(spawnPos)
-
-            a = self.gunDispersion()
-            shell2 = Projectile.Projectile(
-                self.clock, self.gameScene, a, self.t_range, self.shot_s, self.shot
-            )
-            spawnPos = self.computeSpawnPos(95, az_rad)
-            shell2.setZValue(4)
-            shell2.setPos(spawnPos)
-
-            self.gameScene.addItem(shell0)
-            self.gameScene.addItem(shell1)
-            self.gameScene.addItem(shell2)
-
-    def setDFromShipCenter(self, distanceFromCenter):
-        """
-
-        Parameters
-        ----------
-        distanceFromCenter : int
-            Distance from the turret to its parent ship center.
-
-        Returns
-        -------
-        None.
-
-        Summary
-        -------
-        Sets the distance between the center of the turret and its parent ship
-        center.
-
-        """
-        self.d_shipCenter = distanceFromCenter
+            spawnPos = self.computeSpawnPos(pos, az_rad)
+            shot.setZValue(4)
+            shot.setPos(spawnPos)
+            self.gameScene.addItem(shot)
+            shot = None
 
     def printInfos(self):
         """

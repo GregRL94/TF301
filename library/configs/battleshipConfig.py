@@ -35,7 +35,7 @@ hull = {
 weapons = {
     "turrets_size": "l",
     "turrets_pos": [[125, 50], [575, 50], [750, 50]],
-    "turrets_list": None,
+    "turrets_list": [],
     "laser_turrets_list": None,
     "laser_turrets_pos": None,
     "guns_range": 21000,
