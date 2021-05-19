@@ -1,22 +1,22 @@
 # -*- coding: utf-8 -*-
 
-'''
+"""
     File name: MapGenerator.py
     Author: Grégory LARGANGE
     Date created: 25/11/2020
     Last modified by: Grégory LARGANGE
-    Date last modified: 18/03/2021
+    Date last modified: 19/05/2021
     Python version: 3.8.1
-'''
+"""
 
 import random, time
 
 from PyQt5.QtCore import QPoint, QPointF
 from PyQt5.QtGui import QPolygonF
-from library import MathsFormulas, HEAP
+from library.utils import HEAP
 
 
-class MapGenerator():
+class MapGenerator:
     """
 
     A class to proceduraly generate a map of defined size. The obstacles of the
@@ -92,7 +92,6 @@ class MapGenerator():
         The constructor of the class.
 
         """
-        self.geometrics = MathsFormulas.Geometrics()
         self.gameMap = []
 
         self.mapW = int(mapWidth / mapSlicing)
@@ -115,8 +114,15 @@ class MapGenerator():
             for j in range(self.mapW):
                 self.gameMap[i].append(0)
 
-    def setMapParameters(self, maxObstruction, minObstWidth, maxObstWidth,
-                         minObstHeight, maxObstHeight, minD2Obstacles):
+    def setMapParameters(
+        self,
+        maxObstruction,
+        minObstWidth,
+        maxObstWidth,
+        minObstHeight,
+        maxObstHeight,
+        minD2Obstacles,
+    ):
         """
 
         Parameters
@@ -186,8 +192,12 @@ class MapGenerator():
         Generates a random obstacle using the obstacle parameters as boundaries.
 
         """
-        tlx = random.randint(0, len(self.gameMap[0]) - 1 - self.minObsW)  # Ensures that obstacle is inside the map
-        tly = random.randint(0, len(self.gameMap) - 1 - self.minObsH)  # Ensures that obstacle is inside the map
+        tlx = random.randint(
+            0, len(self.gameMap[0]) - 1 - self.minObsW
+        )  # Ensures that obstacle is inside the map
+        tly = random.randint(
+            0, len(self.gameMap) - 1 - self.minObsH
+        )  # Ensures that obstacle is inside the map
         w = random.randint(self.minObsW, self.maxObsW)
         h = random.randint(self.minObsH, self.maxObsH)
         return [tlx, tly, w, h]
@@ -271,7 +281,9 @@ class MapGenerator():
         poly = QPolygonF()
 
         # Sets the value of each point within the polygon to one in the map grid.
-        for i in range(y, y + h + 1): # +1 Because of the way the map is drawn (think about fence sections)
+        for i in range(
+            y, y + h + 1
+        ):  # +1 Because of the way the map is drawn (think about fence sections)
             for j in range(x, x + w + 1):
                 line, column = i, j
                 if line > len(self.gameMap) - 1:
@@ -286,7 +298,7 @@ class MapGenerator():
         polyBR = QPoint((x + w) * self.mapS, (y + h) * self.mapS)
         polyTR = QPoint((x + w) * self.mapS, y * self.mapS)
 
-        poly<<polyTL<<polyBL<<polyBR<<polyTR
+        poly << polyTL << polyBL << polyBR << polyTR
 
         # Adds it to the polygonList holding every obstacles polygon.
         self.polygonsList.append(poly)
@@ -338,7 +350,11 @@ class MapGenerator():
                 removedIndex = min(len(self.gameMap[0]) - 1, max(0, j - kernelExtent))
                 addedIndex = min(len(self.gameMap[0]) - 2, max(0, j + kernelExtent - 1))
 
-                penaltiesH[i][j] = penaltiesH[i][j - 1] - self.gameMap[i][removedIndex] + self.gameMap[i][addedIndex]
+                penaltiesH[i][j] = (
+                    penaltiesH[i][j - 1]
+                    - self.gameMap[i][removedIndex]
+                    + self.gameMap[i][addedIndex]
+                )
 
         # Vertical Pass
         for j in range(len(self.gameMap[0])):
@@ -349,7 +365,9 @@ class MapGenerator():
 
             # We assign the calculated values
             blurredPenalty = round(penaltiesV[0][j] / (kernelSize * kernelSize))
-            self.gameMap[0][j] = max(0, min(9, blurredPenalty)) if self.gameMap[0][j] != 10 else 10
+            self.gameMap[0][j] = (
+                max(0, min(9, blurredPenalty)) if self.gameMap[0][j] != 10 else 10
+            )
 
             # Then we move through the column
             for i in range(1, len(self.gameMap)):
@@ -357,9 +375,15 @@ class MapGenerator():
                 addedIndex = min(len(self.gameMap) - 2, max(0, i + kernelExtent - 1))
 
                 # We assign the calculated values
-                penaltiesV[i][j] = penaltiesV[i - 1][j] - penaltiesH[removedIndex][j] + penaltiesH[addedIndex][j]
+                penaltiesV[i][j] = (
+                    penaltiesV[i - 1][j]
+                    - penaltiesH[removedIndex][j]
+                    + penaltiesH[addedIndex][j]
+                )
                 blurredPenalty = round(penaltiesV[i][j] / (kernelSize * kernelSize))
-                self.gameMap[i][j] = max(0, min(9, blurredPenalty)) if self.gameMap[i][j] != 10 else 10
+                self.gameMap[i][j] = (
+                    max(0, min(9, blurredPenalty)) if self.gameMap[i][j] != 10 else 10
+                )
 
     def generateMap(self):
         """
@@ -570,7 +594,7 @@ class Node(HEAP.HEAPItem):
             return -1
 
 
-class Astar():
+class Astar:
     """
 
     A class implementing the A* algorithm to find an optimal path between two
@@ -638,7 +662,9 @@ class Astar():
             self.allNodes.append([])
             for j in range(len(gameMap[0])):
                 traversible = True if (gameMap[i][j] != 10) else False
-                self.allNodes[i].append(Node(i, j, self.gridS, traversible, gameMap[i][j]))
+                self.allNodes[i].append(
+                    Node(i, j, self.gridS, traversible, gameMap[i][j])
+                )
 
         print("***** INITIALIZED A* IN %s SECONDS *****" % (time.time() - sTime))
 
@@ -819,12 +845,13 @@ class Astar():
         directionOld = QPointF()
 
         for i in range(1, len(path)):
-            directionNew = QPointF(path[i-1].jGrid - path[i].jGrid,
-                                   path[i-1].iGrid - path[i].iGrid)
+            directionNew = QPointF(
+                path[i - 1].jGrid - path[i].jGrid, path[i - 1].iGrid - path[i].iGrid
+            )
             if directionNew != directionOld:
                 simplifiedPath.append(path[i])
             directionOld = directionNew
-        
+
         return simplifiedPath
 
     def findPath(self, startPos, targetPos):
@@ -850,10 +877,12 @@ class Astar():
         """
         sTime = time.time()
         # Converts from game scene position to grid position
-        startNode = self.getNode(round(startPos.y() / self.gridS),
-                                 round(startPos.x() / self.gridS))
-        targetNode = self.getNode(round(targetPos.y() / self.gridS),
-                                  round(targetPos.x() / self.gridS))
+        startNode = self.getNode(
+            round(startPos.y() / self.gridS), round(startPos.x() / self.gridS)
+        )
+        targetNode = self.getNode(
+            round(targetPos.y() / self.gridS), round(targetPos.x() / self.gridS)
+        )
 
         # We always start by ading the startNode to the openList.
         self.openList.addItem(startNode)
@@ -882,7 +911,11 @@ class Astar():
 
                     # This node gCost is the distance between him and the current
                     # node we are at
-                    newMoveCost = self.currentNode.gCost + self.distanceB2Nodes(self.currentNode, node) + node.movementPenalty
+                    newMoveCost = (
+                        self.currentNode.gCost
+                        + self.distanceB2Nodes(self.currentNode, node)
+                        + node.movementPenalty
+                    )
                     # If the new move cost is lower than the node current gCost
                     # or if it is not in the openList, we update its data
                     if (newMoveCost < node.gCost) | (node not in self.openList.items):

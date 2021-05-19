@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-'''
-    File name: Gun_Turret.py
+"""
+    File name: Waypoint.py
     Author: Grégory LARGANGE
     Date created: 12/10/2020
     Last modified by: Grégory LARGANGE
-    Date last modified: 19/03/2020
+    Date last modified: 19/05/2020
     Python version: 3.8.1
-'''
+"""
 
 from PyQt5.QtGui import QColor, QPen
 from PyQt5.QtWidgets import QGraphicsEllipseItem

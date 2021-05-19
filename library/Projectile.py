@@ -19,6 +19,7 @@ from PyQt5.QtGui import QPen, QBrush, QColor
 from PyQt5.QtWidgets import QGraphicsRectItem
 
 from library.utils.Config import Config
+from library.utils.MathsFormulas import Cinematics as cin
 
 
 class Projectile(QGraphicsRectItem):
@@ -258,9 +259,7 @@ class Projectile(QGraphicsRectItem):
         Sets the rotation of the projectile to _rotation.
 
         """
-        self.setTransformOriginPoint(
-            QPointF(self.rect().width() / 2, self.rect().height() / 2)
-        )
+        self.setTransformOriginPoint(self.rect().center())
         self.setRotation(_rotation)
 
     def move(self):
@@ -277,15 +276,12 @@ class Projectile(QGraphicsRectItem):
 
         """
         rot_rad = math.radians(self._rotation)
-        nextX = round(self.pos().x() + self.v * math.cos(rot_rad), 4)
-        nextY = round(self.pos().y() + self.v * math.sin(rot_rad), 4)
-        self.cur_d += int(
-            math.sqrt(pow(nextX - self.pos().x(), 2) + pow(nextY - self.pos().y(), 2))
-        )
+        nextPos = cin.movementBy(self.pos(), self.v, rot_rad)
+        self.cur_d += self.v
         if (self.cur_d >= self.m_range) | (self.cur_d >= self.eff_range):
             self.gameScene.destroyObject(self)
         else:
-            self.setPos(nextX, nextY)
+            self.setPos(nextPos)
             self.v_decrease()
             if self._type == "AP":
                 self.pen_decrease()

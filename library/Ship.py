@@ -20,13 +20,13 @@ from PyQt5.QtWidgets import QGraphicsItem, QGraphicsRectItem
 from library import RangeCircles
 from library.GunTurret import GunTurret as turret
 from library.InGameData import TechsData as tech_dat
-from library.MathsFormulas import (
+from library.utils.MathsFormulas import (
     Geometrics as geo,
     Cinematics as cin,
     Controllers as con,
 )
-from library.Mapping import Astar as astar
 from library.utils.Config import Config
+from library.Mapping import Astar as astar
 
 
 class Ship(QGraphicsRectItem):

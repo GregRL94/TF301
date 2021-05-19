@@ -19,7 +19,7 @@ from PyQt5.QtGui import QColor, QPen, QBrush
 from PyQt5.QtWidgets import QGraphicsRectItem
 
 from library.Projectile import Projectile
-from library.MathsFormulas import Geometrics as geo, Controllers as con
+from library.utils.MathsFormulas import Geometrics as geo, Controllers as con
 from library.InGameData import (
     ProjectileData as p_dat,
     TechsData as tech_dat,

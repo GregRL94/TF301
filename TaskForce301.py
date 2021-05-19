@@ -165,10 +165,18 @@ class Ui_TSKF301MainWindow(object):
         self.graphicsScene.addShip(ship1)
         _bb_dict, _bb_txt = None, None
 
-        # _bb_dict, _bb_txt = Config._file2dict(_bb_cfg)
-        # ship2 = Ship._battleShip(self.mainClock, self.graphicsScene, self.mapGen.gameMap, self.mapGen.mapS, QPointF(2500, 5000), "ALLY", _bb_dict)
-        # self.graphicsScene.addShip(ship2)
-        # _bb_dict, _bb_txt = None, None
+        _bb_dict, _bb_txt = Config._file2dict(_bb_cfg)
+        ship2 = Ship._battleShip(
+            self.mainClock,
+            self.graphicsScene,
+            self.mapGen.gameMap,
+            self.mapGen.mapS,
+            QPointF(2500, 5000),
+            "ALLY",
+            _bb_dict,
+        )
+        self.graphicsScene.addShip(ship2)
+        _bb_dict, _bb_txt = None, None
 
         # _bb_dict, _bb_txt = Config._file2dict(_bb_cfg)
         # ship3 = Ship._battleShip(self.mainClock, self.graphicsScene, self.mapGen.gameMap, self.mapGen.mapS, QPointF(12500, 10000), "ENNEMY", _bb_dict)
