@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-'''
+"""
     File name: TaskForce301.py
     Author: Grégory LARGANGE
     Date created: 07/10/2020
     Last modified by: Grégory LARGANGE
     Date last modified: 12/04/2021
     Python version: 3.8.1
-'''
+"""
 
 import sys
 
@@ -23,7 +23,6 @@ from library.utils.Config import Config
 
 
 class Ui_TSKF301MainWindow(object):
-
     def setupUi(self, TSKF301MainWindow):
         TSKF301MainWindow.setObjectName("TSKF301MainWindow")
         TSKF301MainWindow.resize(1280, 960)
@@ -84,7 +83,9 @@ class Ui_TSKF301MainWindow(object):
 
     def retranslateUi(self, TSKF301MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        TSKF301MainWindow.setWindowTitle(_translate("TSKF301MainWindow", "TSKF301MainWindow"))
+        TSKF301MainWindow.setWindowTitle(
+            _translate("TSKF301MainWindow", "TSKF301MainWindow")
+        )
         self.menuGame.setTitle(_translate("TSKF301MainWindow", "Game"))
         self.playerShipsDW.setWindowTitle(_translate("TSKF301MainWindow", "SHIPS"))
         self.actionNew_Game.setText(_translate("TSKF301MainWindow", "New Game"))
@@ -93,13 +94,17 @@ class Ui_TSKF301MainWindow(object):
         self.actionNew_GameMap.setShortcut(_translate("TSKF301MainWindow", "M"))
         self.actionSpawnShips.setText(_translate("TSKF301MainWindow", "Spawn ships"))
         self.actionSpawnShips.setShortcut(_translate("TSKF301MainWindow", "S"))
-        self.actionStart_Pause_Game.setText(_translate("TSKF301MainWindow", "Start Game"))
-        self.actionStart_Pause_Game.setShortcut(_translate("TSKF301MainWindow", "Space"))
+        self.actionStart_Pause_Game.setText(
+            _translate("TSKF301MainWindow", "Start Game")
+        )
+        self.actionStart_Pause_Game.setShortcut(
+            _translate("TSKF301MainWindow", "Space")
+        )
         self.actionAstar.setText(_translate("TSKF301MainWindow", "PathFinder"))
         self.actionAstar.setShortcut(_translate("TSKF301MainWindow", "A"))
 
     def initGameData(self):
-        self.mainClock = MainClock.MainClock(25)  #ms
+        self.mainClock = MainClock.MainClock(25)  # ms
         self.mapGen = None
         self.mapExtPercentage = 0.10
         self.mapRes = 500
@@ -117,13 +122,19 @@ class Ui_TSKF301MainWindow(object):
 
     def newGame(self):
         playableArea = 20000
-        self.graphicsScene.setSceneRect(0, 0, int(playableArea * (1 + self.mapExtPercentage)),
-                                              int(playableArea * (1 + self.mapExtPercentage)))
+        self.graphicsScene.setSceneRect(
+            0,
+            0,
+            int(playableArea * (1 + self.mapExtPercentage)),
+            int(playableArea * (1 + self.mapExtPercentage)),
+        )
         self.graphicsScene.setInnerMap(self.mapExtPercentage, playableArea)
-        self.graphicsView.fitInView(QtCore.QRectF(0, 0, playableArea, playableArea),
-                                    Qt.KeepAspectRatio)
-        self.mapGen = Mapping.MapGenerator(self.graphicsScene.width(), self.graphicsScene.height(),
-                                           self.mapRes)
+        self.graphicsView.fitInView(
+            QtCore.QRectF(0, 0, playableArea, playableArea), Qt.KeepAspectRatio
+        )
+        self.mapGen = Mapping.MapGenerator(
+            self.graphicsScene.width(), self.graphicsScene.height(), self.mapRes
+        )
         self.mapGen.setMapParameters(0.0, 4, 10, 4, 10, 4)
         self.genRandomMap()
         self.debugDisp(True, False)
@@ -138,24 +149,42 @@ class Ui_TSKF301MainWindow(object):
         self.debugDisp(True, False)
 
     def spawnShips(self):
-        _bb_cfg = path.join(path.dirname(path.realpath(__file__)), "library/configs/battleshipConfig.py")
+        _bb_cfg = path.join(
+            path.dirname(path.realpath(__file__)), "library/configs/battleshipConfig.py"
+        )
         _bb_dict, _bb_txt = Config._file2dict(_bb_cfg)
-        ship1 = Ship._battleShip(self.mainClock, self.graphicsScene, self.mapGen.gameMap, self.mapGen.mapS, QPointF(2500, 2500), "ALLY", _bb_dict)
+        ship1 = Ship._battleShip(
+            self.mainClock,
+            self.graphicsScene,
+            self.mapGen.gameMap,
+            self.mapGen.mapS,
+            QPointF(2500, 2500),
+            "ALLY",
+            _bb_dict,
+        )
         self.graphicsScene.addShip(ship1)
         _bb_dict, _bb_txt = None, None
 
-        _bb_dict, _bb_txt = Config._file2dict(_bb_cfg)
-        ship2 = Ship._battleShip(self.mainClock, self.graphicsScene, self.mapGen.gameMap, self.mapGen.mapS, QPointF(2500, 5000), "ALLY", _bb_dict)
-        self.graphicsScene.addShip(ship2)
-        _bb_dict, _bb_txt = None, None
+        # _bb_dict, _bb_txt = Config._file2dict(_bb_cfg)
+        # ship2 = Ship._battleShip(self.mainClock, self.graphicsScene, self.mapGen.gameMap, self.mapGen.mapS, QPointF(2500, 5000), "ALLY", _bb_dict)
+        # self.graphicsScene.addShip(ship2)
+        # _bb_dict, _bb_txt = None, None
+
+        # _bb_dict, _bb_txt = Config._file2dict(_bb_cfg)
+        # ship3 = Ship._battleShip(self.mainClock, self.graphicsScene, self.mapGen.gameMap, self.mapGen.mapS, QPointF(12500, 10000), "ENNEMY", _bb_dict)
+        # self.graphicsScene.addShip(ship3)
+        # _bb_dict, _bb_txt = None, None
 
         _bb_dict, _bb_txt = Config._file2dict(_bb_cfg)
-        ship3 = Ship._battleShip(self.mainClock, self.graphicsScene, self.mapGen.gameMap, self.mapGen.mapS, QPointF(12500, 10000), "ENNEMY", _bb_dict)
-        self.graphicsScene.addShip(ship3)
-        _bb_dict, _bb_txt = None, None
-
-        _bb_dict, _bb_txt = Config._file2dict(_bb_cfg)
-        ship4 = Ship._battleShip(self.mainClock, self.graphicsScene, self.mapGen.gameMap, self.mapGen.mapS, QPointF(12500, 12500), "ENNEMY", _bb_dict)
+        ship4 = Ship._battleShip(
+            self.mainClock,
+            self.graphicsScene,
+            self.mapGen.gameMap,
+            self.mapGen.mapS,
+            QPointF(12500, 12500),
+            "ENNEMY",
+            _bb_dict,
+        )
         self.graphicsScene.addShip(ship4)
         _bb_dict, _bb_txt = None, None
 

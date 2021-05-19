@@ -5,7 +5,7 @@
     Author: Grégory LARGANGE
     Date created: 12/10/2020
     Last modified by: Grégory LARGANGE
-    Date last modified: 18/03/2020
+    Date last modified: 19/05/2020
     Python version: 3.8.1
 """
 
@@ -18,7 +18,7 @@ from PyQt5.QtCore import QRectF, QPointF
 from PyQt5.QtGui import QColor, QPen, QBrush
 from PyQt5.QtWidgets import QGraphicsRectItem
 
-from library import Projectile
+from library.Projectile import Projectile
 from library.MathsFormulas import Geometrics as geo, Controllers as con
 from library.InGameData import (
     ProjectileData as p_dat,
@@ -39,8 +39,8 @@ class GunTurret(QGraphicsRectItem):
     d_shipCenter : int
         The distance between the turret center and its parent ship center.
 
-    shot : string
-        The tag defining which shell type to fire.
+    shot_t : string
+        The tag defining which shot type to fire.
 
     azimut : float
         The current rotation angle of the turret.
@@ -104,8 +104,8 @@ class GunTurret(QGraphicsRectItem):
     rotateToTAzimut()
         Rotates the turret towards target angle.
 
-    chooseShot(shot : string)
-        Selects the type of shell to shoot depending on shot.
+    chooseShot(shot_t : string)
+        Selects the type of shot to shoot depending on shot_t.
 
     gunDispersion()
         Applies a random dispersion depending on gun_acc to the azimut of an
@@ -138,7 +138,7 @@ class GunTurret(QGraphicsRectItem):
     )
 
     d_shipCenter = 0
-    shot = "HE"
+    shot_t = "HE"
     azimut = 0
 
     target = None
@@ -186,7 +186,7 @@ class GunTurret(QGraphicsRectItem):
 
         Summary
         -------
-        Initialize variables for instanciation.
+        Initialize variables for instantiation.
 
         """
         rect = QRectF(0, 0, self._width, self._height)
@@ -380,7 +380,7 @@ class GunTurret(QGraphicsRectItem):
         """
         shellSpeed = (
             p_dat.speeds_shellType[0]
-            if self.shot == "AP"
+            if self.shot_t == "AP"
             else p_dat.speeds_shellType[1]
         )
         shellSpeed *= self.parentShip.refresh[
@@ -432,13 +432,13 @@ class GunTurret(QGraphicsRectItem):
         )
         self.setRotation(self.azimut)
 
-    def chooseShot(self, shot):
+    def chooseShot(self, shot_type):
         """
 
         Parameters
         ----------
-        shot : string
-            The type of the shell.
+        shot_type : string
+            The type of the shot.
 
         Returns
         -------
@@ -446,10 +446,10 @@ class GunTurret(QGraphicsRectItem):
 
         Summary
         -------
-        Sets the type of shell to be used by the turret.
+        Sets the type of shot to be used by the turret.
 
         """
-        self.shot = shot
+        self.shot_t = shot_type
 
     def gunDispersion(self):
         """
@@ -551,9 +551,20 @@ class GunTurret(QGraphicsRectItem):
 
         for pos in self.guns_pos:
             a = self.gunDispersion()
-            shot = Projectile.Projectile(
-                self.clock, self.gameScene, a, self.t_range, self.shot_s, self.shot
-            )
+
+            if self.shot_s == "s":
+                shot = Projectile.small(
+                    self.clock, self.gameScene, self.t_range, a, self.shot_t
+                )
+            elif self.shot_s == "m":
+                shot = Projectile.medium(
+                    self.clock, self.gameScene, self.t_range, a, self.shot_t
+                )
+            elif self.shot_s == "l":
+                shot = Projectile.large(
+                    self.clock, self.gameScene, self.t_range, a, self.shot_t
+                )
+
             spawnPos = self.computeSpawnPos(pos, az_rad)
             shot.setZValue(4)
             shot.setPos(spawnPos)
