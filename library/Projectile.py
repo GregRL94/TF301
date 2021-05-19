@@ -1,22 +1,25 @@
 # -*- coding: utf-8 -*-
 
-'''
+"""
     File name: Projectile.py
     Author: Grégory LARGANGE
     Date created: 07/10/2020
     Last modified by: Grégory LARGANGE
-    Date last modified: 18/03/2021
+    Date last modified: 19/05/2021
     Python version: 3.8.1
-'''
+"""
 
 import math
 import random
 
+from os import path
+
 from PyQt5.QtCore import QRectF, QPointF
-from PyQt5.QtGui import QPen, QBrush
+from PyQt5.QtGui import QPen, QBrush, QColor
 from PyQt5.QtWidgets import QGraphicsRectItem
 
-from library.InGameData import ProjectileData as p_dat
+from library.utils.Config import Config
+from library.utils.MathsFormulas import Cinematics as cin
 
 
 class Projectile(QGraphicsRectItem):
@@ -28,9 +31,6 @@ class Projectile(QGraphicsRectItem):
 
     Attributes
     ----------
-    m_range : int
-        The maximum distance the projectile can travekl before exploding.
-
     cur_d : int
         The current distance the projectile has already traveled.
 
@@ -40,6 +40,9 @@ class Projectile(QGraphicsRectItem):
              _range : int, _size : str, _type : str)
         The constructor of the class.
 
+    __init_instance_(_range : int, _rotation : float)
+        Initialize variables for instantiation.
+
     rotate(_rotation : float)
         Applies _rotation to the projectile.
 
@@ -48,7 +51,7 @@ class Projectile(QGraphicsRectItem):
         speed.
 
     range_rng()
-        Returns a random distance within the target range +/- inaccuracy interval.
+        Returns a random distance within the target range +/- dispersion interval.
 
     v_decrease()
         Linear degression of the speed of the projectile.
@@ -61,10 +64,14 @@ class Projectile(QGraphicsRectItem):
 
     """
 
-    m_range = 0
+    cfg_dict, cfg_text = Config._file2dict(
+        path.join(
+            path.dirname(path.realpath(__file__)), "configs", "projectileConfig.py"
+        )
+    )
     cur_d = 0
 
-    def __init__(self, clock, gameScene, _rotation, _range, _size="l", _type="AP"):
+    def __init__(self, clock, gameScene, _type="AP"):
         """
 
         Parameters
@@ -73,15 +80,6 @@ class Projectile(QGraphicsRectItem):
             The main clock of the game.
         gameScene : gameScene.
             The main display of the game.
-        _rotation : float
-            A rotation to apply to the projectile.
-        _range : int
-            The distacce the projectile must travel.
-        _size : string, optional
-            A letter indicating the size of the shell. The default is "l".
-            "s" => small
-            "m" => medium
-            "l" => large
         _type : string, optional
             A string indicating the type of the shell. The default is "AP".
             "AP" => Armor Piercing
@@ -100,53 +98,149 @@ class Projectile(QGraphicsRectItem):
 
         self.clock = clock
         self.gameScene = gameScene
-        self._rotation = _rotation
-        self._range = _range
+        self._type = _type
 
-        # Sets projectile parameters from p_dat according to passed _size #
-        if _size == "s":
-            rect = QRectF(0, 0, p_dat.w_h_ratio * p_dat.size_values[0],
-                          p_dat.size_values[0])
-            self.thk = p_dat.thk_values[0]
-            self.inacc = p_dat.inaccuracy[0]
-            self.m_range = p_dat.ranges_shellSize[0]
-            index = 0
-        elif _size == "m":
-            rect = QRectF(0, 0, p_dat.w_h_ratio * p_dat.size_values[1],
-                          p_dat.size_values[1])
-            self.thk = p_dat.thk_values[1]
-            self.inacc = p_dat.inaccuracy[1]
-            self.m_range = p_dat.ranges_shellSize[1]
-            index = 1
-        elif _size == "l":
-            rect = QRectF(0, 0, p_dat.w_h_ratio * p_dat.size_values[2],
-                          p_dat.size_values[2])
-            self.thk = p_dat.thk_values[2]
-            self.inacc = p_dat.inaccuracy[2]
-            self.m_range = p_dat.ranges_shellSize[2]
-            index = 2
+        self.clock.clockSignal.connect(self.move)
+
+    def __init_instance__(self, _range, _rotation):
+        """
+
+        Parameters
+        ----------
+        _range : int
+            The distance the shot should travel.
+        _rotation : float
+            The angle at which the shot should be fired.
+
+        Returns
+        -------
+        None.
+
+        Summary
+        -------
+        Initialize variables for instantiation.
+
+        """
+        rect = QRectF(0, 0, self._width, self._height)
+        self.eff_range = int(self.range_rng(_range))
+        self._rotation = _rotation
+
+        if self._type == "AP":
+            self.v = self.v0 = self.v_AP
+            self._pen = self.p0 = self.pen_AP
+            self.dmg = self.dmg_AP
+            self.colors = self.colors_AP
+        else:
+            self.v = self.v0 = self.v_HE
+            self._pen = self.p0 = self.pen_HE
+            self.dmg = self.dmg_HE
+            self.colors = self.colors_HE
 
         self.setRect(rect)
-        self.eff_range = int(self.range_rng())
-
         if self._rotation != 0:
             self.rotate(self._rotation)
 
-        self._type = _type
-        # Sets projectile parameters from p_dat according to _type #
-        if self._type == "AP":
-            self.v = self.v0 = p_dat.speeds_shellType[0]
-            self.dmg = p_dat.damage_type[index][0]
-            self.pen = self.p0 = p_dat.pen_values[index][0]
-            self.colors = [p_dat.colors_values[0], p_dat.colors_values[1]]
-        else:
-            self.v = self.v0 = p_dat.speeds_shellType[1]
-            self.dmg = p_dat.damage_type[index][1]
-            self.pen = self.p0 = p_dat.pen_values[index][1]
-            self.colors = [p_dat.colors_values[2], p_dat.colors_values[3]]
-        self.v_dec = p_dat.v_decreaseRate
+    @classmethod
+    def small(cls, clock, gameScene, _range, _rotation, _type="AP"):
+        """
 
-        self.clock.clockSignal.connect(self.move)
+        Parameters
+        ----------
+        clock : GameClock
+            The main clock of the game.
+        gameScene : GameScene
+            The main display of the game.
+        _range : int
+            The distance the shot should travel.
+        _rotation : float
+            The angle at which the shot should be fired.
+        _type : string
+            The type of the shot.
+
+        Returns
+        -------
+        s_shot : Projectile
+            The projectile.
+
+        Summary
+        -------
+        Creates a shot using the 'small' configuration setup.
+
+        """
+        cfg_s = cls.cfg_dict["small"].copy()
+        s_shot = cls(clock, gameScene, _type)
+        s_shot.__dict__.update(cfg_s)
+        s_shot.__init_instance__(_range, _rotation)
+
+        return s_shot
+
+    @classmethod
+    def medium(cls, clock, gameScene, _range, _rotation, _type="AP"):
+        """
+
+        Parameters
+        ----------
+        clock : GameClock
+            The main clock of the game.
+        gameScene : GameScene
+            The main display of the game.
+        _range : int
+            The distance the shot should travel.
+        _rotation : float
+            The angle at which the shot should be fired.
+        _type : string
+            The type of the shot.
+
+        Returns
+        -------
+        s_shot : Projectile
+            The projectile.
+
+        Summary
+        -------
+        Creates a shot using the 'medium' configuration setup.
+
+        """
+        cfg_m = cls.cfg_dict["medium"].copy()
+        m_shot = cls(clock, gameScene, _type)
+        m_shot.__dict__.update(cfg_m)
+        m_shot.__init_instance__(_range, _rotation)
+
+        return m_shot
+
+    @classmethod
+    def large(cls, clock, gameScene, _range, _rotation, _type="AP"):
+        """
+
+        Parameters
+        ----------
+        clock : GameClock
+            The main clock of the game.
+        gameScene : GameScene
+            The main display of the game.
+        _range : int
+            The distance the shot should travel.
+        _rotation : float
+            The angle at which the shot should be fired.
+        _type : string
+            The type of the shot.
+
+        Returns
+        -------
+        s_shot : Projectile
+            The projectile.
+
+        Summary
+        -------
+        Creates a shot using the 'large' configuration setup.
+
+        """
+        cfg_l = cls.cfg_dict["large"].copy()
+        l_shot = cls(clock, gameScene, _type)
+        l_shot.__dict__.update(cfg_l)
+        l_shot.__init_instance__(_range, _rotation)
+
+        return l_shot
 
     def rotate(self, _rotation):
         """
@@ -165,8 +259,7 @@ class Projectile(QGraphicsRectItem):
         Sets the rotation of the projectile to _rotation.
 
         """
-        self.setTransformOriginPoint(QPointF(self.rect().width() / 2,
-                                             self.rect().height() / 2))
+        self.setTransformOriginPoint(self.rect().center())
         self.setRotation(_rotation)
 
     def move(self):
@@ -183,34 +276,32 @@ class Projectile(QGraphicsRectItem):
 
         """
         rot_rad = math.radians(self._rotation)
-        nextX = round(self.pos().x() + self.v*math.cos(rot_rad), 4)
-        nextY = round(self.pos().y() + self.v*math.sin(rot_rad), 4)
-        self.cur_d += int(math.sqrt(pow(nextX - self.pos().x(), 2) +\
-                                pow(nextY - self.pos().y(), 2)))
+        nextPos = cin.movementBy(self.pos(), self.v, rot_rad)
+        self.cur_d += self.v
         if (self.cur_d >= self.m_range) | (self.cur_d >= self.eff_range):
             self.gameScene.destroyObject(self)
         else:
-            self.setPos(nextX, nextY)
+            self.setPos(nextPos)
             self.v_decrease()
             if self._type == "AP":
                 self.pen_decrease()
 
-    def range_rng(self):
+    def range_rng(self, _range):
         """
 
         Returns
         -------
-        float
+        int
             The distance the projectile will travel before being destroyed.
 
         Summary
         -------
         Randomly generates a distance at which the projectile will explode.
-        This random distance dpends on the inaccuracy parameter.
+        This random distance depends on the accuracy parameter.
 
         """
-        disp = self._range * self.inacc
-        return random.uniform(self._range - disp, self._range + disp)
+        disp = _range * self.accy
+        return random.uniform(_range - disp, _range)
 
     def v_decrease(self):
         """
@@ -221,10 +312,10 @@ class Projectile(QGraphicsRectItem):
 
         Summary
         -------
-        Linera degression of the speed of the projectile.
+        Linear degression of the speed of the projectile.
 
         """
-        self.v = round(self.v - self.v_dec, 4)
+        self.v = round(self.v - self.decc, 4)
 
     def pen_decrease(self):
         """
@@ -238,7 +329,7 @@ class Projectile(QGraphicsRectItem):
         Linear degression of the projectile penetration.
 
         """
-        self.pen = int(self.p0 + self.p0 * ((self.v - self.v0) / self.v0))
+        self._pen = int(self.p0 + self.p0 * ((self.v - self.v0) / self.v0))
 
     def paint(self, painter, option, widget=None):
         """
@@ -261,6 +352,6 @@ class Projectile(QGraphicsRectItem):
         Instructions to draw the item on the game scene.
 
         """
-        painter.setBrush(QBrush(self.colors[0]))
-        painter.setPen(QPen(self.colors[1], self.thk))
+        painter.setBrush(QBrush(QColor(self.colors[0])))
+        painter.setPen(QPen(QColor(self.colors[1]), self.thk))
         painter.drawRect(self.rect())
