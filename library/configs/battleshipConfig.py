@@ -5,7 +5,7 @@
     Author: Grégory LARGANGE
     Date created: 07/04/2021
     Last modified by: Grégory LARGANGE
-    Date last modified: 12/04/2021
+    Date last modified: 28/05/2021
     Python version: 3.8.1
 
     THIS FILE IS THE DEFAULT CONFIGURATION
@@ -56,6 +56,8 @@ det_and_range = {
     "detected_ships": None,
     "rcom_ships": None,
     "ships_in_range": None,
+    "det_r_angles": [-33.34, 0, 33.34],
+    "det_r_range": 0,
 }
 
 coordinates = {"center": None, "r_centers": None, "heading": 0, "rot_direction": 0}

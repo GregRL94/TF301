@@ -5,7 +5,7 @@
     Author: Grégory LARGANGE
     Date created: 07/10/2020
     Last modified by: Grégory LARGANGE
-    Date last modified: 12/04/2021
+    Date last modified: 28/05/2021
     Python version: 3.8.1
 """
 
@@ -135,7 +135,7 @@ class Ui_TSKF301MainWindow(object):
         self.mapGen = Mapping.MapGenerator(
             self.graphicsScene.width(), self.graphicsScene.height(), self.mapRes
         )
-        self.mapGen.setMapParameters(0.0, 4, 10, 4, 10, 4)
+        self.mapGen.setMapParameters(0.2, 4, 10, 4, 10, 4)
         self.genRandomMap()
         self.debugDisp(True, False)
         self.gameState = False
@@ -165,36 +165,44 @@ class Ui_TSKF301MainWindow(object):
         self.graphicsScene.addShip(ship1)
         _bb_dict, _bb_txt = None, None
 
-        _bb_dict, _bb_txt = Config._file2dict(_bb_cfg)
-        ship2 = Ship._battleShip(
-            self.mainClock,
-            self.graphicsScene,
-            self.mapGen.gameMap,
-            self.mapGen.mapS,
-            QPointF(2500, 5000),
-            "ALLY",
-            _bb_dict,
-        )
-        self.graphicsScene.addShip(ship2)
-        _bb_dict, _bb_txt = None, None
+        # _bb_dict, _bb_txt = Config._file2dict(_bb_cfg)
+        # ship2 = Ship._battleShip(
+        #     self.mainClock,
+        #     self.graphicsScene,
+        #     self.mapGen.gameMap,
+        #     self.mapGen.mapS,
+        #     QPointF(2500, 5000),
+        #     "ALLY",
+        #     _bb_dict,
+        # )
+        # self.graphicsScene.addShip(ship2)
+        # _bb_dict, _bb_txt = None, None
 
         # _bb_dict, _bb_txt = Config._file2dict(_bb_cfg)
-        # ship3 = Ship._battleShip(self.mainClock, self.graphicsScene, self.mapGen.gameMap, self.mapGen.mapS, QPointF(12500, 10000), "ENNEMY", _bb_dict)
+        # ship3 = Ship._battleShip(
+        #     self.mainClock,
+        #     self.graphicsScene,
+        #     self.mapGen.gameMap,
+        #     self.mapGen.mapS,
+        #     QPointF(12500, 10000),
+        #     "ENNEMY",
+        #     _bb_dict,
+        # )
         # self.graphicsScene.addShip(ship3)
         # _bb_dict, _bb_txt = None, None
 
-        _bb_dict, _bb_txt = Config._file2dict(_bb_cfg)
-        ship4 = Ship._battleShip(
-            self.mainClock,
-            self.graphicsScene,
-            self.mapGen.gameMap,
-            self.mapGen.mapS,
-            QPointF(12500, 12500),
-            "ENNEMY",
-            _bb_dict,
-        )
-        self.graphicsScene.addShip(ship4)
-        _bb_dict, _bb_txt = None, None
+        # _bb_dict, _bb_txt = Config._file2dict(_bb_cfg)
+        # ship4 = Ship._battleShip(
+        #     self.mainClock,
+        #     self.graphicsScene,
+        #     self.mapGen.gameMap,
+        #     self.mapGen.mapS,
+        #     QPointF(12500, 12500),
+        #     "ENNEMY",
+        #     _bb_dict,
+        # )
+        # self.graphicsScene.addShip(ship4)
+        # _bb_dict, _bb_txt = None, None
 
         self.rComs.updateShipLists()
 

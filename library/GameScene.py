@@ -5,7 +5,7 @@
     Author: Grégory LARGANGE
     Date created: 12/10/2020
     Last modified by: Grégory LARGANGE
-    Date last modified: 19/05/2021
+    Date last modified: 28/05/2021
     Python version: 3.8.1
 """
 
@@ -14,7 +14,7 @@ from PyQt5.QtGui import QPen, QBrush, QColor
 from PyQt5.QtWidgets import QGraphicsScene
 
 from library import Island, Waypoint
-from library.utils.MathsFormulas import Geometrics as geo
+from library.utils.MathsFormulas import Geometrics as geo, Cinematics as cin
 
 
 class GameScene(QGraphicsScene):
@@ -94,6 +94,18 @@ class GameScene(QGraphicsScene):
                 if dSNS0 <= effS0ScanRange:
                     shipsInDRange.append(ship)
         return shipsInDRange
+
+    def detectionRay(self, origin, angleInRad, distance, resolution, offset=0):
+        currentPos = origin
+
+        for i in range(offset, distance - resolution, resolution):
+            currentPos = cin.movementBy(currentPos, i, angleInRad)
+            # self.addLine(origin.x(), origin.y(), currentPos.x(), currentPos.y())
+            _item = self.itemAt(currentPos, self.attachedGView.transform())
+            if _item:
+                if _item.data(2):
+                    return i
+        return None
 
     def dispGrid(self, step):
         for i in range(0, int(self.height()), step):
