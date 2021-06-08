@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-'''
+"""
     File name: Obstacle.py
     Author: Grégory LARGANGE
     Date created: 27/11/2020
     Last modified by: Grégory LARGANGE
     Date last modified: 11/12/2020
     Python version: 3.8.1
-'''
+"""
 
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QColor, QPen, QBrush, QCursor
@@ -46,7 +46,7 @@ class Island(QGraphicsPolygonItem):
     """
 
     thickness = 100
-    colorInner = QColor(108, 98, 79) # 107, 134, 68
+    colorInner = QColor(108, 98, 79)  # 107, 134, 68
     colorBorder = QColor(108, 98, 79)
 
     def __init__(self, parentScene, polygon):
@@ -72,6 +72,7 @@ class Island(QGraphicsPolygonItem):
 
         self.parentScene = parentScene
         self.poly = polygon
+        self.setData(2, True)  # Considered an obstacle
         self.setPolygon(self.poly)
         self.setAcceptHoverEvents(True)
 

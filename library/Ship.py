@@ -5,11 +5,12 @@
     Author: Grégory LARGANGE
     Date created: 09/10/2020
     Last modified by: Grégory LARGANGE
-    Date last modified: 01/04/2021
+    Date last modified: 28/05/2021
     Python version: 3.8.1
 """
 
 import math
+import random
 
 from os import path
 
@@ -168,15 +169,18 @@ class Ship(QGraphicsRectItem):
             "SLOW": int(self.hull["max_speed"] / 3),
             "STOP": 0,
         }
+        self.det_and_range["det_r_range"] = cin.rotationRadius(
+            self.speed_params["speed_options"]["SLOW"], self.hull["turn_rate"]
+        )
         self.currentTurret = None
 
         self.setData(1, tag)
+        self.setData(2, True)  # Considered an obstacle
         self.setRect(rect)
         self.setPos(pos)
 
         self.spawnWeapons()
         self.setRangeCirclesDisp()
-        self.printInfos()
 
     @classmethod
     def _battleShip(cls, clock, gameScene, gameMap, mapSlicing, pos, tag, _config):
@@ -236,7 +240,11 @@ class Ship(QGraphicsRectItem):
         """
         self.updateCenter()
         self.updateRCenters()
-        self.move()
+        obs_det_results = self.dynamicObjectDetection()
+        if obs_det_results:
+            self.dodgeManoeuver(obs_det_results)
+        else:
+            self.move()
 
         # Debug display #
         if self.iterators["next_point_print"] <= 0:
@@ -491,10 +499,7 @@ class Ship(QGraphicsRectItem):
             self.hull["turn_rate"],
             diff,
         )
-        self.setTransformOriginPoint(
-            QPointF(self.rect().width() / 2, self.rect().height() / 2)
-        )
-        self.setRotation(self.coordinates["heading"])
+        self.rotate()
 
     def updatePath(self, targetPoint=None):
         """
@@ -631,6 +636,24 @@ class Ship(QGraphicsRectItem):
         else:
             return True
 
+    def updatePos(self):
+        """
+
+        Returns
+        -------
+        None.
+
+        Summary
+        -------
+        Update the position of the ship in the game world.
+
+        """
+        headingInRad = math.radians(self.coordinates["heading"])
+        nextPoint = cin.movementBy(self.pos(), self.instant_vars["speed"], headingInRad)
+        self.setPos(nextPoint)
+        self.updateTurretPos()
+        self.displays["rangeCirclesDisp"]._updatePos(self.coordinates["center"])
+
     def updateTurretPos(self):
         """
 
@@ -655,6 +678,95 @@ class Ship(QGraphicsRectItem):
 
             turret.setPos(nextTurPosX, nextTurPosY)
 
+    def rotate(self):
+        """
+
+        Returns
+        -------
+        None.
+
+        Summary
+        -------
+        Rotates the ship around its central axis.
+
+        """
+        self.setTransformOriginPoint(self.rect().center())
+        self.setRotation(self.coordinates["heading"])
+
+    def steer(self, direction, hard=False):
+        """
+
+        Parameters
+        ----------
+        direction : string
+            The direction the ship should steer to.
+
+        Returns
+        -------
+        None.
+
+        Summary
+        -------
+        Rotates the ship at tur_rate rate in towards direction.
+
+        """
+        if direction == "PORT":
+            print("Turning to port")
+            self.coordinates["heading"] -= self.hull["turn_rate"]
+            self.coordinates["rot_direction"] = -1
+        elif direction == "STARBOARD":
+            print("Turning to starboard")
+            self.coordinates["heading"] += self.hull["turn_rate"]
+            self.coordinates["rot_direction"] = 1
+        self.rotate()
+        if hard:
+            self.reachSpeed("SLOW")
+
+    def dodgeManoeuver(self, obstaclesDetectionResults, isEvasive=False):
+        """
+
+        Parameters
+        ----------
+        obstaclesDetectionResults : list
+            The list of returned distances by the detection rays.
+        isEvasive[False]: bool
+            Wether this is an evasive manoeuver.
+
+        Returns
+        -------
+        None.
+
+        Summary
+        -------
+        Tests the returned distances of the detection rays, and decides
+        to steer the ship accordingly.
+
+        """
+        if obstaclesDetectionResults:
+            if obstaclesDetectionResults[0] and obstaclesDetectionResults[1]:
+                self.steer("STARBOARD", True)
+            elif obstaclesDetectionResults[1] and obstaclesDetectionResults[2]:
+                self.steer("PORT", True)
+            elif obstaclesDetectionResults[0]:
+                self.steer("STARBOARD")
+            elif obstaclesDetectionResults[1]:
+                choice = random.random()
+                if choice < 0.5:
+                    self.steer("PORT")
+                else:
+                    self.steer("STARBOARD")
+            elif obstaclesDetectionResults[2]:
+                self.steer("PORT")
+            else:
+                self.reachSpeed("STOP")
+        elif isEvasive:
+            choice = random.random()
+            if choice < 0.5:
+                self.steer("PORT"),
+            else:
+                self.steer("STARBOARD")
+        self.updatePos()
+
     def move(self):
         """
 
@@ -664,21 +776,50 @@ class Ship(QGraphicsRectItem):
 
         Summary
         -------
-        Moves the ship according to is ship in the direction heading.
+        Moves the ship according to its speed and direction.
 
         """
         if self.pathfinding["checkpoint"] is not None:
             self.computeHeading()
             self.rotateToHeading()
         self.setSpeed()
-        headingInRad = math.radians(self.coordinates["heading"])
-        nextPoint = cin.movementBy(self.pos(), self.instant_vars["speed"], headingInRad)
-        self.setPos(nextPoint)
-        self.updateTurretPos()
-        self.displays["rangeCirclesDisp"]._updatePos(self.coordinates["center"])
+        self.updatePos()
 
         if self.checkpointReached(self.pathfinding["checkpoint"]):
             self.selectNextCheckpoint()
+
+    def dynamicObjectDetection(self):
+        """
+
+        Returns
+        -------
+        None.
+
+        Summary
+        -------
+        Cast detetcion rays at given angles in the frontal arc of the ship.
+        Returns None if the detection rays don't intercept any objects, the list
+        of distance of the detected object per detection ray otherwise.
+
+        """
+        det_distances = [None, None, None]
+        range = self.det_and_range["det_r_range"]
+
+        for i, direction in enumerate(self.det_and_range["det_r_angles"]):
+            det_distances[i] = self.gameScene.detectionRay(
+                geo.parallelepiped_Center(
+                    self.pos(), self.rect().width(), self.rect().height()
+                ),
+                math.radians(self.coordinates["heading"] + direction),
+                range,
+                250,
+                int((self.rect().width() / 2) + 50),
+            )
+
+        for distance in det_distances:
+            if distance:
+                return det_distances
+        return None
 
     def scan(self):
         """
