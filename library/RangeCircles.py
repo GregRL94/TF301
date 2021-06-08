@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
-'''
+"""
     File name: RangeCircles.py
     Author: Grégory LARGANGE
     Date created: 19/03/2021
     Last modified by: Grégory LARGANGE
     Date last modified: 23/03/2021
     Python version: 3.8.1
-'''
+"""
 
 from PyQt5.QtCore import Qt, QRectF
 from PyQt5.QtGui import QColor, QPen
@@ -50,7 +50,9 @@ class RangeCircles(QGraphicsEllipseItem):
     outerColor = "black"
     innerColor = "black"
 
-    def __init__(self, _pos, det_range, guns_range, d_circle_color="black", d_gr_color="black"):
+    def __init__(
+        self, _pos, det_range, guns_range, d_circle_color="black", d_gr_color="black"
+    ):
         """
 
         Parameters
@@ -81,6 +83,7 @@ class RangeCircles(QGraphicsEllipseItem):
         """
         super(RangeCircles, self).__init__(0, 0, 0, 0)
 
+        self.setData(2, False)  # Not considered an obstacle
         self.setAcceptHoverEvents(False)
         self.setFlag(QGraphicsItem.ItemIsSelectable, False)
         self.setFlag(QGraphicsItem.ItemIsFocusable, False)
@@ -97,9 +100,12 @@ class RangeCircles(QGraphicsEllipseItem):
             self.innerColor = d_circle_color
 
         self.setRect(QRectF(0, 0, 2 * self.outerR, 2 * self.outerR))
-        self.innerRect = QRectF(self.rect().top() + self.outerR - self.innerR,
-                                self.rect().left() + self.outerR - self.innerR,
-                                2 * self.innerR, 2 * self. innerR)
+        self.innerRect = QRectF(
+            self.rect().top() + self.outerR - self.innerR,
+            self.rect().left() + self.outerR - self.innerR,
+            2 * self.innerR,
+            2 * self.innerR,
+        )
         self.setPos(_pos.x() - self.outerR, _pos.y() - self.outerR)
 
     def _updatePos(self, newPos):

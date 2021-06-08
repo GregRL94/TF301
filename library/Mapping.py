@@ -875,7 +875,6 @@ class Astar:
         targetPos.
 
         """
-        sTime = time.time()
         # Converts from game scene position to grid position
         startNode = self.getNode(
             round(startPos.y() / self.gridS), round(startPos.x() / self.gridS)
@@ -898,7 +897,6 @@ class Astar:
             if self.currentNode == targetNode:
                 # We retrace the path using each nodes parents
                 foundPath = self.retracePath(startNode, targetNode)
-                print("***** FOUND PATH IN %s SECONDS *****" % (time.time() - sTime))
                 return foundPath
             else:
                 # We get all neighbours of the node being evaluated

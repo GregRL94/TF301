@@ -5,7 +5,7 @@
     Author: Grégory LARGANGE
     Date created: 12/10/2020
     Last modified by: Grégory LARGANGE
-    Date last modified: 19/05/2020
+    Date last modified: 28/05/2020
     Python version: 3.8.1
 """
 
@@ -63,6 +63,7 @@ class Waypoint(QGraphicsEllipseItem):
 
         """
         super(Waypoint, self).__init__(x, y, w, h)
+        self.setData(2, False)  # Not an obstacle
         self.color = color
 
     def paint(self, painter, option, widget=None):
