@@ -21,6 +21,8 @@ from library import MainClock, GameScene, Mapping, InGameData
 from library.Ship import Ship
 from library.utils.Config import Config
 
+from library.dialogs.BattleSetup import BattleSetup as bs
+
 
 class Ui_TSKF301MainWindow(object):
     def setupUi(self, TSKF301MainWindow):
@@ -62,15 +64,15 @@ class Ui_TSKF301MainWindow(object):
         self.actionNew_GameMap.setObjectName("actionNew_GameMap")
         self.actionSpawnShips = QtWidgets.QAction(TSKF301MainWindow)
         self.actionSpawnShips.setObjectName("actionSpawnShips")
+        self.actionBattleSetup = QtWidgets.QAction(TSKF301MainWindow)
+        self.actionBattleSetup.setObjectName("actionBattleSetup")
         self.actionStart_Pause_Game = QtWidgets.QAction(TSKF301MainWindow)
         self.actionStart_Pause_Game.setObjectName("actionStart_Pause_Game")
-        self.actionAstar = QtWidgets.QAction(TSKF301MainWindow)
-        self.actionAstar.setObjectName("actionAstar")
         self.menuGame.addAction(self.actionNew_Game)
         self.menuGame.addAction(self.actionNew_GameMap)
         self.menuGame.addAction(self.actionSpawnShips)
+        self.menuGame.addAction(self.actionBattleSetup)
         self.menuGame.addAction(self.actionStart_Pause_Game)
-        self.menuGame.addAction(self.actionAstar)
         self.menubar.addAction(self.menuGame.menuAction())
 
         self.retranslateUi(TSKF301MainWindow)
@@ -79,6 +81,7 @@ class Ui_TSKF301MainWindow(object):
         self.actionNew_Game.triggered.connect(self.newGame)
         self.actionNew_GameMap.triggered.connect(self.newGameMap)
         self.actionSpawnShips.triggered.connect(self.spawnShips)
+        self.actionBattleSetup.triggered.connect(self.testCreateBattle)
         self.actionStart_Pause_Game.triggered.connect(self.start_Pause_Game)
 
     def retranslateUi(self, TSKF301MainWindow):
@@ -92,6 +95,8 @@ class Ui_TSKF301MainWindow(object):
         self.actionNew_Game.setShortcut(_translate("TSKF301MainWindow", "N"))
         self.actionNew_GameMap.setText(_translate("TSKF301MainWindow", "New Game Map"))
         self.actionNew_GameMap.setShortcut(_translate("TSKF301MainWindow", "M"))
+        self.actionBattleSetup.setText(_translate("TSKF301MainWindow", "Battle"))
+        self.actionBattleSetup.setShortcut(_translate("TSKF301MainWindow", "B"))
         self.actionSpawnShips.setText(_translate("TSKF301MainWindow", "Spawn ships"))
         self.actionSpawnShips.setShortcut(_translate("TSKF301MainWindow", "S"))
         self.actionStart_Pause_Game.setText(
@@ -100,8 +105,6 @@ class Ui_TSKF301MainWindow(object):
         self.actionStart_Pause_Game.setShortcut(
             _translate("TSKF301MainWindow", "Space")
         )
-        self.actionAstar.setText(_translate("TSKF301MainWindow", "PathFinder"))
-        self.actionAstar.setShortcut(_translate("TSKF301MainWindow", "A"))
 
     def initGameData(self):
         self.mainClock = MainClock.MainClock(25)  # ms
@@ -205,6 +208,14 @@ class Ui_TSKF301MainWindow(object):
         # _bb_dict, _bb_txt = None, None
 
         self.rComs.updateShipLists()
+
+    def testCreateBattle(self):
+        b_setup = bs()
+        result = b_setup.battleSetupUI()
+        print(result)
+        if result:
+            result = b_setup.createFleetUi()
+            print(result)
 
     def start_Pause_Game(self):
         if self.gameState:

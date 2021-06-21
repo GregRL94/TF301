@@ -570,7 +570,7 @@
             <item>
              <widget class="QLabel" name="ship_mg_lbl">
               <property name="text">
-               <string>main guns</string>
+               <string>Main guns</string>
               </property>
              </widget>
             </item>
@@ -591,7 +591,7 @@
             <item>
              <widget class="QLabel" name="acc_lbl">
               <property name="text">
-               <string>guns accuracy</string>
+               <string>Guns accuracy</string>
               </property>
              </widget>
             </item>
@@ -612,7 +612,7 @@
             <item>
              <widget class="QLabel" name="fc_lbl">
               <property name="text">
-               <string>fire control error</string>
+               <string>Fire control error</string>
               </property>
              </widget>
             </item>
@@ -633,7 +633,7 @@
             <item>
              <widget class="QLabel" name="err_reduc_lbl">
               <property name="text">
-               <string>error reduction rate</string>
+               <string>Error reduction rate</string>
               </property>
              </widget>
             </item>
@@ -678,7 +678,7 @@
             <item>
              <widget class="QLabel" name="max_hp_lbl">
               <property name="text">
-               <string>hp:</string>
+               <string>HP:</string>
               </property>
              </widget>
             </item>
@@ -699,7 +699,7 @@
             <item>
              <widget class="QLabel" name="armor_lbl">
               <property name="text">
-               <string>armor:</string>
+               <string>Armor:</string>
               </property>
              </widget>
             </item>
@@ -720,7 +720,7 @@
             <item>
              <widget class="QLabel" name="shield_lbl">
               <property name="text">
-               <string>shield</string>
+               <string>Shield</string>
               </property>
              </widget>
             </item>
@@ -761,7 +761,7 @@
             <item>
              <widget class="QLabel" name="v_lbl">
               <property name="text">
-               <string>speed</string>
+               <string>Speed</string>
               </property>
              </widget>
             </item>
@@ -782,7 +782,7 @@
             <item>
              <widget class="QLabel" name="accel_lbl">
               <property name="text">
-               <string>acceleration</string>
+               <string>Acceleration</string>
               </property>
              </widget>
             </item>
@@ -803,7 +803,7 @@
             <item>
              <widget class="QLabel" name="t_rate_lbl">
               <property name="text">
-               <string>turn rate</string>
+               <string>Turn rate</string>
               </property>
              </widget>
             </item>
@@ -844,7 +844,7 @@
             <item>
              <widget class="QLabel" name="vision_lbl">
               <property name="text">
-               <string>vision range</string>
+               <string>Vision range</string>
               </property>
              </widget>
             </item>
@@ -865,7 +865,7 @@
             <item>
              <widget class="QLabel" name="concl_lbl">
               <property name="text">
-               <string>concealment</string>
+               <string>Concealment</string>
               </property>
              </widget>
             </item>
