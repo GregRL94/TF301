@@ -21,7 +21,7 @@ from library import MainClock, GameScene, Mapping, InGameData
 from library.Ship import Ship
 from library.utils.Config import Config
 
-from library.dialogs.BattleSetup import BattleSetup as bs
+from library.dialogs.BattleSetup import BattleSetup
 
 
 class Ui_TSKF301MainWindow(object):
@@ -106,8 +106,44 @@ class Ui_TSKF301MainWindow(object):
             _translate("TSKF301MainWindow", "Space")
         )
 
+    def loadConfigsAsDicts(self):
+        _configsDict = {}
+
+        _bb_cfg = path.join(
+            path.dirname(path.realpath(__file__)), "library/configs/battleshipConfig.py"
+        )
+        _bb_dict, _bb_txt = Config._file2dict(_bb_cfg)
+        _configsDict["BB"] = _bb_dict
+
+        # _ca_cfg = path.join(
+        #     path.dirname(path.realpath(__file__)), "library/configs/cruiserConfig.py"
+        # )
+        # _ca_dict, _ca_txt = Config._file2dict(_ca_cfg)
+        # configsDict["CA"] = _ca_dict
+
+        # _ff_cfg = path.join(
+        #     path.dirname(path.realpath(__file__)), "library/configs/frigateConfig.py"
+        # )
+        # _ff_dict, _ff_txt = Config._file2dict(_ff_cfg)
+        # configsDict["FF"] = _ff_dict
+
+        # _pt_cfg = path.join(
+        #     path.dirname(path.realpath(__file__)), "library/configs/corvetteConfig.py"
+        # )
+        # _pt_dict, _pt_txt = Config._file2dict(_pt_cfg)
+        # configsDict["PT"] = _pt_dict
+
+        _tur_cfg = path.join(
+            path.dirname(path.realpath(__file__)), "library/configs/turretConfig.py"
+        )
+        _tur_dict, _tur_txt = Config._file2dict(_tur_cfg)
+        _configsDict["TUR"] = _tur_dict
+
+        return _configsDict
+
     def initGameData(self):
         self.mainClock = MainClock.MainClock(25)  # ms
+        self.configsDict = self.loadConfigsAsDicts()
         self.mapGen = None
         self.mapExtPercentage = 0.10
         self.mapRes = 500
@@ -210,12 +246,10 @@ class Ui_TSKF301MainWindow(object):
         self.rComs.updateShipLists()
 
     def testCreateBattle(self):
-        b_setup = bs()
+        b_setup = BattleSetup(self.configsDict)
         result = b_setup.battleSetupUI()
-        print(result)
         if result:
             result = b_setup.createFleetUi()
-            print(result)
 
     def start_Pause_Game(self):
         if self.gameState:

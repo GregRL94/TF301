@@ -5,15 +5,28 @@
     Author: Grégory LARGANGE
     Date created: 10/06/2021
     Last modified by: Grégory LARGANGE
-    Date last modified: 10/06/2021
+    Date last modified: 22/06/2021
     Python version: 3.8.1
 """
 
+import copy
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+from library.InGameData import TechsData as tech_dat
 
 
 class BattleSetup:
+    def __init__(self, configsList):
+        self.bb_dict = configsList["BB"]
+        # self.ca_dict = configsList["CA"]
+        # self.ff_dict = configsList["FF"]
+        # self.pt_dict = configsList["PT"]
+        self.tur_dict = configsList["TUR"]
+
+        self.currentShip = {}
+        self.allShips = []
+        self.radioButtonsEnabled = False
+
     def createFleetUi(self):
         fleet_setup = QtWidgets.QDialog()
         fleet_setup.setObjectName("fleet_setup")
@@ -200,39 +213,6 @@ class BattleSetup:
 
         gridLayout = QtWidgets.QGridLayout()
         gridLayout.setObjectName("gridLayout")
-        gun_tech_lbl = QtWidgets.QLabel(verticalLayoutWidget_2)
-        font = QtGui.QFont()
-        font.setBold(True)
-        font.setWeight(75)
-        gun_tech_lbl.setFont(font)
-        gun_tech_lbl.setObjectName("gun_tech_lbl")
-        gun_tech_lbl.setText("Gun tech")
-        gridLayout.addWidget(gun_tech_lbl, 0, 0, 1, 1)
-
-        rdr_tech_0 = QtWidgets.QRadioButton(verticalLayoutWidget_2)
-        rdr_tech_0.setObjectName("rdr_tech_0")
-        rdr_tech_0.setText("Mk I")
-        gridLayout.addWidget(rdr_tech_0, 2, 1, 1, 1)
-
-        fc_tech_0 = QtWidgets.QRadioButton(verticalLayoutWidget_2)
-        fc_tech_0.setObjectName("fc_tech_0")
-        fc_tech_0.setText("Mk I")
-        gridLayout.addWidget(fc_tech_0, 1, 1, 1, 1)
-
-        gun_tech_1 = QtWidgets.QRadioButton(verticalLayoutWidget_2)
-        gun_tech_1.setObjectName("gun_tech_1")
-        gun_tech_1.setText("Mk II")
-        gridLayout.addWidget(gun_tech_1, 0, 2, 1, 1)
-
-        rdr_tech_1 = QtWidgets.QRadioButton(verticalLayoutWidget_2)
-        rdr_tech_1.setObjectName("rdr_tech_1")
-        rdr_tech_1.setText("Mk II")
-        gridLayout.addWidget(rdr_tech_1, 2, 2, 1, 1)
-
-        fc_tech_1 = QtWidgets.QRadioButton(verticalLayoutWidget_2)
-        fc_tech_1.setObjectName("fc_tech_1")
-        fc_tech_1.setText("Mk II")
-        gridLayout.addWidget(fc_tech_1, 1, 2, 1, 1)
 
         radar_tech_lbl = QtWidgets.QLabel(verticalLayoutWidget_2)
         font = QtGui.QFont()
@@ -252,25 +232,84 @@ class BattleSetup:
         fc_tech_lbl.setText("Fire Control tech")
         gridLayout.addWidget(fc_tech_lbl, 1, 0, 1, 1)
 
-        gun_tech_0 = QtWidgets.QRadioButton(verticalLayoutWidget_2)
-        gun_tech_0.setObjectName("gun_tech_0")
-        gun_tech_0.setText("Mk I")
-        gridLayout.addWidget(gun_tech_0, 0, 1, 1, 1)
+        gun_tech_lbl = QtWidgets.QLabel(verticalLayoutWidget_2)
+        font = QtGui.QFont()
+        font.setBold(True)
+        font.setWeight(75)
+        gun_tech_lbl.setFont(font)
+        gun_tech_lbl.setObjectName("gun_tech_lbl")
+        gun_tech_lbl.setText("Gun tech")
+        gridLayout.addWidget(gun_tech_lbl, 0, 0, 1, 1)
 
-        gun_tech_2 = QtWidgets.QRadioButton(verticalLayoutWidget_2)
-        gun_tech_2.setObjectName("gun_tech_2")
-        gun_tech_2.setText("Mk III")
-        gridLayout.addWidget(gun_tech_2, 0, 3, 1, 1)
+        self.rdr_tech_rButtongrp = QtWidgets.QButtonGroup()
+        self.fc_tech_rButtonGroup = QtWidgets.QButtonGroup()
+        self.gun_tech_rButtonGroup = QtWidgets.QButtonGroup()
 
-        fc_tech_2 = QtWidgets.QRadioButton(verticalLayoutWidget_2)
-        fc_tech_2.setObjectName("fc_tech_2")
-        fc_tech_2.setText("Mk III")
-        gridLayout.addWidget(fc_tech_2, 1, 3, 1, 1)
+        self.rdr_tech_0 = QtWidgets.QRadioButton(verticalLayoutWidget_2)
+        self.rdr_tech_0.setObjectName("rdr_tech_0")
+        self.rdr_tech_0.setText("Mk I")
+        self.rdr_tech_0.setChecked(True)
+        self.rdr_tech_0.setEnabled(False)
+        self.rdr_tech_rButtongrp.addButton(self.rdr_tech_0, 0)
+        gridLayout.addWidget(self.rdr_tech_0, 2, 1, 1, 1)
 
-        rdr_tech_2 = QtWidgets.QRadioButton(verticalLayoutWidget_2)
-        rdr_tech_2.setObjectName("rdr_tech_2")
-        rdr_tech_2.setText("Mk III")
-        gridLayout.addWidget(rdr_tech_2, 2, 3, 1, 1)
+        self.fc_tech_0 = QtWidgets.QRadioButton(verticalLayoutWidget_2)
+        self.fc_tech_0.setObjectName("fc_tech_0")
+        self.fc_tech_0.setText("Mk I")
+        self.fc_tech_0.setChecked(True)
+        self.fc_tech_0.setEnabled(False)
+        self.fc_tech_rButtonGroup.addButton(self.fc_tech_0, 0)
+        gridLayout.addWidget(self.fc_tech_0, 1, 1, 1, 1)
+
+        self.gun_tech_0 = QtWidgets.QRadioButton(verticalLayoutWidget_2)
+        self.gun_tech_0.setObjectName("gun_tech_0")
+        self.gun_tech_0.setText("Mk I")
+        self.gun_tech_0.setChecked(True)
+        self.gun_tech_0.setEnabled(False)
+        self.gun_tech_rButtonGroup.addButton(self.gun_tech_0, 0)
+        gridLayout.addWidget(self.gun_tech_0, 0, 1, 1, 1)
+
+        self.rdr_tech_1 = QtWidgets.QRadioButton(verticalLayoutWidget_2)
+        self.rdr_tech_1.setObjectName("rdr_tech_1")
+        self.rdr_tech_1.setText("Mk II")
+        self.rdr_tech_1.setEnabled(False)
+        self.rdr_tech_rButtongrp.addButton(self.rdr_tech_1, 1)
+        gridLayout.addWidget(self.rdr_tech_1, 2, 2, 1, 1)
+
+        self.fc_tech_1 = QtWidgets.QRadioButton(verticalLayoutWidget_2)
+        self.fc_tech_1.setObjectName("fc_tech_1")
+        self.fc_tech_1.setText("Mk II")
+        self.fc_tech_1.setEnabled(False)
+        self.fc_tech_rButtonGroup.addButton(self.fc_tech_1, 1)
+        gridLayout.addWidget(self.fc_tech_1, 1, 2, 1, 1)
+
+        self.gun_tech_1 = QtWidgets.QRadioButton(verticalLayoutWidget_2)
+        self.gun_tech_1.setObjectName("gun_tech_1")
+        self.gun_tech_1.setText("Mk II")
+        self.gun_tech_1.setEnabled(False)
+        self.gun_tech_rButtonGroup.addButton(self.gun_tech_1, 1)
+        gridLayout.addWidget(self.gun_tech_1, 0, 2, 1, 1)
+
+        self.rdr_tech_2 = QtWidgets.QRadioButton(verticalLayoutWidget_2)
+        self.rdr_tech_2.setObjectName("rdr_tech_2")
+        self.rdr_tech_2.setText("Mk III")
+        self.rdr_tech_2.setEnabled(False)
+        self.rdr_tech_rButtongrp.addButton(self.rdr_tech_2, 2)
+        gridLayout.addWidget(self.rdr_tech_2, 2, 3, 1, 1)
+
+        self.fc_tech_2 = QtWidgets.QRadioButton(verticalLayoutWidget_2)
+        self.fc_tech_2.setObjectName("fc_tech_2")
+        self.fc_tech_2.setText("Mk III")
+        self.fc_tech_2.setEnabled(False)
+        self.fc_tech_rButtonGroup.addButton(self.fc_tech_2, 2)
+        gridLayout.addWidget(self.fc_tech_2, 1, 3, 1, 1)
+
+        self.gun_tech_2 = QtWidgets.QRadioButton(verticalLayoutWidget_2)
+        self.gun_tech_2.setObjectName("gun_tech_2")
+        self.gun_tech_2.setText("Mk III")
+        self.gun_tech_2.setEnabled(False)
+        self.gun_tech_rButtonGroup.addButton(self.gun_tech_2, 2)
+        gridLayout.addWidget(self.gun_tech_2, 0, 3, 1, 1)
 
         tech_lyt.addLayout(gridLayout)
         ship_creator_lyt.addLayout(tech_lyt)
@@ -313,13 +352,13 @@ class BattleSetup:
         type_label.setText("Type:")
         type_lyt.addWidget(type_label)
 
-        ship_type_label = QtWidgets.QLabel(verticalLayoutWidget_2)
-        ship_type_label.setAlignment(
+        self.ship_type_label = QtWidgets.QLabel(verticalLayoutWidget_2)
+        self.ship_type_label.setAlignment(
             QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter
         )
-        ship_type_label.setObjectName("ship_type_label")
-        ship_type_label.setText("TextLabel")
-        type_lyt.addWidget(ship_type_label)
+        self.ship_type_label.setObjectName("ship_type_label")
+        self.ship_type_label.setText("")
+        type_lyt.addWidget(self.ship_type_label)
 
         ship_stats_lyt_3.addLayout(type_lyt)
         name_lyt = QtWidgets.QHBoxLayout()
@@ -329,13 +368,13 @@ class BattleSetup:
         name_label.setText("Name:")
         name_lyt.addWidget(name_label)
 
-        ship_name_label = QtWidgets.QLabel(verticalLayoutWidget_2)
-        ship_name_label.setAlignment(
+        self.ship_name_label = QtWidgets.QLabel(verticalLayoutWidget_2)
+        self.ship_name_label.setAlignment(
             QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter
         )
-        ship_name_label.setObjectName("ship_name_label")
-        ship_name_label.setText("TextLabel")
-        name_lyt.addWidget(ship_name_label)
+        self.ship_name_label.setObjectName("ship_name_label")
+        self.ship_name_label.setText("")
+        name_lyt.addWidget(self.ship_name_label)
 
         ship_stats_lyt_3.addLayout(name_lyt)
         len_lyt = QtWidgets.QHBoxLayout()
@@ -345,13 +384,13 @@ class BattleSetup:
         length_lbl.setText("Length:")
         len_lyt.addWidget(length_lbl)
 
-        ship_length_lbl = QtWidgets.QLabel(verticalLayoutWidget_2)
-        ship_length_lbl.setAlignment(
+        self.ship_length_lbl = QtWidgets.QLabel(verticalLayoutWidget_2)
+        self.ship_length_lbl.setAlignment(
             QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter
         )
-        ship_length_lbl.setObjectName("ship_length_lbl")
-        ship_length_lbl.setText("TextLabel")
-        len_lyt.addWidget(ship_length_lbl)
+        self.ship_length_lbl.setObjectName("ship_length_lbl")
+        self.ship_length_lbl.setText("")
+        len_lyt.addWidget(self.ship_length_lbl)
 
         ship_stats_lyt_3.addLayout(len_lyt)
         widht_layout = QtWidgets.QHBoxLayout()
@@ -362,13 +401,13 @@ class BattleSetup:
         width_lbl.setText("Width:")
         widht_layout.addWidget(width_lbl)
 
-        ship_width_lbl = QtWidgets.QLabel(verticalLayoutWidget_2)
-        ship_width_lbl.setAlignment(
+        self.ship_width_lbl = QtWidgets.QLabel(verticalLayoutWidget_2)
+        self.ship_width_lbl.setAlignment(
             QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter
         )
-        ship_width_lbl.setObjectName("ship_width_lbl")
-        ship_width_lbl.setText("TextLabel")
-        widht_layout.addWidget(ship_width_lbl)
+        self.ship_width_lbl.setObjectName("ship_width_lbl")
+        self.ship_width_lbl.setText("")
+        widht_layout.addWidget(self.ship_width_lbl)
 
         ship_stats_lyt_3.addLayout(widht_layout)
         line = QtWidgets.QFrame(verticalLayoutWidget_2)
@@ -394,13 +433,13 @@ class BattleSetup:
         ship_mg_lbl.setText("Main guns:")
         main_guns_lyt.addWidget(ship_mg_lbl)
 
-        ship_w_lbl = QtWidgets.QLabel(verticalLayoutWidget_2)
-        ship_w_lbl.setAlignment(
+        self.ship_w_lbl = QtWidgets.QLabel(verticalLayoutWidget_2)
+        self.ship_w_lbl.setAlignment(
             QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter
         )
-        ship_w_lbl.setObjectName("ship_w_lbl")
-        ship_w_lbl.setText("TextLabel")
-        main_guns_lyt.addWidget(ship_w_lbl)
+        self.ship_w_lbl.setObjectName("ship_w_lbl")
+        self.ship_w_lbl.setText("")
+        main_guns_lyt.addWidget(self.ship_w_lbl)
 
         ship_stats_lyt_3.addLayout(main_guns_lyt)
         acc_lyt = QtWidgets.QHBoxLayout()
@@ -411,13 +450,13 @@ class BattleSetup:
         acc_lbl.setText("Guns accuracy:")
         acc_lyt.addWidget(acc_lbl)
 
-        ship_acc_lbl = QtWidgets.QLabel(verticalLayoutWidget_2)
-        ship_acc_lbl.setAlignment(
+        self.ship_acc_lbl = QtWidgets.QLabel(verticalLayoutWidget_2)
+        self.ship_acc_lbl.setAlignment(
             QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter
         )
-        ship_acc_lbl.setObjectName("ship_acc_lbl")
-        ship_acc_lbl.setText("TextLabel")
-        acc_lyt.addWidget(ship_acc_lbl)
+        self.ship_acc_lbl.setObjectName("ship_acc_lbl")
+        self.ship_acc_lbl.setText("")
+        acc_lyt.addWidget(self.ship_acc_lbl)
 
         ship_stats_lyt_3.addLayout(acc_lyt)
         fc_lyt = QtWidgets.QHBoxLayout()
@@ -428,30 +467,30 @@ class BattleSetup:
         fc_lbl.setText("Fire control error:")
         fc_lyt.addWidget(fc_lbl)
 
-        ship_fc_lbl = QtWidgets.QLabel(verticalLayoutWidget_2)
-        ship_fc_lbl.setAlignment(
+        self.ship_fc_lbl = QtWidgets.QLabel(verticalLayoutWidget_2)
+        self.ship_fc_lbl.setAlignment(
             QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter
         )
-        ship_fc_lbl.setObjectName("ship_fc_lbl")
-        ship_fc_lbl.setText("TextLabel")
-        fc_lyt.addWidget(ship_fc_lbl)
+        self.ship_fc_lbl.setObjectName("ship_fc_lbl")
+        self.ship_fc_lbl.setText("")
+        fc_lyt.addWidget(self.ship_fc_lbl)
 
         ship_stats_lyt_3.addLayout(fc_lyt)
         err_reduc_lyt = QtWidgets.QHBoxLayout()
         err_reduc_lyt.setObjectName("err_reduc_lyt")
 
-        err_reduc_lbl = QtWidgets.QLabel(verticalLayoutWidget_2)
-        err_reduc_lbl.setObjectName("err_reduc_lbl")
-        err_reduc_lbl.setText("Error reduction rate:")
-        err_reduc_lyt.addWidget(err_reduc_lbl)
+        w_range_lbl = QtWidgets.QLabel(verticalLayoutWidget_2)
+        w_range_lbl.setObjectName("w_range_lbl")
+        w_range_lbl.setText("Guns range:")
+        err_reduc_lyt.addWidget(w_range_lbl)
 
-        ship_errreduc_lbl = QtWidgets.QLabel(verticalLayoutWidget_2)
-        ship_errreduc_lbl.setAlignment(
+        self.ship_w_range_lbl = QtWidgets.QLabel(verticalLayoutWidget_2)
+        self.ship_w_range_lbl.setAlignment(
             QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter
         )
-        ship_errreduc_lbl.setObjectName("ship_errreduc_lbl")
-        ship_errreduc_lbl.setText("TextLabel")
-        err_reduc_lyt.addWidget(ship_errreduc_lbl)
+        self.ship_w_range_lbl.setObjectName("ship_w_range_lbl")
+        self.ship_w_range_lbl.setText("")
+        err_reduc_lyt.addWidget(self.ship_w_range_lbl)
 
         ship_stats_lyt_3.addLayout(err_reduc_lyt)
         ship_stats_lyt_2.addLayout(ship_stats_lyt_3)
@@ -480,13 +519,13 @@ class BattleSetup:
         max_hp_lbl.setText("HP:")
         hp_lyt.addWidget(max_hp_lbl)
 
-        ship_max_hp_lbl = QtWidgets.QLabel(verticalLayoutWidget_2)
-        ship_max_hp_lbl.setAlignment(
+        self.ship_max_hp_lbl = QtWidgets.QLabel(verticalLayoutWidget_2)
+        self.ship_max_hp_lbl.setAlignment(
             QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter
         )
-        ship_max_hp_lbl.setObjectName("ship_max_hp_lbl")
-        ship_max_hp_lbl.setText("TextLabel")
-        hp_lyt.addWidget(ship_max_hp_lbl)
+        self.ship_max_hp_lbl.setObjectName("ship_max_hp_lbl")
+        self.ship_max_hp_lbl.setText("")
+        hp_lyt.addWidget(self.ship_max_hp_lbl)
 
         hull_stats_lyt.addLayout(hp_lyt)
         armor_lyt = QtWidgets.QHBoxLayout()
@@ -497,13 +536,13 @@ class BattleSetup:
         armor_lbl.setText("Armor:")
         armor_lyt.addWidget(armor_lbl)
 
-        ship_armor_lbl = QtWidgets.QLabel(verticalLayoutWidget_2)
-        ship_armor_lbl.setAlignment(
+        self.ship_armor_lbl = QtWidgets.QLabel(verticalLayoutWidget_2)
+        self.ship_armor_lbl.setAlignment(
             QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter
         )
-        ship_armor_lbl.setObjectName("ship_armor_lbl")
-        ship_armor_lbl.setText("TextLabel")
-        armor_lyt.addWidget(ship_armor_lbl)
+        self.ship_armor_lbl.setObjectName("ship_armor_lbl")
+        self.ship_armor_lbl.setText("")
+        armor_lyt.addWidget(self.ship_armor_lbl)
 
         hull_stats_lyt.addLayout(armor_lyt)
         shield_lyt = QtWidgets.QHBoxLayout()
@@ -514,13 +553,13 @@ class BattleSetup:
         shield_lbl.setText("Shield:")
         shield_lyt.addWidget(shield_lbl)
 
-        ship_shield_lbl = QtWidgets.QLabel(verticalLayoutWidget_2)
-        ship_shield_lbl.setAlignment(
+        self.ship_shield_lbl = QtWidgets.QLabel(verticalLayoutWidget_2)
+        self.ship_shield_lbl.setAlignment(
             QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter
         )
-        ship_shield_lbl.setObjectName("ship_shield_lbl")
-        ship_shield_lbl.setText("TextLabel")
-        shield_lyt.addWidget(ship_shield_lbl)
+        self.ship_shield_lbl.setObjectName("ship_shield_lbl")
+        self.ship_shield_lbl.setText("")
+        shield_lyt.addWidget(self.ship_shield_lbl)
 
         hull_stats_lyt.addLayout(shield_lyt)
         line_2 = QtWidgets.QFrame(verticalLayoutWidget_2)
@@ -546,13 +585,13 @@ class BattleSetup:
         v_lbl.setText("Speed:")
         speed_lyt.addWidget(v_lbl)
 
-        ship_v_lbl = QtWidgets.QLabel(verticalLayoutWidget_2)
-        ship_v_lbl.setAlignment(
+        self.ship_v_lbl = QtWidgets.QLabel(verticalLayoutWidget_2)
+        self.ship_v_lbl.setAlignment(
             QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter
         )
-        ship_v_lbl.setObjectName("ship_v_lbl")
-        ship_v_lbl.setText("TextLabel")
-        speed_lyt.addWidget(ship_v_lbl)
+        self.ship_v_lbl.setObjectName("ship_v_lbl")
+        self.ship_v_lbl.setText("")
+        speed_lyt.addWidget(self.ship_v_lbl)
 
         hull_stats_lyt.addLayout(speed_lyt)
         accel_lyt = QtWidgets.QHBoxLayout()
@@ -563,13 +602,13 @@ class BattleSetup:
         accel_lbl.setText("Acceleration:")
         accel_lyt.addWidget(accel_lbl)
 
-        ship_accel_lbl = QtWidgets.QLabel(verticalLayoutWidget_2)
-        ship_accel_lbl.setAlignment(
+        self.ship_accel_lbl = QtWidgets.QLabel(verticalLayoutWidget_2)
+        self.ship_accel_lbl.setAlignment(
             QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter
         )
-        ship_accel_lbl.setObjectName("ship_accel_lbl")
-        ship_accel_lbl.setText("TextLabel")
-        accel_lyt.addWidget(ship_accel_lbl)
+        self.ship_accel_lbl.setObjectName("ship_accel_lbl")
+        self.ship_accel_lbl.setText("")
+        accel_lyt.addWidget(self.ship_accel_lbl)
 
         hull_stats_lyt.addLayout(accel_lyt)
         t_rate_lyt = QtWidgets.QHBoxLayout()
@@ -580,13 +619,13 @@ class BattleSetup:
         t_rate_lbl.setText("Turn rate:")
         t_rate_lyt.addWidget(t_rate_lbl)
 
-        ship_t_rate_lbl = QtWidgets.QLabel(verticalLayoutWidget_2)
-        ship_t_rate_lbl.setAlignment(
+        self.ship_t_rate_lbl = QtWidgets.QLabel(verticalLayoutWidget_2)
+        self.ship_t_rate_lbl.setAlignment(
             QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter
         )
-        ship_t_rate_lbl.setObjectName("ship_t_rate_lbl")
-        ship_t_rate_lbl.setText("TextLabel")
-        t_rate_lyt.addWidget(ship_t_rate_lbl)
+        self.ship_t_rate_lbl.setObjectName("ship_t_rate_lbl")
+        self.ship_t_rate_lbl.setText("")
+        t_rate_lyt.addWidget(self.ship_t_rate_lbl)
 
         hull_stats_lyt.addLayout(t_rate_lyt)
         line_3 = QtWidgets.QFrame(verticalLayoutWidget_2)
@@ -612,13 +651,13 @@ class BattleSetup:
         vision_lbl.setText("Vision range:")
         vision_lyt.addWidget(vision_lbl)
 
-        ship_vision_lbl = QtWidgets.QLabel(verticalLayoutWidget_2)
-        ship_vision_lbl.setAlignment(
+        self.ship_vision_lbl = QtWidgets.QLabel(verticalLayoutWidget_2)
+        self.ship_vision_lbl.setAlignment(
             QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter
         )
-        ship_vision_lbl.setObjectName("ship_vision_lbl")
-        ship_vision_lbl.setText("TextLabel")
-        vision_lyt.addWidget(ship_vision_lbl)
+        self.ship_vision_lbl.setObjectName("ship_vision_lbl")
+        self.ship_vision_lbl.setText("")
+        vision_lyt.addWidget(self.ship_vision_lbl)
 
         hull_stats_lyt.addLayout(vision_lyt)
         concl_lyt = QtWidgets.QHBoxLayout()
@@ -629,13 +668,13 @@ class BattleSetup:
         concl_lbl.setText("Concealment:")
         concl_lyt.addWidget(concl_lbl)
 
-        ship_concl_lbl = QtWidgets.QLabel(verticalLayoutWidget_2)
-        ship_concl_lbl.setAlignment(
+        self.ship_concl_lbl = QtWidgets.QLabel(verticalLayoutWidget_2)
+        self.ship_concl_lbl.setAlignment(
             QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter
         )
-        ship_concl_lbl.setObjectName("ship_concl_lbl")
-        ship_concl_lbl.setText("TextLabel")
-        concl_lyt.addWidget(ship_concl_lbl)
+        self.ship_concl_lbl.setObjectName("ship_concl_lbl")
+        self.ship_concl_lbl.setText("")
+        concl_lyt.addWidget(self.ship_concl_lbl)
 
         hull_stats_lyt.addLayout(concl_lyt)
         ship_stats_lyt_2.addLayout(hull_stats_lyt)
@@ -653,10 +692,10 @@ class BattleSetup:
         ship_cost_lbl.setText("SHIP COST:")
         clear_add_but_lyt.addWidget(ship_cost_lbl)
 
-        ship_cost = QtWidgets.QLabel(verticalLayoutWidget_2)
-        ship_cost.setObjectName("ship_cost")
-        ship_cost.setText("00000")
-        clear_add_but_lyt.addWidget(ship_cost)
+        self.ship_cost = QtWidgets.QLabel(verticalLayoutWidget_2)
+        self.ship_cost.setObjectName("ship_cost")
+        self.ship_cost.setText("00000")
+        clear_add_but_lyt.addWidget(self.ship_cost)
 
         spacerItem6 = QtWidgets.QSpacerItem(
             40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum
@@ -672,11 +711,31 @@ class BattleSetup:
         add_ship_but.setObjectName("add_ship_but")
         add_ship_but.setText("Add Ship")
         clear_add_but_lyt.addWidget(add_ship_but)
-
         ship_creator_lyt.addLayout(clear_add_but_lyt)
 
-        battle_but.clicked.connect(fleet_setup.accept)
         QtCore.QMetaObject.connectSlotsByName(fleet_setup)
+        self.setEnabledRadioButtons(False)
+
+        ## Ok and Cancel buttons ##
+        battle_but.clicked.connect(lambda: self.createFleetAccept(fleet_setup))
+        ## Ship type selection button ##
+        bb_but.clicked.connect(lambda: self.shipButtonClicked("BB"))
+        ca_but.clicked.connect(lambda: self.shipButtonClicked("CA"))
+        ff_but.clicked.connect(lambda: self.shipButtonClicked("FF"))
+        pt_but.clicked.connect(lambda: self.shipButtonClicked("PT"))
+
+        ## Updates stats when another tech is selected ##
+        self.rdr_tech_0.toggled.connect(self.updateShipStats)
+        self.rdr_tech_1.toggled.connect(self.updateShipStats)
+        self.rdr_tech_2.toggled.connect(self.updateShipStats)
+
+        self.fc_tech_0.toggled.connect(self.updateShipStats)
+        self.fc_tech_1.toggled.connect(self.updateShipStats)
+        self.fc_tech_2.toggled.connect(self.updateShipStats)
+
+        self.gun_tech_0.toggled.connect(self.updateShipStats)
+        self.gun_tech_1.toggled.connect(self.updateShipStats)
+        self.gun_tech_2.toggled.connect(self.updateShipStats)
 
         return fleet_setup.exec()
 
@@ -797,11 +856,105 @@ class BattleSetup:
         )
         gridLayout.addItem(spacerItem1, 8, 1, 1, 1)
 
-        ok_button.clicked.connect(battle_setup.accept)
-        cancelButton.clicked.connect(battle_setup.reject)
         QtCore.QMetaObject.connectSlotsByName(battle_setup)
+        ok_button.clicked.connect(lambda: self.battleSetupAccept(battle_setup))
+        cancelButton.clicked.connect(lambda: self.battleSetupReject(battle_setup))
 
         return battle_setup.exec()
+
+    def setEnabledRadioButtons(self, state):
+        for radioButton in self.rdr_tech_rButtongrp.buttons():
+            radioButton.setEnabled(state)
+
+        for radioButton in self.fc_tech_rButtonGroup.buttons():
+            radioButton.setEnabled(state)
+
+        for radioButton in self.gun_tech_rButtonGroup.buttons():
+            radioButton.setEnabled(state)
+
+    def shipButtonClicked(self, _type):
+        self.currentShip.clear()
+        if _type == "BB":
+            self.currentShip = copy.deepcopy(self.bb_dict)
+            self.currentTurDict = self.tur_dict["large"]
+        # elif _type == "CA":
+        #     self.currentShip = copy.deepcopy(self.ca_dict)
+        #     self.currentTurDict = self.tur_dict["medium"]
+        # elif _type == "FF":
+        #     self.currentShip = copy.deepcopy(self.ff_dict)
+        #     self.currentTurDict = self.tur_dict["small"]
+        # elif _type == "PT":
+        #     self.currentShip = copy.deepcopy(self.pt_dict)
+        #     self.currentTurDict = self.tur_dict["small"]
+        else:
+            print("Type value error: The given type does not match any ship type.")
+
+        try:
+            if not self.radioButtonsEnabled:
+                self.setEnabledRadioButtons(True)
+                self.radioButtonsEnabled = True
+            self.resetShipStats()
+            self.updateShipStats()
+        except Exception:
+            print("Could not update UI")
+
+    def resetShipStats(self):
+        ## Reset radioButtons ##
+        self.rdr_tech_0.setChecked(True)
+        self.fc_tech_0.setChecked(True)
+        self.gun_tech_0.setChecked(True)
+
+        ## General section ##
+        self.ship_name_label.setText(str(self.currentShip["naming"]["_name"]))
+        self.ship_type_label.setText(str(self.currentShip["naming"]["_type"]))
+        self.ship_length_lbl.setText(str(self.currentShip["geometry"]["_width"]))
+        self.ship_width_lbl.setText(str(self.currentShip["geometry"]["_height"]))
+
+        ## Weapons section ##
+        total_guns = (
+            len(self.currentShip["weapons"]["turrets_pos"])
+            * self.currentTurDict["n_guns"]
+        )
+        guns_txt = str(total_guns) + " " + self.currentTurDict["_size"]
+        self.ship_w_lbl.setText(guns_txt)
+        self.ship_w_range_lbl.setText(str(self.currentShip["weapons"]["guns_range"]))
+
+        ## Hull section ##
+        self.ship_max_hp_lbl.setText(str(self.currentShip["hull"]["max_hp"]))
+        self.ship_armor_lbl.setText(str(self.currentShip["hull"]["armor"]))
+        self.ship_shield_lbl.setText(str(self.currentShip["hull"]["max_shield"]))
+
+        ## Mobility section ##
+        self.ship_v_lbl.setText(str(self.currentShip["hull"]["max_speed"]))
+        self.ship_accel_lbl.setText(str(self.currentShip["hull"]["max_accel"]))
+        self.ship_t_rate_lbl.setText(str(self.currentShip["hull"]["turn_rate"]))
+
+        ## Vision & Concealement section ##
+        self.ship_concl_lbl.setText(str(self.currentShip["hull"]["base_concealement"]))
+
+    def updateShipStats(self):
+        ## Updates current ship config ##
+        a, b, c = (
+            self.gun_tech_rButtonGroup.checkedId(),
+            self.fc_tech_rButtonGroup.checkedId(),
+            self.rdr_tech_rButtongrp.checkedId(),
+        )
+        self.currentShip["techs"]["guns_tech"] = a
+        self.currentShip["techs"]["fc_tech"] = b
+        self.currentShip["techs"]["radar_tech"] = c
+
+        currentAcc = round(
+            self.currentTurDict["gun_disp"] * tech_dat.gun_tech_acc[a], 4
+        )
+        currentVision = (
+            self.currentShip["hull"]["base_detection_range"]
+            + self.currentShip["hull"]["base_detection_range"]
+            * tech_dat.radar_tech_aug[c]
+        )
+
+        self.ship_acc_lbl.setText(str(currentAcc))
+        self.ship_fc_lbl.setText(str(tech_dat.fc_tech_e[b]))
+        self.ship_vision_lbl.setText(str(currentVision))
 
     def createFleetAccept(self, dialog):
         dialog.accept()
