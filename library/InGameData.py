@@ -192,7 +192,6 @@ class TechsData:
     radar_tech_aug = [
         0,
         0.25,
-        0.37,
         0.5,
     ]  # The higher the tech, the higher the boost on the base radar range
     fc_correction_rate = (

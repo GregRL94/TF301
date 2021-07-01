@@ -5,26 +5,72 @@
     Author: Grégory LARGANGE
     Date created: 10/06/2021
     Last modified by: Grégory LARGANGE
-    Date last modified: 22/06/2021
+    Date last modified: 28/06/2021
     Python version: 3.8.1
 """
 
 import copy
 
+from os import path
 from PyQt5 import QtCore, QtGui, QtWidgets
+
 from library.InGameData import TechsData as tech_dat
+from library.utils.Config import Config
+from library.displays import InteractiveList
+from . import dialogsUtils
 
 
 class BattleSetup:
-    def __init__(self, configsList):
-        self.bb_dict = configsList["BB"]
-        # self.ca_dict = configsList["CA"]
-        # self.ff_dict = configsList["FF"]
-        # self.pt_dict = configsList["PT"]
-        self.tur_dict = configsList["TUR"]
+    def __init__(self):
+        bb_cfg = path.join(
+            path.dirname(path.realpath(__file__)), "../configs/battleshipConfig.py"
+        )
+        self.bb_dict, bb_txt = Config._file2dict(bb_cfg)
+
+        # ca_cfg = path.join(
+        #     path.dirname(path.realpath(__file__)), "../configs/cruiserConfig.py"
+        # )
+        # self.ca_dict, ca_txt = Config._file2dict(ca_cfg)
+
+        # ff_cfg = path.join(
+        #     path.dirname(path.realpath(__file__)), "../configs/frigateConfig.py"
+        # )
+        # self.ff_dict, ff_txt = Config._file2dict(ff_cfg)
+
+        # pt_cfg = path.join(
+        #     path.dirname(path.realpath(__file__)), "../configs/corvetteConfig.py"
+        # )
+        # self.pt_dict, pt_txt = Config._file2dict(pt_cfg)
+
+        tur_cfg = path.join(
+            path.dirname(path.realpath(__file__)), "../configs/turretConfig.py"
+        )
+        self.tur_dict, tur_txt = Config._file2dict(tur_cfg)
+
+        map_cfg = path.join(
+            path.dirname(path.realpath(__file__)), "../configs/mapGenConfig.py"
+        )
+        self.map_dict, map_txt = Config._file2dict(map_cfg)
+
+        self.currentMapConfig = {
+            "presetMap": False,
+            "size": 0,
+            "obstruction": 0,
+            "difficulty": "",
+            "funds": 0,
+            "victoryCondition": 0,
+            "resolution": 0,
+            "obstaclesSetup": [],
+            "mapExtension": 0,
+        }
+        self.currentMapConfig["resolution"] = self.map_dict["mapResolution"]
+        self.currentMapConfig["obstaclesSetup"] = self.map_dict["obstacles"]
+        self.currentMapConfig["mapExtension"] = self.map_dict["mapExtension"]
 
         self.currentShip = {}
-        self.allShips = []
+        self.currentTurDict = {}
+        self.allShips = {}
+        self.shipCounter = 0
         self.radioButtonsEnabled = False
 
     def createFleetUi(self):
@@ -75,9 +121,11 @@ class BattleSetup:
         horizontalLayout_7.addWidget(cur_fleet_cost_lbl)
 
         fleet_lyt.addLayout(horizontalLayout_7)
-        listView = QtWidgets.QListView(verticalLayoutWidget)
-        listView.setObjectName("listView")
-        fleet_lyt.addWidget(listView)
+        self.listView = InteractiveList.InteractiveListView(verticalLayoutWidget)
+        self.listView.setObjectName("listView")
+        self.listView.attachedObject = self
+        self.listView.isForBattleSetup = True
+        fleet_lyt.addWidget(self.listView)
         del_ship_lyt = QtWidgets.QHBoxLayout()
         del_ship_lyt.setObjectName("del_ship_lyt")
         spacerItem = QtWidgets.QSpacerItem(
@@ -249,7 +297,6 @@ class BattleSetup:
         self.rdr_tech_0.setObjectName("rdr_tech_0")
         self.rdr_tech_0.setText("Mk I")
         self.rdr_tech_0.setChecked(True)
-        self.rdr_tech_0.setEnabled(False)
         self.rdr_tech_rButtongrp.addButton(self.rdr_tech_0, 0)
         gridLayout.addWidget(self.rdr_tech_0, 2, 1, 1, 1)
 
@@ -257,7 +304,6 @@ class BattleSetup:
         self.fc_tech_0.setObjectName("fc_tech_0")
         self.fc_tech_0.setText("Mk I")
         self.fc_tech_0.setChecked(True)
-        self.fc_tech_0.setEnabled(False)
         self.fc_tech_rButtonGroup.addButton(self.fc_tech_0, 0)
         gridLayout.addWidget(self.fc_tech_0, 1, 1, 1, 1)
 
@@ -265,49 +311,42 @@ class BattleSetup:
         self.gun_tech_0.setObjectName("gun_tech_0")
         self.gun_tech_0.setText("Mk I")
         self.gun_tech_0.setChecked(True)
-        self.gun_tech_0.setEnabled(False)
         self.gun_tech_rButtonGroup.addButton(self.gun_tech_0, 0)
         gridLayout.addWidget(self.gun_tech_0, 0, 1, 1, 1)
 
         self.rdr_tech_1 = QtWidgets.QRadioButton(verticalLayoutWidget_2)
         self.rdr_tech_1.setObjectName("rdr_tech_1")
         self.rdr_tech_1.setText("Mk II")
-        self.rdr_tech_1.setEnabled(False)
         self.rdr_tech_rButtongrp.addButton(self.rdr_tech_1, 1)
         gridLayout.addWidget(self.rdr_tech_1, 2, 2, 1, 1)
 
         self.fc_tech_1 = QtWidgets.QRadioButton(verticalLayoutWidget_2)
         self.fc_tech_1.setObjectName("fc_tech_1")
         self.fc_tech_1.setText("Mk II")
-        self.fc_tech_1.setEnabled(False)
         self.fc_tech_rButtonGroup.addButton(self.fc_tech_1, 1)
         gridLayout.addWidget(self.fc_tech_1, 1, 2, 1, 1)
 
         self.gun_tech_1 = QtWidgets.QRadioButton(verticalLayoutWidget_2)
         self.gun_tech_1.setObjectName("gun_tech_1")
         self.gun_tech_1.setText("Mk II")
-        self.gun_tech_1.setEnabled(False)
         self.gun_tech_rButtonGroup.addButton(self.gun_tech_1, 1)
         gridLayout.addWidget(self.gun_tech_1, 0, 2, 1, 1)
 
         self.rdr_tech_2 = QtWidgets.QRadioButton(verticalLayoutWidget_2)
         self.rdr_tech_2.setObjectName("rdr_tech_2")
         self.rdr_tech_2.setText("Mk III")
-        self.rdr_tech_2.setEnabled(False)
         self.rdr_tech_rButtongrp.addButton(self.rdr_tech_2, 2)
         gridLayout.addWidget(self.rdr_tech_2, 2, 3, 1, 1)
 
         self.fc_tech_2 = QtWidgets.QRadioButton(verticalLayoutWidget_2)
         self.fc_tech_2.setObjectName("fc_tech_2")
         self.fc_tech_2.setText("Mk III")
-        self.fc_tech_2.setEnabled(False)
         self.fc_tech_rButtonGroup.addButton(self.fc_tech_2, 2)
         gridLayout.addWidget(self.fc_tech_2, 1, 3, 1, 1)
 
         self.gun_tech_2 = QtWidgets.QRadioButton(verticalLayoutWidget_2)
         self.gun_tech_2.setObjectName("gun_tech_2")
         self.gun_tech_2.setText("Mk III")
-        self.gun_tech_2.setEnabled(False)
         self.gun_tech_rButtonGroup.addButton(self.gun_tech_2, 2)
         gridLayout.addWidget(self.gun_tech_2, 0, 3, 1, 1)
 
@@ -702,22 +741,22 @@ class BattleSetup:
         )
         clear_add_but_lyt.addItem(spacerItem6)
 
-        clear_ship_but = QtWidgets.QPushButton(verticalLayoutWidget_2)
-        clear_ship_but.setObjectName("clear_ship_but")
-        clear_ship_but.setText("Reset")
-        clear_add_but_lyt.addWidget(clear_ship_but)
+        self.clear_ship_but = QtWidgets.QPushButton(verticalLayoutWidget_2)
+        self.clear_ship_but.setObjectName("clear_ship_but")
+        self.clear_ship_but.setText("Reset")
+        self.clear_ship_but.setEnabled(False)
+        clear_add_but_lyt.addWidget(self.clear_ship_but)
 
-        add_ship_but = QtWidgets.QPushButton(verticalLayoutWidget_2)
-        add_ship_but.setObjectName("add_ship_but")
-        add_ship_but.setText("Add Ship")
-        clear_add_but_lyt.addWidget(add_ship_but)
+        self.add_ship_but = QtWidgets.QPushButton(verticalLayoutWidget_2)
+        self.add_ship_but.setObjectName("add_ship_but")
+        self.add_ship_but.setText("Add Ship")
+        self.add_ship_but.setEnabled(False)
+        clear_add_but_lyt.addWidget(self.add_ship_but)
         ship_creator_lyt.addLayout(clear_add_but_lyt)
 
         QtCore.QMetaObject.connectSlotsByName(fleet_setup)
         self.setEnabledRadioButtons(False)
 
-        ## Ok and Cancel buttons ##
-        battle_but.clicked.connect(lambda: self.createFleetAccept(fleet_setup))
         ## Ship type selection button ##
         bb_but.clicked.connect(lambda: self.shipButtonClicked("BB"))
         ca_but.clicked.connect(lambda: self.shipButtonClicked("CA"))
@@ -737,6 +776,16 @@ class BattleSetup:
         self.gun_tech_1.toggled.connect(self.updateShipStats)
         self.gun_tech_2.toggled.connect(self.updateShipStats)
 
+        ## Add, reset or delete current ship ##
+        self.clear_ship_but.clicked.connect(self.resetButtonClicked)
+        self.add_ship_but.clicked.connect(self.addShipButtonClicked)
+        del_ship_but.clicked.connect(self.listView.removeFromList)
+
+        ## reset, load or save fleet ##
+        clear_fleet_but.clicked.connect(self.clearFleet)
+
+        ## Battle button ##
+        battle_but.clicked.connect(lambda: self.createFleetAccept(fleet_setup))
         return fleet_setup.exec()
 
     def battleSetupUI(self):
@@ -766,56 +815,60 @@ class BattleSetup:
         horizontalLayout.addWidget(ok_button)
 
         gridLayout.addLayout(horizontalLayout, 9, 1, 1, 1)
-        points_cmbbox = QtWidgets.QComboBox(battle_setup)
-        points_cmbbox.setObjectName("points_cmbbox")
-        points_cmbbox.addItem("25 %")
-        points_cmbbox.addItem("50 %")
-        points_cmbbox.addItem("75 %")
-        gridLayout.addWidget(points_cmbbox, 7, 1, 1, 1)
+        self.points_cmbbox = QtWidgets.QComboBox(battle_setup)
+        self.points_cmbbox.setObjectName("points_cmbbox")
+        self.points_cmbbox.addItem("25")
+        self.points_cmbbox.addItem("50")
+        self.points_cmbbox.addItem("75")
+        self.points_cmbbox.setEnabled(False)
+        gridLayout.addWidget(self.points_cmbbox, 7, 1, 1, 1)
 
-        difficulty_cmbbox = QtWidgets.QComboBox(battle_setup)
-        difficulty_cmbbox.setObjectName("difficulty_cmbbox")
-        difficulty_cmbbox.addItem("Easy")
-        difficulty_cmbbox.addItem("Normal")
-        difficulty_cmbbox.addItem("Hard")
-        difficulty_cmbbox.addItem("Very Hard")
-        gridLayout.addWidget(difficulty_cmbbox, 3, 1, 1, 1)
+        self.difficulty_cmbbox = QtWidgets.QComboBox(battle_setup)
+        self.difficulty_cmbbox.setObjectName("difficulty_cmbbox")
+        self.difficulty_cmbbox.addItem("Easy")
+        self.difficulty_cmbbox.addItem("Normal")
+        self.difficulty_cmbbox.addItem("Hard")
+        self.difficulty_cmbbox.addItem("Very Hard")
+        gridLayout.addWidget(self.difficulty_cmbbox, 3, 1, 1, 1)
 
         map_size_lbl = QtWidgets.QLabel(battle_setup)
         map_size_lbl.setObjectName("map_size_lbl")
         map_size_lbl.setText("Map size:")
         gridLayout.addWidget(map_size_lbl, 1, 0, 1, 1)
 
-        funds_cmbbox = QtWidgets.QComboBox(battle_setup)
-        funds_cmbbox.setObjectName("funds_cmbbox")
-        funds_cmbbox.addItem("Small")
-        funds_cmbbox.addItem("Standard")
-        funds_cmbbox.addItem("Large")
-        funds_cmbbox.addItem("Custom")
-        gridLayout.addWidget(funds_cmbbox, 4, 1, 1, 1)
+        self.funds_cmbbox = QtWidgets.QComboBox(battle_setup)
+        self.funds_cmbbox.setObjectName("funds_cmbbox")
+        self.funds_cmbbox.addItem("Small")
+        self.funds_cmbbox.addItem("Standard")
+        self.funds_cmbbox.addItem("Large")
+        self.funds_cmbbox.addItem("Custom")
+        gridLayout.addWidget(self.funds_cmbbox, 4, 1, 1, 1)
 
         funds_lbl = QtWidgets.QLabel(battle_setup)
         funds_lbl.setObjectName("funds_lbl")
         funds_lbl.setText("Funds:")
         gridLayout.addWidget(funds_lbl, 4, 0, 1, 1)
 
-        maps_comboBox = QtWidgets.QComboBox(battle_setup)
-        maps_comboBox.setObjectName("maps_comboBox")
-        maps_comboBox.addItem("Random")
-        maps_comboBox.addItem("Map 1")
-        maps_comboBox.addItem("Map 2")
-        gridLayout.addWidget(maps_comboBox, 0, 1, 1, 1)
+        self.maps_comboBox = QtWidgets.QComboBox(battle_setup)
+        self.maps_comboBox.setObjectName("maps_comboBox")
+        self.maps_comboBox.addItem("Random")
+        self.maps_comboBox.addItem("Map 1")
+        self.maps_comboBox.addItem("Map 2")
+        gridLayout.addWidget(self.maps_comboBox, 0, 1, 1, 1)
 
         difficulty_lbl = QtWidgets.QLabel(battle_setup)
         difficulty_lbl.setObjectName("difficulty_lbl")
         difficulty_lbl.setText("Difficulty:")
         gridLayout.addWidget(difficulty_lbl, 3, 0, 1, 1)
 
-        v_cond_cmbbox = QtWidgets.QComboBox(battle_setup)
-        v_cond_cmbbox.setObjectName("v_cond_cmbbox")
-        v_cond_cmbbox.addItem("Annihilation")
-        v_cond_cmbbox.addItem("Points")
-        gridLayout.addWidget(v_cond_cmbbox, 6, 1, 1, 1)
+        self.v_cond_cmbbox = QtWidgets.QComboBox(battle_setup)
+        self.v_cond_cmbbox.setObjectName("v_cond_cmbbox")
+        self.v_cond_cmbbox.addItem("Annihilation")
+        self.v_cond_cmbbox.addItem("Points (%)")
+        self.v_cond_cmbbox.setToolTip(
+            "Choose between total destruction of the ennemy fleet or destruction of a percentage of its fleet"
+        )
+        gridLayout.addWidget(self.v_cond_cmbbox, 6, 1, 1, 1)
 
         map_obs_lbl = QtWidgets.QLabel(battle_setup)
         map_obs_lbl.setObjectName("map_obs_lbl")
@@ -832,24 +885,28 @@ class BattleSetup:
         sel_s_map_lbl.setText("Selected Map:")
         gridLayout.addWidget(sel_s_map_lbl, 0, 0, 1, 1)
 
-        map_size_cmbbox = QtWidgets.QComboBox(battle_setup)
-        map_size_cmbbox.setObjectName("map_size_cmbbox")
-        map_size_cmbbox.addItem("Small")
-        map_size_cmbbox.addItem("Medium")
-        map_size_cmbbox.addItem("Large")
-        gridLayout.addWidget(map_size_cmbbox, 1, 1, 1, 1)
+        self.map_size_cmbbox = QtWidgets.QComboBox(battle_setup)
+        self.map_size_cmbbox.setObjectName("map_size_cmbbox")
+        self.map_size_cmbbox.addItem("Small")
+        self.map_size_cmbbox.addItem("Medium")
+        self.map_size_cmbbox.addItem("Large")
+        gridLayout.addWidget(self.map_size_cmbbox, 1, 1, 1, 1)
 
-        cstm_funds_l_edit = QtWidgets.QLineEdit(battle_setup)
-        cstm_funds_l_edit.setObjectName("cstm_funds_l_edit")
-        gridLayout.addWidget(cstm_funds_l_edit, 5, 1, 1, 1)
+        self.cstm_funds_l_edit = QtWidgets.QLineEdit(battle_setup)
+        self.cstm_funds_l_edit.setObjectName("cstm_funds_l_edit")
+        self.cstm_funds_l_edit.setEnabled(False)
+        gridLayout.addWidget(self.cstm_funds_l_edit, 5, 1, 1, 1)
 
-        mapObs_cmbbox = QtWidgets.QComboBox(battle_setup)
-        mapObs_cmbbox.setObjectName("mapObs_cmbbox")
-        mapObs_cmbbox.addItem("Open")
-        mapObs_cmbbox.addItem("Light")
-        mapObs_cmbbox.addItem("Medium")
-        mapObs_cmbbox.addItem("Heavy")
-        gridLayout.addWidget(mapObs_cmbbox, 2, 1, 1, 1)
+        self.mapObs_cmbbox = QtWidgets.QComboBox(battle_setup)
+        self.mapObs_cmbbox.setObjectName("mapObs_cmbbox")
+        self.mapObs_cmbbox.addItem("Open")
+        self.mapObs_cmbbox.addItem("Light")
+        self.mapObs_cmbbox.addItem("Medium")
+        self.mapObs_cmbbox.addItem("Heavy")
+        self.mapObs_cmbbox.setToolTip(
+            "Defines how much of the map is covered by obstacles"
+        )
+        gridLayout.addWidget(self.mapObs_cmbbox, 2, 1, 1, 1)
 
         spacerItem1 = QtWidgets.QSpacerItem(
             20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding
@@ -857,6 +914,17 @@ class BattleSetup:
         gridLayout.addItem(spacerItem1, 8, 1, 1, 1)
 
         QtCore.QMetaObject.connectSlotsByName(battle_setup)
+        self.updateMapConfig()
+
+        self.maps_comboBox.currentTextChanged.connect(
+            lambda: self.setEnabledOtherWidget(self.maps_comboBox)
+        )
+        self.funds_cmbbox.currentTextChanged.connect(
+            lambda: self.setEnabledOtherWidget(self.funds_cmbbox)
+        )
+        self.v_cond_cmbbox.currentTextChanged.connect(
+            lambda: self.setEnabledOtherWidget(self.v_cond_cmbbox)
+        )
         ok_button.clicked.connect(lambda: self.battleSetupAccept(battle_setup))
         cancelButton.clicked.connect(lambda: self.battleSetupReject(battle_setup))
 
@@ -876,7 +944,7 @@ class BattleSetup:
         self.currentShip.clear()
         if _type == "BB":
             self.currentShip = copy.deepcopy(self.bb_dict)
-            self.currentTurDict = self.tur_dict["large"]
+            self.currentTurDict = copy.deepcopy(self.tur_dict["large"])
         # elif _type == "CA":
         #     self.currentShip = copy.deepcopy(self.ca_dict)
         #     self.currentTurDict = self.tur_dict["medium"]
@@ -889,6 +957,10 @@ class BattleSetup:
         else:
             print("Type value error: The given type does not match any ship type.")
 
+        if not self.add_ship_but.isEnabled():
+            self.add_ship_but.setEnabled(True)
+            self.clear_ship_but.setEnabled(True)
+
         try:
             if not self.radioButtonsEnabled:
                 self.setEnabledRadioButtons(True)
@@ -898,12 +970,7 @@ class BattleSetup:
         except Exception:
             print("Could not update UI")
 
-    def resetShipStats(self):
-        ## Reset radioButtons ##
-        self.rdr_tech_0.setChecked(True)
-        self.fc_tech_0.setChecked(True)
-        self.gun_tech_0.setChecked(True)
-
+    def updateShipCreatorUI(self):
         ## General section ##
         self.ship_name_label.setText(str(self.currentShip["naming"]["_name"]))
         self.ship_type_label.setText(str(self.currentShip["naming"]["_type"]))
@@ -932,8 +999,15 @@ class BattleSetup:
         ## Vision & Concealement section ##
         self.ship_concl_lbl.setText(str(self.currentShip["hull"]["base_concealement"]))
 
+    def resetShipStats(self):
+        ## Reset radioButtons ##
+        self.rdr_tech_0.setChecked(True)
+        self.fc_tech_0.setChecked(True)
+        self.gun_tech_0.setChecked(True)
+
+        self.updateShipCreatorUI()
+
     def updateShipStats(self):
-        ## Updates current ship config ##
         a, b, c = (
             self.gun_tech_rButtonGroup.checkedId(),
             self.fc_tech_rButtonGroup.checkedId(),
@@ -956,6 +1030,126 @@ class BattleSetup:
         self.ship_fc_lbl.setText(str(tech_dat.fc_tech_e[b]))
         self.ship_vision_lbl.setText(str(currentVision))
 
+    def setStatsFomList(self, shipId):
+        self.currentTurDict.clear()
+
+        for key, value in self.allShips.items():
+            if key == shipId:
+                self.currentShip = copy.deepcopy(value)
+                break
+
+        a, b, c = (
+            self.currentShip["techs"]["guns_tech"],
+            self.currentShip["techs"]["fc_tech"],
+            self.currentShip["techs"]["radar_tech"],
+        )
+
+        print(a, b, c)
+        self.gun_tech_rButtonGroup.button(a).setChecked(True)
+        self.fc_tech_rButtonGroup.button(b).setChecked(True)
+        self.rdr_tech_rButtongrp.button(c).setChecked(True)
+
+        if self.currentShip["naming"]["_type"] == "BB":
+            self.currentTurDict = copy.deepcopy(self.tur_dict["large"])
+        elif self.currentShip["naming"]["_type"] == "CA":
+            self.currentTurDict = copy.deepcopy(self.tur_dict["medium"])
+        elif self.currentShip["naming"]["_type"] == "FF":
+            self.currentTurDict = copy.deepcopy(self.tur_dict["small"])
+        elif self.currentShip["naming"]["_type"] == "PT":
+            self.currentTurDict = copy.deepcopy(self.tur_dict["small"])
+        else:
+            print("Could not retrieve turret informations")
+
+        self.updateShipCreatorUI()
+
+        currentAcc = round(
+            self.currentTurDict["gun_disp"] * tech_dat.gun_tech_acc[a], 4
+        )
+        currentVision = (
+            self.currentShip["hull"]["base_detection_range"]
+            + self.currentShip["hull"]["base_detection_range"]
+            * tech_dat.radar_tech_aug[c]
+        )
+
+        self.ship_acc_lbl.setText(str(currentAcc))
+        self.ship_fc_lbl.setText(str(tech_dat.fc_tech_e[b]))
+        self.ship_vision_lbl.setText(str(currentVision))
+
+    def resetButtonClicked(self):
+        self.resetShipStats()
+        self.updateShipStats()
+
+    def addShipButtonClicked(self):
+        self.allShips[self.shipCounter] = self.currentShip
+        self.listView.addToList(self.shipCounter, self.currentShip["naming"]["_type"])
+        self.shipCounter += 1
+
+    def removeShips(self, shipsIDsList):
+        for shipID in shipsIDsList:
+            print("Deleting ship at ", shipID)
+            self.allShips.pop(shipID)
+
+    def clearFleet(self):
+        self.allShips.clear()
+        self.listView.clearList()
+
+    def setEnabledOtherWidget(self, comboBox):
+        if comboBox is self.maps_comboBox:
+            if str(comboBox.currentText()) != "Random":
+                self.map_size_cmbbox.setEnabled(False)
+                self.mapObs_cmbbox.setEnabled(False)
+            else:
+                self.map_size_cmbbox.setEnabled(True)
+                self.mapObs_cmbbox.setEnabled(True)
+
+        elif comboBox is self.funds_cmbbox:
+            if str(comboBox.currentText()) != "Custom":
+                self.cstm_funds_l_edit.setEnabled(False)
+            else:
+                self.cstm_funds_l_edit.setEnabled(True)
+
+        elif comboBox is self.v_cond_cmbbox:
+            if str(comboBox.currentText()) == "Annihilation":
+                self.points_cmbbox.setEnabled(False)
+            else:
+                self.points_cmbbox.setEnabled(True)
+
+    def updateMapConfig(self):
+        if self.maps_comboBox.currentText() == "Random":
+            self.currentMapConfig["presetMap"] = False
+        else:
+            self.currentMapConfig["presetMap"] = self.maps_comboBox.currentText()
+
+        self.currentMapConfig["size"] = self.map_dict["size"][
+            self.map_size_cmbbox.currentText()
+        ]
+        self.currentMapConfig["obstruction"] = self.map_dict["obstruction"][
+            self.mapObs_cmbbox.currentText()
+        ]
+        self.currentMapConfig["difficulty"] = self.difficulty_cmbbox.currentText()
+
+        if self.funds_cmbbox.currentText() == "Custom":
+            try:
+                self.currentMapConfig["funds"] = int(self.cstm_funds_l_edit.text())
+            except Exception:
+                dialogsUtils.popMessageBox(
+                    "Error", 2, "Please fill in custom funds field", 1
+                )
+                return 1
+        else:
+            self.currentMapConfig["funds"] = self.map_dict["funds"][
+                self.funds_cmbbox.currentText()
+            ]
+
+        if self.v_cond_cmbbox.currentText() == "Annihilation":
+            self.currentMapConfig["victoryCondition"] = 1
+        else:
+            self.currentMapConfig["victoryCondition"] = int(
+                int(self.points_cmbbox.currentText()) / 100
+            )
+
+        return 0
+
     def createFleetAccept(self, dialog):
         dialog.accept()
 
@@ -963,7 +1157,11 @@ class BattleSetup:
         dialog.reject()
 
     def battleSetupAccept(self, dialog):
-        dialog.accept()
+        if self.updateMapConfig() == 0:
+            print(self.currentMapConfig)
+            dialog.accept()
+        else:
+            return
 
     def battleSetupReject(self, dialog):
         dialog.reject()
