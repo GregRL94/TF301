@@ -30,7 +30,6 @@ class InteractiveListView(QListView):
 
         if self.isForBattleSetup:
             item = self._model.itemFromIndex(_selectedIndexes[0])
-            print(item, " ", item.itemId, item.itemTag)
             self.attachedObject.setStatsFomList(item.itemId)
         else:
             for index in self.selectedIndexes():

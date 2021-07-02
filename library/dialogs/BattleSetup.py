@@ -764,17 +764,17 @@ class BattleSetup:
         pt_but.clicked.connect(lambda: self.shipButtonClicked("PT"))
 
         ## Updates stats when another tech is selected ##
-        self.rdr_tech_0.toggled.connect(self.updateShipStats)
-        self.rdr_tech_1.toggled.connect(self.updateShipStats)
-        self.rdr_tech_2.toggled.connect(self.updateShipStats)
+        self.rdr_tech_0.clicked.connect(self.updateShipStats)
+        self.rdr_tech_1.clicked.connect(self.updateShipStats)
+        self.rdr_tech_2.clicked.connect(self.updateShipStats)
 
-        self.fc_tech_0.toggled.connect(self.updateShipStats)
-        self.fc_tech_1.toggled.connect(self.updateShipStats)
-        self.fc_tech_2.toggled.connect(self.updateShipStats)
+        self.fc_tech_0.clicked.connect(self.updateShipStats)
+        self.fc_tech_1.clicked.connect(self.updateShipStats)
+        self.fc_tech_2.clicked.connect(self.updateShipStats)
 
-        self.gun_tech_0.toggled.connect(self.updateShipStats)
-        self.gun_tech_1.toggled.connect(self.updateShipStats)
-        self.gun_tech_2.toggled.connect(self.updateShipStats)
+        self.gun_tech_0.clicked.connect(self.updateShipStats)
+        self.gun_tech_1.clicked.connect(self.updateShipStats)
+        self.gun_tech_2.clicked.connect(self.updateShipStats)
 
         ## Add, reset or delete current ship ##
         self.clear_ship_but.clicked.connect(self.resetButtonClicked)
