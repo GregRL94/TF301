@@ -197,6 +197,7 @@ class TechsData:
     fc_correction_rate = (
         150  # The rate at which the error on target speed estimation is reduced.
     )
+    cost_per_tech = [2500, 5000]  # Cost tech1 -> tech2, tech2 -> tech3
 
 
 class RadioCommunications:

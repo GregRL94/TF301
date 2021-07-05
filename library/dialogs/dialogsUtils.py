@@ -5,8 +5,11 @@
     Author: Grégory LARGANGE
     Date created: 28/06/2021
     Last modified by: Grégory LARGANGE
-    Date last modified: 28/06/2021
+    Date last modified: 05/07/2021
     Python version: 3.8.1
+
+    This file was made in collaboration
+    with Maxime JOLIVEL
 """
 
 
@@ -86,3 +89,35 @@ def popMessageBox(
             func[0]()
         else:
             msgBox.close()
+
+
+def OkCancelDialog(windowTitle: str, iconTypeID: int, messageStr: str):
+    """
+
+    Parameters
+    ----------
+    windowTitle: string
+        The text that will be displayed as title of the box.
+    iconTypeID : int
+        The icon to be displayed by the message box.
+    messageStr : string
+        The message string to be displayed by the message box.
+
+    Returns
+    -------
+    None.
+
+    Summary
+    -------
+    Pops a basic Ok|Cancel message box.
+
+    """
+    msgBox = QMessageBox()
+    msgBox.setWindowTitle(windowTitle)
+    if iconTypeID not in ICON_TYPE_DICT:
+        raise ValueError("iconTypeID unknown")
+    msgBox.setIcon(ICON_TYPE_DICT[iconTypeID])
+    msgBox.setText(messageStr)
+    msgBox.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+
+    return msgBox.exec()

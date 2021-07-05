@@ -5,9 +5,10 @@
     Author: Grégory LARGANGE
     Date created: 10/06/2021
     Last modified by: Grégory LARGANGE
-    Date last modified: 28/06/2021
+    Date last modified: 05/07/2021
     Python version: 3.8.1
 """
+
 
 import copy
 
@@ -67,11 +68,13 @@ class BattleSetup:
         self.currentMapConfig["obstaclesSetup"] = self.map_dict["obstacles"]
         self.currentMapConfig["mapExtension"] = self.map_dict["mapExtension"]
 
+        self.radioButtonsEnabled = False
         self.currentShip = {}
         self.currentTurDict = {}
         self.allShips = {}
         self.shipCounter = 0
-        self.radioButtonsEnabled = False
+        self.currentShipKey = self.shipCounter
+        self.fleetCost = 0
 
     def createFleetUi(self):
         fleet_setup = QtWidgets.QDialog()
@@ -112,16 +115,18 @@ class BattleSetup:
         ships_in_fleet_lbl.setText("SHIPS IN FLEET")
         horizontalLayout_7.addWidget(ships_in_fleet_lbl)
 
-        cur_fleet_cost_lbl = QtWidgets.QLabel(verticalLayoutWidget)
-        cur_fleet_cost_lbl.setAlignment(
+        self.cur_fleet_cost_lbl = QtWidgets.QLabel(verticalLayoutWidget)
+        self.cur_fleet_cost_lbl.setAlignment(
             QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter
         )
-        cur_fleet_cost_lbl.setObjectName("cur_fleet_cost_lbl")
-        cur_fleet_cost_lbl.setText("COST / MAX COST")
-        horizontalLayout_7.addWidget(cur_fleet_cost_lbl)
+        self.cur_fleet_cost_lbl.setObjectName("cur_fleet_cost_lbl")
+        self.cur_fleet_cost_lbl.setText(
+            str(self.fleetCost) + "/" + str(self.currentMapConfig["funds"])
+        )
+        horizontalLayout_7.addWidget(self.cur_fleet_cost_lbl)
 
         fleet_lyt.addLayout(horizontalLayout_7)
-        self.listView = InteractiveList.InteractiveListView(verticalLayoutWidget)
+        self.listView = InteractiveList.InteractiveListView(False, verticalLayoutWidget)
         self.listView.setObjectName("listView")
         self.listView.attachedObject = self
         self.listView.isForBattleSetup = True
@@ -388,7 +393,7 @@ class BattleSetup:
         type_lyt.setObjectName("type_lyt")
         type_label = QtWidgets.QLabel(verticalLayoutWidget_2)
         type_label.setObjectName("type_label")
-        type_label.setText("Type:")
+        type_label.setText("Description:")
         type_lyt.addWidget(type_label)
 
         self.ship_type_label = QtWidgets.QLabel(verticalLayoutWidget_2)
@@ -733,7 +738,7 @@ class BattleSetup:
 
         self.ship_cost = QtWidgets.QLabel(verticalLayoutWidget_2)
         self.ship_cost.setObjectName("ship_cost")
-        self.ship_cost.setText("00000")
+        self.ship_cost.setText(str(0))
         clear_add_but_lyt.addWidget(self.ship_cost)
 
         spacerItem6 = QtWidgets.QSpacerItem(
@@ -743,15 +748,9 @@ class BattleSetup:
 
         self.clear_ship_but = QtWidgets.QPushButton(verticalLayoutWidget_2)
         self.clear_ship_but.setObjectName("clear_ship_but")
-        self.clear_ship_but.setText("Reset")
+        self.clear_ship_but.setText("Reset Ship")
         self.clear_ship_but.setEnabled(False)
         clear_add_but_lyt.addWidget(self.clear_ship_but)
-
-        self.add_ship_but = QtWidgets.QPushButton(verticalLayoutWidget_2)
-        self.add_ship_but.setObjectName("add_ship_but")
-        self.add_ship_but.setText("Add Ship")
-        self.add_ship_but.setEnabled(False)
-        clear_add_but_lyt.addWidget(self.add_ship_but)
         ship_creator_lyt.addLayout(clear_add_but_lyt)
 
         QtCore.QMetaObject.connectSlotsByName(fleet_setup)
@@ -778,7 +777,6 @@ class BattleSetup:
 
         ## Add, reset or delete current ship ##
         self.clear_ship_but.clicked.connect(self.resetButtonClicked)
-        self.add_ship_but.clicked.connect(self.addShipButtonClicked)
         del_ship_but.clicked.connect(self.listView.removeFromList)
 
         ## reset, load or save fleet ##
@@ -926,7 +924,7 @@ class BattleSetup:
             lambda: self.setEnabledOtherWidget(self.v_cond_cmbbox)
         )
         ok_button.clicked.connect(lambda: self.battleSetupAccept(battle_setup))
-        cancelButton.clicked.connect(lambda: self.battleSetupReject(battle_setup))
+        cancelButton.clicked.connect(battle_setup.reject)
 
         return battle_setup.exec()
 
@@ -941,7 +939,6 @@ class BattleSetup:
             radioButton.setEnabled(state)
 
     def shipButtonClicked(self, _type):
-        self.currentShip.clear()
         if _type == "BB":
             self.currentShip = copy.deepcopy(self.bb_dict)
             self.currentTurDict = copy.deepcopy(self.tur_dict["large"])
@@ -957,18 +954,18 @@ class BattleSetup:
         else:
             print("Type value error: The given type does not match any ship type.")
 
-        if not self.add_ship_but.isEnabled():
-            self.add_ship_but.setEnabled(True)
+        if not self.clear_ship_but.isEnabled():
             self.clear_ship_but.setEnabled(True)
 
         try:
             if not self.radioButtonsEnabled:
                 self.setEnabledRadioButtons(True)
                 self.radioButtonsEnabled = True
-            self.resetShipStats()
+            self.updateShipCreatorUI()
             self.updateShipStats()
-        except Exception:
-            print("Could not update UI")
+            self.addShip()
+        except Exception as e:
+            print("Could not update UI", e)
 
     def updateShipCreatorUI(self):
         ## General section ##
@@ -1016,6 +1013,9 @@ class BattleSetup:
         self.currentShip["techs"]["guns_tech"] = a
         self.currentShip["techs"]["fc_tech"] = b
         self.currentShip["techs"]["radar_tech"] = c
+        self.currentShip["naming"]["cost"] = self.updateShipCost(
+            self.currentShip["naming"]["base_cost"], [a, b, c]
+        )
 
         currentAcc = round(
             self.currentTurDict["gun_disp"] * tech_dat.gun_tech_acc[a], 4
@@ -1029,13 +1029,36 @@ class BattleSetup:
         self.ship_acc_lbl.setText(str(currentAcc))
         self.ship_fc_lbl.setText(str(tech_dat.fc_tech_e[b]))
         self.ship_vision_lbl.setText(str(currentVision))
+        self.ship_cost.setText(str(self.currentShip["naming"]["cost"]))
 
-    def setStatsFomList(self, shipId):
-        self.currentTurDict.clear()
+        if len(self.allShips.keys()) > 0:
+            self.allShips[self.currentShipKey] = copy.deepcopy(self.currentShip)
+            self.updateFleetCost()
 
-        for key, value in self.allShips.items():
-            if key == shipId:
-                self.currentShip = copy.deepcopy(value)
+    def updateShipCost(self, baseCost, techLevelsList):
+        shipCost = baseCost
+
+        for techLevel in techLevelsList:
+            if techLevel == 1:
+                shipCost += tech_dat.cost_per_tech[0]
+            elif techLevel == 2:
+                shipCost += tech_dat.cost_per_tech[1]
+
+        return shipCost
+
+    def updateFleetCost(self):
+        self.fleetCost = 0
+
+        for ship in self.allShips.values():
+            self.fleetCost += ship["naming"]["cost"]
+        self.cur_fleet_cost_lbl.setText(
+            str(self.fleetCost) + " / " + str(self.currentMapConfig["funds"])
+        )
+
+    def setStatsFomList(self, _shipKey):
+        for shipKey, ship in self.allShips.items():
+            if shipKey == _shipKey:
+                self.currentShip = copy.deepcopy(ship)
                 break
 
         a, b, c = (
@@ -1043,11 +1066,12 @@ class BattleSetup:
             self.currentShip["techs"]["fc_tech"],
             self.currentShip["techs"]["radar_tech"],
         )
-
-        print(a, b, c)
         self.gun_tech_rButtonGroup.button(a).setChecked(True)
         self.fc_tech_rButtonGroup.button(b).setChecked(True)
         self.rdr_tech_rButtongrp.button(c).setChecked(True)
+        shipCost = self.updateShipCost(
+            self.currentShip["naming"]["base_cost"], [a, b, c]
+        )
 
         if self.currentShip["naming"]["_type"] == "BB":
             self.currentTurDict = copy.deepcopy(self.tur_dict["large"])
@@ -1074,24 +1098,34 @@ class BattleSetup:
         self.ship_acc_lbl.setText(str(currentAcc))
         self.ship_fc_lbl.setText(str(tech_dat.fc_tech_e[b]))
         self.ship_vision_lbl.setText(str(currentVision))
+        self.ship_cost.setText(str(shipCost))
+
+        self.currentShipKey = shipKey
 
     def resetButtonClicked(self):
         self.resetShipStats()
         self.updateShipStats()
 
-    def addShipButtonClicked(self):
+    def addShip(self):
         self.allShips[self.shipCounter] = self.currentShip
         self.listView.addToList(self.shipCounter, self.currentShip["naming"]["_type"])
         self.shipCounter += 1
+        self.currentShipKey = self.shipCounter
+        self.updateFleetCost()
 
-    def removeShips(self, shipsIDsList):
-        for shipID in shipsIDsList:
-            print("Deleting ship at ", shipID)
-            self.allShips.pop(shipID)
+    def removeShips(self, shipKeysList):
+        for shipKey in shipKeysList:
+            try:
+                self.allShips.pop(shipKey)
+            except KeyError as ke:
+                print("Could not find ship to delete", "\n", ke)
+
+        self.updateFleetCost()
 
     def clearFleet(self):
         self.allShips.clear()
         self.listView.clearList()
+        self.updateFleetCost()
 
     def setEnabledOtherWidget(self, comboBox):
         if comboBox is self.maps_comboBox:
@@ -1151,6 +1185,44 @@ class BattleSetup:
         return 0
 
     def createFleetAccept(self, dialog):
+        if len(self.allShips) <= 0:
+            dialogsUtils.popMessageBox(
+                "Error", 2, "You can't go to battle with no ships in your fleet !", 1
+            )
+            return
+
+        if self.fleetCost > self.currentMapConfig["funds"]:
+            dialogsUtils.popMessageBox(
+                "Error",
+                2,
+                "Your fleet's budget is above what the Admiralty allowed you. Reduce your fleet's cost before engaging the battle.",
+                1,
+            )
+            return
+
+        if (self.currentMapConfig["funds"] - self.fleetCost) >= tech_dat.cost_per_tech[
+            0
+        ]:
+            result = dialogsUtils.OkCancelDialog(
+                "Warning",
+                1,
+                "Admiral, It looks like you still have funds left for your fleet. Do you want to engage the battle anyways ?",
+            )
+            if result == 4194304:
+                return
+
+        print("MAP:")
+        for key, value in self.currentMapConfig.items():
+            print(key, "\n", value)
+        print("")
+        print("")
+
+        print("ALL SHIPS IN FLEET")
+        for shipKey, ship in self.allShips.items():
+            print(shipKey)
+            for statKey, statValue in ship.items():
+                print(statKey, "\n", statValue)
+            print("")
         dialog.accept()
 
     def createFleetReject(self, dialog):
@@ -1158,10 +1230,6 @@ class BattleSetup:
 
     def battleSetupAccept(self, dialog):
         if self.updateMapConfig() == 0:
-            print(self.currentMapConfig)
             dialog.accept()
         else:
             return
-
-    def battleSetupReject(self, dialog):
-        dialog.reject()

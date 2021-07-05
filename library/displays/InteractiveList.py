@@ -5,7 +5,7 @@
     Author: Grégory LARGANGE
     Date created: 29/06/2021
     Last modified by: Grégory LARGANGE
-    Date last modified: 30/06/2021
+    Date last modified: 05/07/2021
     Python version: 3.8.1
 """
 
@@ -16,9 +16,12 @@ from PyQt5.QtWidgets import QListView, QAbstractItemView
 
 
 class InteractiveListView(QListView):
-    def __init__(self, parent=None):
+    def __init__(self, _extendedSelection=False, parent=None):
         super(InteractiveListView, self).__init__(parent)
-        self.setSelectionMode(QAbstractItemView.SingleSelection)
+        if _extendedSelection:
+            self.setSelectionMode(QAbstractItemView.ExtendedSelection)
+        else:
+            self.setSelectionMode(QAbstractItemView.SingleSelection)
         self._model = InteractiveListModel(self)
         self.setModel(self._model)
         self.attachedObject = None

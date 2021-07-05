@@ -14,7 +14,7 @@
 """
 
 
-naming = {"_type": "BB", "_name": "Monitor"}
+naming = {"_type": "BB", "_name": "Monitor", "base_cost": 10000, "cost": 10000}
 
 geometry = {
     "_width": 1150,
