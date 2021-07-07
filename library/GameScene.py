@@ -60,11 +60,11 @@ class GameScene(QGraphicsScene):
         else:
             super(GameScene, self).mousePressEvent(mouseDown)
 
-    def setInnerMap(self, extPer, innerMap):
-        self.innerBL = int(extPer * innerMap)
-        self.innerBR = int(innerMap)
-        self.innerBT = int(extPer * innerMap)
-        self.innerBB = int(innerMap)
+    def setInnerMap(self, mapExtension, innerMap):
+        self.innerBL = int(mapExtension)
+        self.innerBR = int(innerMap + mapExtension)
+        self.innerBT = int(mapExtension)
+        self.innerBB = int(innerMap + mapExtension)
 
     def displayMap(self, obstaclesList):
         for obstacle in obstaclesList:

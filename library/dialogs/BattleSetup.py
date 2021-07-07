@@ -22,7 +22,90 @@ from . import dialogsUtils
 
 
 class BattleSetup:
+    """
+
+    A class to handle the creation of a new game.
+
+    ...
+
+    Methods
+    -------
+    __init__()
+        Constructor of the class.
+
+    createFleetUI()
+        Displays fleet creator window.
+
+    battleSetupUI()
+        Displays battle setup window.
+
+    setEnableRadioButtons(state: bool)
+        Enables or disables radio buttons.
+
+    shipButtonClicked(_type: str)
+        Adds a ship of _type.
+
+    updateShipCreatorUI()
+        Updates the ship stats displays.
+
+    resetShipStats():
+        Reset current ship stats.
+
+    updateShipStats():
+        Update current ship stats.
+
+    update ship cost(baseCost: int, techLevelsList: list)
+        Calculate current ship cost according to techs in techLevelsList.
+
+    updateFleetCost()
+        Calculate fleet cost.
+
+    setStatsFromList(_shipKey : int)
+        Updates current ship stats and displays according to _shipKey
+        returned by the list.
+
+    resetButtonClicked()
+        Resets curent ship stats.
+
+    addShip()
+        Adds a ship.
+
+    removeShips(shipKeysList : list)
+        Removes the ship(s) located at each _shipKey of shipKeysList.
+
+    clearFleet()
+        Removes all ships.
+
+    setEnabledOtherWidget(comboBox : QtWidgets.QComboBox)
+        Enables or disables some widgets depending on comboBox current text.
+
+    resetMapConfig()
+        Resets the current map configuration to its default values.
+
+    updateMapConfig()
+        Sets the values of the current map configuration.
+
+    createFleetAccept(dialog : QtWidgets.QDialog)
+        Defines the behaviour of the fleet creator window when accept button is clicked.
+
+    battleSetupAccept(dialog : QtWidgets.QDialog)
+        Defines the behaviour of the battle setup window when accept button is clicked.
+
+    """
+
     def __init__(self):
+        """
+
+        Returns
+        -------
+        None.
+
+        Summary
+        -------
+        Constructor of the class.
+        Load default configs for all ship types and map generator.
+
+        """
         bb_cfg = path.join(
             path.dirname(path.realpath(__file__)), "../configs/battleshipConfig.py"
         )
@@ -53,30 +136,28 @@ class BattleSetup:
         )
         self.map_dict, map_txt = Config._file2dict(map_cfg)
 
-        self.currentMapConfig = {
-            "presetMap": False,
-            "size": 0,
-            "obstruction": 0,
-            "difficulty": "",
-            "funds": 0,
-            "victoryCondition": 0,
-            "resolution": 0,
-            "obstaclesSetup": [],
-            "mapExtension": 0,
-        }
-        self.currentMapConfig["resolution"] = self.map_dict["mapResolution"]
-        self.currentMapConfig["obstaclesSetup"] = self.map_dict["obstacles"]
-        self.currentMapConfig["mapExtension"] = self.map_dict["mapExtension"]
-
-        self.radioButtonsEnabled = False
+        self.currentMapConfig = {}
         self.currentShip = {}
         self.currentTurDict = {}
         self.allShips = {}
+        self.radioButtonsEnabled = False
         self.shipCounter = 0
-        self.currentShipKey = self.shipCounter
+        self.currentShipKey = 0
         self.fleetCost = 0
+        self.resetMapConfig()
 
     def createFleetUi(self):
+        """
+
+        Returns
+        -------
+        None.
+
+        Summary
+        -------
+        Generates fleet creator UI, binds buttons and actions to function.
+
+        """
         fleet_setup = QtWidgets.QDialog()
         fleet_setup.setObjectName("fleet_setup")
         fleet_setup.resize(812, 660)
@@ -787,6 +868,17 @@ class BattleSetup:
         return fleet_setup.exec()
 
     def battleSetupUI(self):
+        """
+
+        Returns
+        -------
+        None.
+
+        Summary
+        -------
+        Generates battleSetup UI, binds actions and buttons to functions.
+
+        """
         battle_setup = QtWidgets.QDialog()
         battle_setup.setObjectName("battle_setup")
         battle_setup.resize(400, 300)
@@ -928,7 +1020,23 @@ class BattleSetup:
 
         return battle_setup.exec()
 
-    def setEnabledRadioButtons(self, state):
+    def setEnabledRadioButtons(self, state: bool):
+        """
+
+        Parameters
+        ----------
+        state : bool
+            True enables the radio buttons, False disables.
+
+        Returns
+        -------
+        None.
+
+        Summary
+        -------
+        Enables or disables the radio buttons depending on state.
+
+        """
         for radioButton in self.rdr_tech_rButtongrp.buttons():
             radioButton.setEnabled(state)
 
@@ -938,7 +1046,23 @@ class BattleSetup:
         for radioButton in self.gun_tech_rButtonGroup.buttons():
             radioButton.setEnabled(state)
 
-    def shipButtonClicked(self, _type):
+    def shipButtonClicked(self, _type: str):
+        """
+
+        Parameters
+        ----------
+        _type : string
+            The type indicated by the button.
+
+        Returns
+        -------
+        None
+
+        Summary
+        -------
+        Add a base configuration of ship of _type to the user's fleet.
+
+        """
         if _type == "BB":
             self.currentShip = copy.deepcopy(self.bb_dict)
             self.currentTurDict = copy.deepcopy(self.tur_dict["large"])
@@ -968,6 +1092,17 @@ class BattleSetup:
             print("Could not update UI", e)
 
     def updateShipCreatorUI(self):
+        """
+
+        Returns
+        -------
+        None.
+
+        Summary
+        -------
+        Update the static part of the ship creator display.
+
+        """
         ## General section ##
         self.ship_name_label.setText(str(self.currentShip["naming"]["_name"]))
         self.ship_type_label.setText(str(self.currentShip["naming"]["_type"]))
@@ -997,7 +1132,17 @@ class BattleSetup:
         self.ship_concl_lbl.setText(str(self.currentShip["hull"]["base_concealement"]))
 
     def resetShipStats(self):
-        ## Reset radioButtons ##
+        """
+
+        Returns
+        -------
+        None.
+
+        Summary
+        -------
+        Set the lowest tech levels radio buttons to checked.
+
+        """
         self.rdr_tech_0.setChecked(True)
         self.fc_tech_0.setChecked(True)
         self.gun_tech_0.setChecked(True)
@@ -1005,6 +1150,17 @@ class BattleSetup:
         self.updateShipCreatorUI()
 
     def updateShipStats(self):
+        """
+
+        Returns
+        -------
+        None.
+
+        Summary
+        -------
+        Recalculate the current ship stats and updates the dinamic displays.
+
+        """
         a, b, c = (
             self.gun_tech_rButtonGroup.checkedId(),
             self.fc_tech_rButtonGroup.checkedId(),
@@ -1035,7 +1191,26 @@ class BattleSetup:
             self.allShips[self.currentShipKey] = copy.deepcopy(self.currentShip)
             self.updateFleetCost()
 
-    def updateShipCost(self, baseCost, techLevelsList):
+    def updateShipCost(self, baseCost: int, techLevelsList: list):
+        """
+
+        Parameters
+        ----------
+        baseCost : int
+            The cost of the vanilla ship.
+        techLevelsList : list
+            The list of the tech levels.
+
+        Returns
+        -------
+        shipCost : int
+            The final cost of the ship.
+
+        Summary
+        -------
+        Calculates the final cost of the ship, technologies cost included.
+
+        """
         shipCost = baseCost
 
         for techLevel in techLevelsList:
@@ -1047,6 +1222,18 @@ class BattleSetup:
         return shipCost
 
     def updateFleetCost(self):
+        """
+
+        Returns
+        -------
+        None.
+
+        Summary
+        -------
+        Calculate the fleet cost according to all ships current cost.
+        Updates the displays.
+
+        """
         self.fleetCost = 0
 
         for ship in self.allShips.values():
@@ -1055,7 +1242,21 @@ class BattleSetup:
             str(self.fleetCost) + " / " + str(self.currentMapConfig["funds"])
         )
 
-    def setStatsFomList(self, _shipKey):
+    def setStatsFomList(self, _shipKey: int):
+        """
+
+        Parameters
+        ----------
+        _shipKey : int
+            The key at which the ship's data will be retrieved.
+
+        Summary
+        -------
+        Goes through allShips dict.
+        Load the stats and update the dispays of the ship config
+        found at the key _shipKey.
+
+        """
         for shipKey, ship in self.allShips.items():
             if shipKey == _shipKey:
                 self.currentShip = copy.deepcopy(ship)
@@ -1103,17 +1304,57 @@ class BattleSetup:
         self.currentShipKey = shipKey
 
     def resetButtonClicked(self):
+        """
+
+        Returns
+        -------
+        None.
+
+        Summary
+        -------
+        Resets current ship stats to defaults.
+
+        """
         self.resetShipStats()
         self.updateShipStats()
 
     def addShip(self):
+        """
+
+        Returns
+        -------
+        None.
+
+        Summary
+        -------
+        Adds the currently defined ship to the all ships dictionnary,
+        Adds a reference into the list.
+
+        """
         self.allShips[self.shipCounter] = self.currentShip
         self.listView.addToList(self.shipCounter, self.currentShip["naming"]["_type"])
         self.shipCounter += 1
         self.currentShipKey = self.shipCounter
         self.updateFleetCost()
 
-    def removeShips(self, shipKeysList):
+    def removeShips(self, shipKeysList: list):
+        """
+
+        Parameters
+        ----------
+        shipKeysList : list of int
+            A list of all the keys of the ship configs to remove.
+
+        Returns
+        -------
+        None.
+
+        Summary
+        -------
+        Removes all the pairs (_shipKey, shipConfig) for _shipKey
+        in shipKeysList.
+
+        """
         for shipKey in shipKeysList:
             try:
                 self.allShips.pop(shipKey)
@@ -1123,11 +1364,39 @@ class BattleSetup:
         self.updateFleetCost()
 
     def clearFleet(self):
+        """
+
+        Returns
+        -------
+        None.
+
+        Summary
+        -------
+        Clears the current fleet from all ships.
+
+        """
         self.allShips.clear()
         self.listView.clearList()
         self.updateFleetCost()
 
-    def setEnabledOtherWidget(self, comboBox):
+    def setEnabledOtherWidget(self, comboBox: QtWidgets.QComboBox):
+        """
+
+        Parameters
+        ----------
+        comboBox: QtWidgets.QComboBox
+            The selected como box.
+
+        Returns
+        -------
+        None.
+
+        Summary
+        -------
+        Enables or disable other widgets according to
+        the current text of combo box.
+
+        """
         if comboBox is self.maps_comboBox:
             if str(comboBox.currentText()) != "Random":
                 self.map_size_cmbbox.setEnabled(False)
@@ -1148,7 +1417,47 @@ class BattleSetup:
             else:
                 self.points_cmbbox.setEnabled(True)
 
+    def resetMapConfig(self):
+        """
+
+        Returns
+        -------
+        None.
+
+        Summary
+        -------
+        Resets the current Map config to its default values.
+
+        """
+        self.currentMapConfig.clear()
+
+        self.currentMapConfig = {
+            "presetMap": False,
+            "size": 0,
+            "obstruction": 0,
+            "difficulty": "",
+            "funds": 0,
+            "victoryCondition": 0,
+            "resolution": 0,
+            "obstaclesSetup": [],
+            "extension": 0,
+        }
+        self.currentMapConfig["resolution"] = self.map_dict["mapResolution"]
+        self.currentMapConfig["obstaclesSetup"] = self.map_dict["obstacles"]
+        self.currentMapConfig["extension"] = self.map_dict["mapExtension"]
+
     def updateMapConfig(self):
+        """
+
+        Returns
+        -------
+        None.
+
+        Summary
+        -------
+        Sets the current map config according to the state of the battlesetup UI.
+
+        """
         if self.maps_comboBox.currentText() == "Random":
             self.currentMapConfig["presetMap"] = False
         else:
@@ -1184,7 +1493,23 @@ class BattleSetup:
 
         return 0
 
-    def createFleetAccept(self, dialog):
+    def createFleetAccept(self, dialog: QtWidgets.QDialog):
+        """
+
+        Parameters
+        ----------
+        dialog : QtWidgets.QDialog
+            The FleetCreator Dialog.
+
+        Returns
+        -------
+        None.
+
+        Summary
+        -------
+        Tests if the fleet can be created. If yes, set the dialog state to accepted.
+
+        """
         if len(self.allShips) <= 0:
             dialogsUtils.popMessageBox(
                 "Error", 2, "You can't go to battle with no ships in your fleet !", 1
@@ -1211,25 +1536,31 @@ class BattleSetup:
             if result == 4194304:
                 return
 
-        print("MAP:")
-        for key, value in self.currentMapConfig.items():
-            print(key, "\n", value)
-        print("")
-        print("")
-
-        print("ALL SHIPS IN FLEET")
-        for shipKey, ship in self.allShips.items():
-            print(shipKey)
-            for statKey, statValue in ship.items():
-                print(statKey, "\n", statValue)
-            print("")
         dialog.accept()
 
-    def createFleetReject(self, dialog):
-        dialog.reject()
-
-    def battleSetupAccept(self, dialog):
+    def battleSetupAccept(self, dialog: QtWidgets.QDialog):
         if self.updateMapConfig() == 0:
             dialog.accept()
         else:
             return
+
+    def clearBattleSetup(self):
+        """
+
+        Returns
+        -------
+        None.
+
+        Summary
+        -------
+        Master clear of the class.
+
+        """
+        self.resetMapConfig()
+        self.currentShip.clear()
+        self.currentTurDict.clear()
+        self.allShips.clear()
+        self.radioButtonsEnabled = False
+        self.shipCounter = 0
+        self.currentShipKey = 0
+        self.fleetCost = 0
