@@ -15,9 +15,10 @@ from os import path
 
 from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtCore import Qt, QPointF
-from PyQt5.QtWidgets import QGraphicsView, QMessageBox
+from PyQt5.QtWidgets import QMessageBox
 
-from library import MainClock, GameScene, Mapping, InGameData
+from library import MainClock, Mapping, InGameData
+from library.displays import GameDisplay
 from library.Ship import Ship
 from library.dialogs import BattleSetup, InGameMenus, dialogsUtils
 
@@ -32,8 +33,8 @@ class Ui_TSKF301MainWindow(object):
         self.gridLayout.setObjectName("gridLayout")
         self.gridLayout.setContentsMargins(3, 3, 3, 3)
         self.gridLayout.setSpacing(2)
-        self.graphicsScene = GameScene.GameScene(self.centralwidget)
-        self.graphicsView = QGraphicsView(self.graphicsScene)
+        self.graphicsScene = GameDisplay.GameScene(self.centralwidget)
+        self.graphicsView = GameDisplay.GameView(self.graphicsScene)
         self.graphicsView.setObjectName("graphicsView")
         self.graphicsScene.attachedGView = self.graphicsView
         self.gridLayout.addWidget(self.graphicsView, 0, 1, 1, 1)

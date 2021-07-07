@@ -1,17 +1,17 @@
 # -*- coding: utf-8 -*-
 
 """
-    File name: GameScene.py
+    File name: GameDisplay.py
     Author: Grégory LARGANGE
     Date created: 12/10/2020
     Last modified by: Grégory LARGANGE
-    Date last modified: 28/05/2021
+    Date last modified: 07/07/2021
     Python version: 3.8.1
 """
 
 from PyQt5.QtCore import Qt, QPointF
 from PyQt5.QtGui import QPen, QBrush, QColor
-from PyQt5.QtWidgets import QGraphicsScene
+from PyQt5.QtWidgets import QGraphicsScene, QGraphicsView
 
 from library import Island, Waypoint
 from library.utils.MathsFormulas import Geometrics as geo, Cinematics as cin
@@ -197,3 +197,111 @@ class GameScene(QGraphicsScene):
     def destroyObject(self, _object):
         self.removeItem(_object)
         del _object
+
+
+class GameView(QGraphicsView):
+    def __init__(self, parent=None):
+        """
+
+        Parameters
+        ----------
+        parent : QObject, optional
+            The parent of the class.
+
+        Returns
+        -------
+        None.
+
+        Summary
+        -------
+        Constructor.
+
+        """
+        super(GameView, self).__init__(parent)
+        self.gameScene = parent
+        self.currentZoom = 1.0
+        self.zoomInFactor = 1.1
+        self.zoomOutFactor = 1 / self.zoomInFactor
+        self.ctrlKeyDown = False
+
+    def wheelEvent(self, event):
+        """
+
+        Parameters
+        ----------
+        event : QWheelEvent
+            A signal indicating that the mouse wheel angle has changed.
+
+        Returns
+        -------
+        None.
+
+        Summary
+        -------
+        If the bool ctrlKeyDown is TRUE at the moment of the event, triggers
+        the zoom functionnality:
+        Unset anchors so that cursor is the focus of the zoom.
+        Apply zoomIn or zooOut factor depending on the sign of wheel event angle
+        delta.
+        Translate view according to scale change.
+
+        """
+        if self.ctrlKeyDown:
+
+            # Set Anchors
+            self.setTransformationAnchor(QGraphicsView.NoAnchor)
+            self.setResizeAnchor(QGraphicsView.NoAnchor)
+
+            # Save the cursor position in the scene at the moment of the event
+            oldPos = self.mapToScene(event.pos())
+
+            # Zoom
+            if event.angleDelta().y() > 0:
+                zoomFactor = self.zoomInFactor
+            else:
+                zoomFactor = self.zoomOutFactor
+            self.currentZoom *= zoomFactor
+            # Do not apply zoom if outside of defined boundaries
+            if not (self.currentZoom <= 0.1) | (self.currentZoom >= 15.0):
+                self.scale(zoomFactor, zoomFactor)
+            elif self.currentZoom <= 0.1:
+                self.currentZoom = 0.1
+            elif self.currentZoom >= 15.0:
+                self.currentZoom = 15.0
+
+            # Get the new position of the event in the scaled scene
+            newPos = self.mapToScene(event.pos())
+
+            # Move scene to old position
+            delta = newPos - oldPos
+            self.translate(delta.x(), delta.y())
+
+    def keyPressEvent(self, keyEvent):
+        """
+
+        Parameters
+        ----------
+        keyEvent : QKeyPressEvent
+            A signal indicating that a keyboard key went from up position to
+            down position.
+
+        Returns
+        -------
+        None.
+
+        Summary
+        -------
+        If the key pressed is Control, set the bool ctrlKeyDown to True.
+        If the key pressed is Back, reset the transform of the GraphicView,
+        along with reseting the view anchors to center and scaling it back to 1.
+
+        """
+        if keyEvent.key() == Qt.Key_Control:
+            self.ctrlKeyDown = True
+        if keyEvent.key() == Qt.Key_Back:
+            self.setTransformationAnchor(QGraphicsView.AnchorViewCenter)
+            self.setResizeAnchor(QGraphicsView.AnchorViewCenter)
+            self.resetTransform()
+            self.scale(1.0, 1.0)
+            self.currentZoom = 1.0
+        super(GameView, self).keyPressEvent(keyEvent)
