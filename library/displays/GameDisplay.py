@@ -282,8 +282,7 @@ class GameView(QGraphicsView):
         Parameters
         ----------
         keyEvent : QKeyPressEvent
-            A signal indicating that a keyboard key went from up position to
-            down position.
+            A signal indicating that a keyboard key was pressed.
 
         Returns
         -------
@@ -298,10 +297,30 @@ class GameView(QGraphicsView):
         """
         if keyEvent.key() == Qt.Key_Control:
             self.ctrlKeyDown = True
-        if keyEvent.key() == Qt.Key_Back:
+        if keyEvent.key() == Qt.Key_Backspace:
             self.setTransformationAnchor(QGraphicsView.AnchorViewCenter)
             self.setResizeAnchor(QGraphicsView.AnchorViewCenter)
             self.resetTransform()
             self.scale(1.0, 1.0)
             self.currentZoom = 1.0
         super(GameView, self).keyPressEvent(keyEvent)
+
+    def keyReleaseEvent(self, keyEvent):
+        """
+
+        Parameters
+        ----------
+        keyEvent : QKeyReleaseEvent
+            A signal indicating that a keyboard key was released.
+
+        Returns
+        -------
+        None.
+
+        Summary
+        -------
+        If the key released is Control, set the bool ctrlKeyDown to False.
+
+        """
+        if keyEvent.key() == Qt.Key_Control:
+            self.ctrlKeyDown = False
