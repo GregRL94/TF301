@@ -711,11 +711,9 @@ class Ship(QGraphicsRectItem):
 
         """
         if direction == "PORT":
-            print("Turning to port")
             self.coordinates["heading"] -= self.hull["turn_rate"]
             self.coordinates["rot_direction"] = -1
         elif direction == "STARBOARD":
-            print("Turning to starboard")
             self.coordinates["heading"] += self.hull["turn_rate"]
             self.coordinates["rot_direction"] = 1
         self.rotate()

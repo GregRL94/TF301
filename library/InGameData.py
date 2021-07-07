@@ -192,12 +192,12 @@ class TechsData:
     radar_tech_aug = [
         0,
         0.25,
-        0.37,
         0.5,
     ]  # The higher the tech, the higher the boost on the base radar range
     fc_correction_rate = (
         150  # The rate at which the error on target speed estimation is reduced.
     )
+    cost_per_tech = [2500, 5000]  # Cost tech1 -> tech2, tech2 -> tech3
 
 
 class RadioCommunications:

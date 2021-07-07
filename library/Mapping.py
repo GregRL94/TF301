@@ -42,8 +42,7 @@ class MapGenerator:
         The constructor of the class. Defines the map size and initialize the
         map grid according to the map size.
 
-    setMapParameters(maxObstruction : float, minObstWidth : int, maxObstWidth : int,
-                     minObstHeight : int, maxObstHeight : int , minD2Obstacles : int)
+    setMapParameters(maxObstruction : float, obsParametersList : list)
         Sets up the parameters that will be used to generates random obstacles.
 
     resetMap()
@@ -114,31 +113,15 @@ class MapGenerator:
             for j in range(self.mapW):
                 self.gameMap[i].append(0)
 
-    def setMapParameters(
-        self,
-        maxObstruction,
-        minObstWidth,
-        maxObstWidth,
-        minObstHeight,
-        maxObstHeight,
-        minD2Obstacles,
-    ):
+    def setMapParameters(self, mapObstruction: float, obsParametersList: list):
         """
 
         Parameters
         ----------
         maxObstruction : float
             The maximum percentage of the map area that can be obstacles.
-        minObstWidth : int
-            The minimun width of an obstacle.
-        maxObstWidth : int
-            The maximum width of an obstacle..
-        minObstHeight : int
-            The minimun height of an obstacle.
-        maxObstHeight : int
-            The maximum height of an obstacle.
-        minD2Obstacles : int
-            The minimum distance between two distinct obstacles..
+        obsParametersList : list
+            The list of parameters that the obstacle generator will follow.
 
         Returns
         -------
@@ -151,12 +134,12 @@ class MapGenerator:
         cannot be closer to another obstacle than minD2Obstacles.
 
         """
-        self.maxO = maxObstruction
-        self.minObsW = minObstWidth
-        self.maxObsW = maxObstWidth
-        self.minObsH = minObstHeight
-        self.maxObsH = maxObstHeight
-        self.minD2O = minD2Obstacles
+        self.maxO = mapObstruction
+        self.minObsW = obsParametersList[0]
+        self.maxObsW = obsParametersList[1]
+        self.minObsH = obsParametersList[2]
+        self.maxObsH = obsParametersList[3]
+        self.minD2O = obsParametersList[4]
 
     def resetMap(self):
         """
