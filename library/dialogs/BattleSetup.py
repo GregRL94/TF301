@@ -1188,7 +1188,6 @@ class BattleSetup:
         self.ship_cost.setText(str(self.currentShip["naming"]["cost"]))
 
         if self.currentShipKey in self.allShips:
-            print("updating dict key")
             self.allShips[self.currentShipKey] = copy.deepcopy(self.currentShip)
             self.updateFleetCost()
 
