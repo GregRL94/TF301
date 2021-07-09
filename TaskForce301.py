@@ -14,7 +14,7 @@ import sys
 from os import path
 
 from PyQt5 import QtCore, QtWidgets
-from PyQt5.QtCore import Qt, QPointF
+from PyQt5.QtCore import Qt, QPoint
 from PyQt5.QtWidgets import QMessageBox
 
 from library import MainClock, Mapping, InGameData
@@ -175,106 +175,171 @@ class Ui_TSKF301MainWindow(object):
         self.genRandomMap()
         self.debugDisp(True, False)
 
-    def spawnShips(self, playerShipsConfigs: list, ennemyShipsConfigs=None):
-        allySpawnPos = QPointF(6000, 6000)
-        ennemySpawnPos = QPointF(12000, 12000)
+    def spawnShips(
+        self,
+        mapSize: int,
+        mapExtension: int,
+        distBLines: int,
+        playerShipsConfigs: list,
+        ennemyShipsConfigs=None,
+    ):
+        a_spawnXOffset = mapExtension + 1000
+        e_spawnXOffset = mapExtension + mapSize - 1000
+        spawnYCenter = mapSize // 2
+        a_nbBBAndCA = a_nbFF = a_nbPT = 0
+        e_nbBBAndCA = e_nbFF = e_nbPT = 0
+
+        for ship in playerShipsConfigs:
+            if ship["naming"]["_type"] == "BB" or ship["naming"]["_type"] == "CA":
+                a_nbBBAndCA += 1
+            elif ship["naming"]["_type"] == "FF":
+                a_nbFF += 1
+            elif ship["naming"]["_type"] == "PT":
+                a_nbPT += 1
+
+        allySpawnPos = [
+            QPoint(a_spawnXOffset, spawnYCenter - (a_nbBBAndCA // 2) * 1000),
+            QPoint(a_spawnXOffset + distBLines, spawnYCenter - (a_nbFF // 2) * 1000),
+            QPoint(
+                a_spawnXOffset + 2 * distBLines, spawnYCenter - (a_nbPT // 2) * 1000
+            ),
+        ]
 
         for i, playerShipConfig in enumerate(playerShipsConfigs):
             if playerShipConfig["naming"]["_type"] == "BB":
+                spawnPos = allySpawnPos[0]
                 currentShip = Ship._battleShip(
                     self.mainClock,
                     self.graphicsScene,
                     self.mapGen.gameMap,
                     self.mapGen.mapS,
-                    allySpawnPos,
+                    spawnPos,
                     "ALLY",
                     playerShipConfig,
                 )
+                allySpawnPos[0].setY(allySpawnPos[0].y() + 1000)
+
             elif playerShipConfig["naming"]["_type"] == "CA":
+                spawnPos = allySpawnPos[0]
                 currentShip = Ship.cruiser(
                     self.mainClock,
                     self.graphicsScene,
                     self.mapGen.gameMap,
                     self.mapGen.mapS,
-                    allySpawnPos,
+                    spawnPos,
                     "ALLY",
                     playerShipConfig,
                 )
+                allySpawnPos[0].setY(allySpawnPos[0].y() + 1000)
+
             elif playerShipConfig["naming"]["_type"] == "FF":
+                spawnPos = allySpawnPos[1]
                 currentShip = Ship.frigate(
                     self.mainClock,
                     self.graphicsScene,
                     self.mapGen.gameMap,
                     self.mapGen.mapS,
-                    allySpawnPos,
+                    spawnPos,
                     "ALLY",
                     playerShipConfig,
                 )
+                allySpawnPos[1].setY(allySpawnPos[1].y() + 1000)
+
             elif playerShipConfig["naming"]["_type"] == "PT":
+                spawnPos = allySpawnPos[2]
                 currentShip = Ship.corvette(
                     self.mainClock,
                     self.graphicsScene,
                     self.mapGen.gameMap,
                     self.mapGen.mapS,
-                    allySpawnPos,
+                    spawnPos,
                     "ALLY",
                     playerShipConfig,
                 )
+                allySpawnPos[2].setY(allySpawnPos[2].y() + 1000)
+
             else:
-                print("Could not Generate ship at", i, "!")
+                print("Could not Generate ship at:", i, "!")
             self.graphicsScene.addShip(currentShip)
             currentShip = None
-            allySpawnPos.setX(allySpawnPos.x() + 1000)
-            allySpawnPos.setY(allySpawnPos.y() + 1000)
 
         if ennemyShipsConfigs:
+            for ship in ennemyShipsConfigs:
+                if ship["naming"]["_type"] == "BB" or ship["naming"]["_type"] == "CA":
+                    e_nbBBAndCA += 1
+                elif ship["naming"]["_type"] == "FF":
+                    e_nbFF += 1
+                elif ship["naming"]["_type"] == "PT":
+                    e_nbPT += 1
+
+            ennemySpawnPos = [
+                QPoint(e_spawnXOffset, spawnYCenter - (e_nbBBAndCA // 2) * 1000),
+                QPoint(
+                    e_spawnXOffset - distBLines, spawnYCenter - (e_nbFF // 2) * 1000
+                ),
+                QPoint(
+                    e_spawnXOffset - 2 * distBLines,
+                    spawnYCenter - (e_nbPT // 2) * 1000,
+                ),
+            ]
+
             for j, ennemyShipConfig in enumerate(ennemyShipsConfigs):
                 if ennemyShipConfig["naming"]["_type"] == "BB":
+                    spawnPos = ennemySpawnPos[0]
                     currentShip = Ship._battleShip(
                         self.mainClock,
                         self.graphicsScene,
                         self.mapGen.gameMap,
                         self.mapGen.mapS,
-                        ennemySpawnPos,
+                        spawnPos,
                         "ENNEMY",
                         ennemyShipConfig,
                     )
+                    ennemySpawnPos[0].setY(ennemySpawnPos[0].y() + 1000)
+
                 elif ennemyShipConfig["naming"]["_type"] == "CA":
+                    spawnPos = ennemySpawnPos[0]
                     currentShip = Ship.cruiser(
                         self.mainClock,
                         self.graphicsScene,
                         self.mapGen.gameMap,
                         self.mapGen.mapS,
-                        ennemySpawnPos,
+                        spawnPos,
                         "ENNEMY",
                         ennemyShipConfig,
                     )
+                    ennemySpawnPos[0].setY(ennemySpawnPos[0].y() + 1000)
+
                 elif ennemyShipConfig["naming"]["_type"] == "FF":
+                    spawnPos = ennemySpawnPos[1]
                     currentShip = Ship.frigate(
                         self.mainClock,
                         self.graphicsScene,
                         self.mapGen.gameMap,
                         self.mapGen.mapS,
-                        ennemySpawnPos,
+                        spawnPos,
                         "ENNEMY",
                         ennemyShipConfig,
                     )
+                    ennemySpawnPos[1].setY(ennemySpawnPos[1].y() + 1000)
+
                 elif ennemyShipConfig["naming"]["_type"] == "PT":
+                    spawnPos = ennemySpawnPos[2]
                     currentShip = Ship.corvette(
                         self.mainClock,
                         self.graphicsScene,
                         self.mapGen.gameMap,
                         self.mapGen.mapS,
-                        ennemySpawnPos,
+                        spawnPos,
                         "ENNEMY",
                         ennemyShipConfig,
                     )
+                    ennemySpawnPos[2].setY(ennemySpawnPos[2].y() + 1000)
+
                 else:
                     print("Could not Generate ship at", j, "!")
                 self.graphicsScene.addShip(currentShip)
                 currentShip = None
-                ennemySpawnPos.setX(allySpawnPos.x() + 1000)
-                ennemySpawnPos.setY(allySpawnPos.y() + 1000)
 
         self.rComs.updateShipLists()
 
@@ -308,7 +373,12 @@ class Ui_TSKF301MainWindow(object):
                     mapConfig["obstruction"],
                     mapConfig["obstaclesSetup"],
                 )
-                self.spawnShips(playerFleet.values())
+                self.spawnShips(
+                    mapConfig["size"],
+                    mapConfig["extension"],
+                    1500,
+                    playerFleet.values(),
+                )
                 self.inBattle = True
                 self.battleState = False
 
