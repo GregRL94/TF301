@@ -5,7 +5,7 @@
     Author: Grégory LARGANGE
     Date created: 12/10/2020
     Last modified by: Grégory LARGANGE
-    Date last modified: 07/07/2021
+    Date last modified: 13/07/2021
     Python version: 3.8.1
 """
 
@@ -198,6 +198,12 @@ class GameScene(QGraphicsScene):
         self.removeItem(_object)
         del _object
 
+    def clearGameScene(self):
+        for ship in self.shipList.values():
+            self.removeItem(ship)
+        self.nextShipID = 0
+        self.clearMap()
+
 
 class GameView(QGraphicsView):
     def __init__(self, parent=None):
@@ -298,11 +304,7 @@ class GameView(QGraphicsView):
         if keyEvent.key() == Qt.Key_Control:
             self.ctrlKeyDown = True
         if keyEvent.key() == Qt.Key_Backspace:
-            self.setTransformationAnchor(QGraphicsView.AnchorViewCenter)
-            self.setResizeAnchor(QGraphicsView.AnchorViewCenter)
-            self.resetTransform()
-            self.scale(1.0, 1.0)
-            self.currentZoom = 1.0
+            self.resetZoom()
         super(GameView, self).keyPressEvent(keyEvent)
 
     def keyReleaseEvent(self, keyEvent):
@@ -324,3 +326,20 @@ class GameView(QGraphicsView):
         """
         if keyEvent.key() == Qt.Key_Control:
             self.ctrlKeyDown = False
+
+    def resetZoom(self):
+        """
+
+        Returns
+        -------
+        None.
+
+        Summary
+        -------
+        Resets the game view to its original scale and anchor position.
+        """
+        self.setTransformationAnchor(QGraphicsView.AnchorViewCenter)
+        self.setResizeAnchor(QGraphicsView.AnchorViewCenter)
+        self.resetTransform()
+        self.scale(1.0, 1.0)
+        self.currentZoom = 1.0
