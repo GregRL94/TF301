@@ -26,7 +26,6 @@ from library.utils.MathsFormulas import (
     Cinematics as cin,
     Controllers as con,
 )
-from library.utils.Config import Config
 from library.Mapping import Astar as astar
 
 
@@ -117,8 +116,6 @@ class Ship(QGraphicsRectItem):
 
     """
 
-    configs_path = path.join(path.dirname(path.realpath(__file__)), "configs")
-
     def __init__(self, clock, gameScene, gameMap, mapSlicing):
         """
 
@@ -184,44 +181,32 @@ class Ship(QGraphicsRectItem):
 
     @classmethod
     def _battleShip(cls, clock, gameScene, gameMap, mapSlicing, pos, tag, _config):
-        # bb_default, bb_txt = Config._file2dict(path.join(cls.configs_path, "battleshipConfig.py"))
-        # bb_cfg = Config._merge_a_into_b(_config, bb_default)
         bb = cls(clock, gameScene, gameMap, mapSlicing)
         bb.__dict__.update(_config)
-        # bb.__dict__.update(bb_cfg)
         bb.__init_instance__(pos, tag)
 
         return bb
 
     @classmethod
     def cruiser(cls, clock, gameScene, gameMap, mapSlicing, pos, tag, _config):
-        # ca_default, ca_txt = Config._file2dict(path.join(cls.configs_path, "cruiserConfig.py"))
-        # ca_cfg = Config._merge_a_into_b(_config, ca_default)
         ca = cls(clock, gameScene, gameMap, mapSlicing)
         ca.__dict__.update(_config)
-        # ca.__dict__.update(ca_cfg)
         ca.__init_instance__(pos, tag)
 
         return ca
 
     @classmethod
     def frigate(cls, clock, gameScene, gameMap, mapSlicing, pos, tag, _config):
-        # ff_default, ff_txt = Config._file2dict(path.join(cls.configs_path, "frigateConfig.py"))
-        # ff_cfg = Config._merge_a_into_b(_config, ff_default)
         ff = cls(clock, gameScene, gameMap, mapSlicing)
         ff.__dict__.update(_config)
-        # ff.__dict__.update(ff_cfg)
         ff.__init_instance__(pos, tag)
 
         return ff
 
     @classmethod
     def corvette(cls, clock, gameScene, gameMap, mapSlicing, pos, tag, _config):
-        # pt_default, pt_txt = Config._file2dict(path.join(cls.configs_path, "corvetteConfig.py"))
-        # pt_cfg = Config._merge_a_into_b(_config, pt_default)
         pt = cls(clock, gameScene, gameMap, mapSlicing)
         pt.__dict__.update(_config)
-        # ff.__dict__.update(pt_cfg)
         pt.__init_instance__(pos, tag)
 
         return pt
@@ -908,12 +893,31 @@ class Ship(QGraphicsRectItem):
         Computes and return the best ship to set as target.
 
         """
+        validTargets = []
+        addedShips = []
         target = None
 
-        if self.det_and_range["ships_in_range"] is not None:
-            if len(self.det_and_range["ships_in_range"]) > 0:
-                target = self.det_and_range["ships_in_range"][0]
-        return target
+        # if self.det_and_range["ships_in_range"] is not None:
+        #     if len(self.det_and_range["ships_in_range"]) > 0:
+        #         target = self.det_and_range["ships_in_range"][0]
+        # return target
+
+        if self.det_and_range["ships_in_range"]:
+            for ship in self.det_and_range["ships_in_range"]:
+                shipCenter = geo.parallelepiped_Center(
+                    ship.pos(), ship.rect().width(), ship.rect().height()
+                )
+                if self.gameScene.isInLineOfSight(
+                    self.coordinates["center"], shipCenter, 250,
+                ):
+                    if ship not in validTargets:
+                        validTargets.append(ship)
+                        ### HERE EVALUATE TARGET
+
+    def evaluateTarget(self, target):
+        # --- Possible Hit Area ---#
+        pass
+        # -------------------------#
 
     def repair(self):
         True

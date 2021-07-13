@@ -5,7 +5,7 @@
     Author: Grégory LARGANGE
     Date created: 12/10/2020
     Last modified by: Grégory LARGANGE
-    Date last modified: 07/07/2021
+    Date last modified: 13/07/2021
     Python version: 3.8.1
 """
 
@@ -106,6 +106,33 @@ class GameScene(QGraphicsScene):
                 if _item.data(2):
                     return i
         return None
+
+    def isInLineOfSight(self, origin, target, resolution):
+        currentPos = origin
+        distance = int(geo.distance_A_B(origin, target))
+        angleInrad = geo.angle(origin, target)
+
+        while int(geo.distance_A_B(origin, currentPos)) < distance:
+            currentPos = cin.movementBy(currentPos, resolution, angleInrad)
+            _item = self.itemAt(currentPos, self.attachedGView.transform())
+            if _item:
+                if _item.data(1) == "ISLAND":
+                    # self.addLine(
+                    #     origin.x(),
+                    #     origin.y(),
+                    #     currentPos.x(),
+                    #     currentPos.y(),
+                    #     QPen(QColor("red"), 4),
+                    # )
+                    return False
+        # self.addLine(
+        #     origin.x(),
+        #     origin.y(),
+        #     currentPos.x(),
+        #     currentPos.y(),
+        #     QPen(QColor("green"), 4),
+        # )
+        return True
 
     def dispGrid(self, step):
         for i in range(0, int(self.height()), step):

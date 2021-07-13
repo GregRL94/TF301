@@ -5,11 +5,12 @@
     Author: Grégory LARGANGE
     Date created: 07/10/2020
     Last modified by: Grégory LARGANGE
-    Date last modified: 07/07/2021
+    Date last modified: 13/07/2021
     Python version: 3.8.1
 """
 
 import sys
+import copy  ### Only for testing
 
 from os import path
 
@@ -188,7 +189,9 @@ class Ui_TSKF301MainWindow(object):
         spawnYCenter = mapSize // 2
         a_nbBBAndCA = a_nbFF = a_nbPT = 0
         e_nbBBAndCA = e_nbFF = e_nbPT = 0
-
+        ######
+        testConfig = None
+        ######
         for ship in playerShipsConfigs:
             if ship["naming"]["_type"] == "BB" or ship["naming"]["_type"] == "CA":
                 a_nbBBAndCA += 1
@@ -206,6 +209,9 @@ class Ui_TSKF301MainWindow(object):
         ]
 
         for i, playerShipConfig in enumerate(playerShipsConfigs):
+            ######
+            testConfig = copy.deepcopy(playerShipConfig)
+            ######
             if playerShipConfig["naming"]["_type"] == "BB":
                 spawnPos = allySpawnPos[0]
                 currentShip = Ship._battleShip(
@@ -341,6 +347,19 @@ class Ui_TSKF301MainWindow(object):
                 self.graphicsScene.addShip(currentShip)
                 currentShip = None
 
+        ##### TBD #####
+        currentShip = Ship._battleShip(
+            self.mainClock,
+            self.graphicsScene,
+            self.mapGen.gameMap,
+            self.mapGen.mapS,
+            QPoint(15000, 15000),
+            "ENNEMY",
+            testConfig,
+        )
+        self.graphicsScene.addShip(currentShip)
+        currentShip = None
+        ################
         self.rComs.updateShipLists()
 
     def createBattle(self):

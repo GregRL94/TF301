@@ -5,7 +5,7 @@
     Author: Grégory LARGANGE
     Date created: 07/10/2020
     Last modified by: Grégory LARGANGE
-    Date last modified: 19/05/2021
+    Date last modified: 13/07/2021
     Python version: 3.8.1
 """
 
@@ -14,7 +14,7 @@ import random
 
 from os import path
 
-from PyQt5.QtCore import QRectF, QPointF
+from PyQt5.QtCore import QRectF
 from PyQt5.QtGui import QPen, QBrush, QColor
 from PyQt5.QtWidgets import QGraphicsRectItem
 
