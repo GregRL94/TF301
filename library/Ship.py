@@ -5,14 +5,14 @@
     Author: Grégory LARGANGE
     Date created: 09/10/2020
     Last modified by: Grégory LARGANGE
-    Date last modified: 28/05/2021
+    Date last modified: 14/07/2021
     Python version: 3.8.1
 """
 
 import math
 import random
 
-from os import path
+from os import error, path
 
 from PyQt5.QtCore import Qt, QRectF, QPointF
 from PyQt5.QtGui import QColor, QPen, QBrush, QCursor
@@ -21,6 +21,7 @@ from PyQt5.QtWidgets import QGraphicsItem, QGraphicsRectItem
 from library import RangeCircles
 from library.GunTurret import GunTurret as turret
 from library.InGameData import TechsData as tech_dat
+from library.utils import HEAP
 from library.utils.MathsFormulas import (
     Geometrics as geo,
     Cinematics as cin,
@@ -140,6 +141,7 @@ class Ship(QGraphicsRectItem):
         """
         super(Ship, self).__init__(QRectF(0, 0, 0, 0))
         self.astar = astar(gameMap, mapSlicing)
+        self.targetList = HEAP.HEAP()
         self.gameScene = gameScene
         self.clock = clock
 
@@ -904,20 +906,69 @@ class Ship(QGraphicsRectItem):
 
         if self.det_and_range["ships_in_range"]:
             for ship in self.det_and_range["ships_in_range"]:
-                shipCenter = geo.parallelepiped_Center(
-                    ship.pos(), ship.rect().width(), ship.rect().height()
-                )
-                if self.gameScene.isInLineOfSight(
-                    self.coordinates["center"], shipCenter, 250,
-                ):
-                    if ship not in validTargets:
-                        validTargets.append(ship)
-                        ### HERE EVALUATE TARGET
+                if ship not in validTargets:
+                    shipCenter = geo.parallelepiped_Center(
+                        ship.pos(), ship.rect().width(), ship.rect().height()
+                    )
+                    if self.gameScene.isInLineOfSight(
+                        self.coordinates["center"], shipCenter, 250,
+                    ):
+                        self.evaluateTarget(ship)
 
     def evaluateTarget(self, target):
-        # --- Possible Hit Area ---#
-        pass
-        # -------------------------#
+        ##################### COMPUTE HIT PROBABILITY PER SALVO #####################
+        #############################################################################
+        print("Now Evaluating ship:", target.naming["_type"], target.data(0))
+        print("...")
+        print("--Target Characteristics--")
+        targetCenter = geo.parallelepiped_Center(
+            target.pos(), target.rect().width(), target.rect().height()
+        )
+        targetDistance = round(
+            geo.distance_A_B(self.coordinates["center"], targetCenter)
+        )
+        print("Distance:", targetDistance)
+        targetArea = int(target.rect().width() * target.rect().height())
+        print("Target surface area:", targetArea)
+        print("---------------------------------")
+
+        print("--Firing characterisctics--")
+        n_shots = (
+            len(self.weapons["turrets_list"]) * self.weapons["turrets_list"][0].n_guns
+        )
+        print("Firing", n_shots, "shots")
+        azimut_error = math.radians(self.weapons["turrets_list"][0].gun_acc)
+        print("Azimut error of independant guns:", azimut_error)
+        if self.naming["_type"] == "BB":
+            errorOnD = tech_dat.shot_innac[2] * targetDistance
+        elif self.naming["_type"] == "CA":
+            errorOnD = tech_dat.shot_innac[1] * targetDistance
+        elif self.naming["_type"] == "FF" or self.naming["type"] == "PT":
+            errorOnD = tech_dat.shot_innac[0] * targetDistance
+        else:
+            print("Could not recognize ship type,", self.naming["_type"])
+        errorOnD = round(errorOnD)
+        print("Distance error of independants shots:", errorOnD)
+        print("----------------------------------------------")
+
+        print("--Hit probability calculations--")
+        hitArea = round(
+            errorOnD * math.tan(azimut_error) * (2 * targetDistance - errorOnD)
+        )
+        print("Computed hit area:", hitArea)
+        hitChance = targetArea / hitArea
+        print("Computed hit chance per shot:", hitChance)
+        hitProbability = round(1 - (1 - hitChance) ** n_shots)
+        print("Computed hit probability on salvo:", hitProbability * 100)
+        print("----------------------------------------------")
+        #############################################################################
+        #############################################################################
+
+        ####################### CHOOSES BEST SUITED SHOT TYPE #######################
+        #############################################################################
+        ## TODO
+        #############################################################################
+        #############################################################################
 
     def repair(self):
         True
@@ -1097,3 +1148,52 @@ class Ship(QGraphicsRectItem):
                 painter.setBrush(QBrush(QColor("red")))
                 painter.setPen(QPen(QColor("darkred"), 10))
         painter.drawEllipse(self.rect())
+
+
+class ShipHEAPItem(HEAP.HEAPItem):
+    def __init__(self, ship, potential):
+        """
+        Parameters
+        ----------
+        ship : Ship
+            An object of class Ship.
+        potential : float
+            An evaluation of the potential damage that can be evaluated on this ship.
+
+        Returns
+        -------
+        None.
+
+        Summary
+        -------
+        Constructor of the class.
+
+        """
+        self.shipInstance = ship
+        self.shipPotential = potential
+
+    def compareTo(self, otherShipHEAPItem):
+        """
+
+        Parameters
+        ----------
+        otherShipHEAPItem : ShipHEAPItem
+            The other shipHEAPItem to compare this shipHEAPItem to.
+
+        Returns
+        -------
+        int
+            The result of the comparison.
+
+        Summary
+        -------
+        Compares the shipHEAPItems according to their potential.
+        Returns 1 if potential of this shipHEAPItem is lower, -1 if higher.
+        Special case if both potentials are equal. See function in line comments.
+
+        """
+        # If the current shipHEAPItem has a lower potential than the shipHEAPItem's potential it is compared to.
+        if self.shipPotential <= otherShipHEAPItem.shipPotential:
+            return -1
+        # If the current shipHEAPItem has a higher potential than the shipHEAPItem's potential it is compared to
+        return 1

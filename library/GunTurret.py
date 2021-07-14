@@ -5,7 +5,7 @@
     Author: Grégory LARGANGE
     Date created: 12/10/2020
     Last modified by: Grégory LARGANGE
-    Date last modified: 19/05/2020
+    Date last modified: 14/07/2020
     Python version: 3.8.1
 """
 
@@ -20,10 +20,7 @@ from PyQt5.QtWidgets import QGraphicsRectItem
 
 from library.Projectile import Projectile
 from library.utils.MathsFormulas import Geometrics as geo, Controllers as con
-from library.InGameData import (
-    ProjectileData as p_dat,
-    TechsData as tech_dat,
-)
+from library.InGameData import TechsData as tech_dat
 from library.utils.Config import Config
 
 
@@ -379,9 +376,9 @@ class GunTurret(QGraphicsRectItem):
 
         """
         shellSpeed = (
-            p_dat.speeds_shellType[0]
+            tech_dat.speeds_shellType[0]
             if self.shot_t == "AP"
-            else p_dat.speeds_shellType[1]
+            else tech_dat.speeds_shellType[1]
         )
         shellSpeed *= self.parentShip.refresh[
             "refresh_rate"
