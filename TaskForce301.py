@@ -34,11 +34,11 @@ class Ui_TSKF301MainWindow(object):
         self.gridLayout.setObjectName("gridLayout")
         self.gridLayout.setContentsMargins(3, 3, 3, 3)
         self.gridLayout.setSpacing(2)
-        self.graphicsScene = GameDisplay.GameScene(self.centralwidget)
-        self.graphicsView = GameDisplay.GameView(self.graphicsScene)
-        self.graphicsView.setObjectName("graphicsView")
-        self.graphicsScene.attachedGView = self.graphicsView
-        self.gridLayout.addWidget(self.graphicsView, 0, 1, 1, 1)
+        self.gameScene = GameDisplay.GameScene(self.centralwidget)
+        self.gameView = GameDisplay.GameView(self.gameScene)
+        self.gameView.setObjectName("gameView")
+        self.gameScene.attachedGView = self.gameView
+        self.gridLayout.addWidget(self.gameView, 0, 1, 1, 1)
         self.main_buttons_frame = QtWidgets.QFrame(self.centralwidget)
         self.main_buttons_frame.setFrameShape(QtWidgets.QFrame.StyledPanel)
         self.main_buttons_frame.setFrameShadow(QtWidgets.QFrame.Raised)
@@ -102,7 +102,7 @@ class Ui_TSKF301MainWindow(object):
         QtCore.QMetaObject.connectSlotsByName(TSKF301MainWindow)
 
         self.newGame_but.clicked.connect(self.createBattle)
-        self.exit_but.clicked.connect(self.exitClicked)
+        self.exit_but.clicked.connect(self.exitGame)
         self.actionInBattlePause.triggered.connect(self.inBattlePause)
         self.actionEscapePause.triggered.connect(self.escapePause)
 
@@ -123,19 +123,16 @@ class Ui_TSKF301MainWindow(object):
     def initData(self):
         self.mainClock = None
         self.mapGen = None
+        self.rComs = None
         self.inBattle = False
         self.battleState = False
 
-    def genRandomMap(self):
-        genObs = self.mapGen.generateMap()
-        self.graphicsScene.displayMap(genObs)
-
     def debugDisp(self, mapResolution, gridOn=True, penalties=True):
         if gridOn:
-            self.graphicsScene.dispGrid(mapResolution)
+            self.gameScene.dispGrid(mapResolution)
         if penalties:
             _penaltyMap = self.mapGen.getPenaltyMap()
-            self.graphicsScene.dispPenalties(_penaltyMap, mapResolution)
+            self.gameScene.dispPenalties(_penaltyMap, mapResolution)
 
     def newGame(
         self,
@@ -145,14 +142,14 @@ class Ui_TSKF301MainWindow(object):
         mapObstruction: float,
         obsParameters: list,
     ):
-        self.graphicsScene.setSceneRect(
+        self.gameScene.setSceneRect(
             0,
             0,
             int(playableArea + 2 * mapExtension),
             int(playableArea + 2 * mapExtension),
         )
-        self.graphicsScene.setInnerMap(mapExtension, playableArea)
-        self.graphicsView.fitInView(
+        self.gameScene.setInnerMap(mapExtension, playableArea)
+        self.gameView.fitInView(
             QtCore.QRectF(
                 mapExtension,
                 mapExtension,
@@ -162,19 +159,13 @@ class Ui_TSKF301MainWindow(object):
             Qt.KeepAspectRatio,
         )
         self.mapGen = Mapping.MapGenerator(
-            self.graphicsScene.width(), self.graphicsScene.height(), mapResolution
+            self.gameScene.width(), self.gameScene.height(), mapResolution
         )
         self.mapGen.setMapParameters(mapObstruction, obsParameters)
-        self.genRandomMap()
+        self.gameScene.displayMap(self.mapGen.generateMap())
         self.debugDisp(mapResolution, True, False)
 
-        self.rComs = InGameData.RadioCommunications(self.mainClock, self.graphicsScene)
-
-    def newGameMap(self):
-        self.graphicsScene.clearMap()
-        self.mapGen.resetMap()
-        self.genRandomMap()
-        self.debugDisp(True, False)
+        self.rComs = InGameData.RadioCommunications(self.mainClock, self.gameScene)
 
     def spawnShips(
         self,
@@ -216,7 +207,7 @@ class Ui_TSKF301MainWindow(object):
                 spawnPos = allySpawnPos[0]
                 currentShip = Ship._battleShip(
                     self.mainClock,
-                    self.graphicsScene,
+                    self.gameScene,
                     self.mapGen.gameMap,
                     self.mapGen.mapS,
                     spawnPos,
@@ -229,7 +220,7 @@ class Ui_TSKF301MainWindow(object):
                 spawnPos = allySpawnPos[0]
                 currentShip = Ship.cruiser(
                     self.mainClock,
-                    self.graphicsScene,
+                    self.gameScene,
                     self.mapGen.gameMap,
                     self.mapGen.mapS,
                     spawnPos,
@@ -242,7 +233,7 @@ class Ui_TSKF301MainWindow(object):
                 spawnPos = allySpawnPos[1]
                 currentShip = Ship.frigate(
                     self.mainClock,
-                    self.graphicsScene,
+                    self.gameScene,
                     self.mapGen.gameMap,
                     self.mapGen.mapS,
                     spawnPos,
@@ -255,7 +246,7 @@ class Ui_TSKF301MainWindow(object):
                 spawnPos = allySpawnPos[2]
                 currentShip = Ship.corvette(
                     self.mainClock,
-                    self.graphicsScene,
+                    self.gameScene,
                     self.mapGen.gameMap,
                     self.mapGen.mapS,
                     spawnPos,
@@ -266,7 +257,7 @@ class Ui_TSKF301MainWindow(object):
 
             else:
                 print("Could not Generate ship at:", i, "!")
-            self.graphicsScene.addShip(currentShip)
+            self.gameScene.addShip(currentShip)
             currentShip = None
 
         if ennemyShipsConfigs:
@@ -294,7 +285,7 @@ class Ui_TSKF301MainWindow(object):
                     spawnPos = ennemySpawnPos[0]
                     currentShip = Ship._battleShip(
                         self.mainClock,
-                        self.graphicsScene,
+                        self.gameScene,
                         self.mapGen.gameMap,
                         self.mapGen.mapS,
                         spawnPos,
@@ -307,7 +298,7 @@ class Ui_TSKF301MainWindow(object):
                     spawnPos = ennemySpawnPos[0]
                     currentShip = Ship.cruiser(
                         self.mainClock,
-                        self.graphicsScene,
+                        self.gameScene,
                         self.mapGen.gameMap,
                         self.mapGen.mapS,
                         spawnPos,
@@ -320,7 +311,7 @@ class Ui_TSKF301MainWindow(object):
                     spawnPos = ennemySpawnPos[1]
                     currentShip = Ship.frigate(
                         self.mainClock,
-                        self.graphicsScene,
+                        self.gameScene,
                         self.mapGen.gameMap,
                         self.mapGen.mapS,
                         spawnPos,
@@ -333,7 +324,7 @@ class Ui_TSKF301MainWindow(object):
                     spawnPos = ennemySpawnPos[2]
                     currentShip = Ship.corvette(
                         self.mainClock,
-                        self.graphicsScene,
+                        self.gameScene,
                         self.mapGen.gameMap,
                         self.mapGen.mapS,
                         spawnPos,
@@ -344,7 +335,7 @@ class Ui_TSKF301MainWindow(object):
 
                 else:
                     print("Could not Generate ship at", j, "!")
-                self.graphicsScene.addShip(currentShip)
+                self.gameScene.addShip(currentShip)
                 currentShip = None
 
         ##### TBD #####
@@ -425,13 +416,28 @@ class Ui_TSKF301MainWindow(object):
             elif result[1] == 1:
                 print("OPENING OPTION MENU")
             elif result[1] == 2:
-                print("EXITING BATTLE")
+                self.exitBattle()
 
             if battleStateAtPause:
-                self.mainClock.startClock()
-                self.battleState = True
+                try:
+                    self.mainClock.startClock()
+                    self.battleState = True
+                except AttributeError:
+                    pass
 
-    def exitClicked(self):
+    def exitBattle(self):
+        result = dialogsUtils.OkCancelDialog("Leave battle", 1, "Admit defeat ?")
+        if result == QMessageBox.Ok:
+            self.mainClock.stopClock()
+            self.battleState = False
+            self.gameScene.clearGameScene()
+            self.gameView.resetZoom()
+            self.initData()
+            self.main_buttons_frame.setVisible(True)
+            self.playerShipsDW.setVisible(False)
+            self.gameView.fitInView(self.gameScene.sceneRect(), Qt.KeepAspectRatio)
+
+    def exitGame(self):
         result = dialogsUtils.OkCancelDialog(
             "Quit Task Force 301?", 1, "Are you sure you want to quit Task Force 301 ?"
         )
