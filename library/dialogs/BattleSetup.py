@@ -832,6 +832,12 @@ class BattleSetup:
         self.clear_ship_but.setText("Reset Ship")
         self.clear_ship_but.setEnabled(False)
         clear_add_but_lyt.addWidget(self.clear_ship_but)
+
+        self.add_ship_but = QtWidgets.QPushButton(verticalLayoutWidget_2)
+        self.add_ship_but.setObjectName("add_ship_but")
+        self.add_ship_but.setText("Add Ship")
+        self.add_ship_but.setEnabled(False)
+        clear_add_but_lyt.addWidget(self.add_ship_but)
         ship_creator_lyt.addLayout(clear_add_but_lyt)
 
         QtCore.QMetaObject.connectSlotsByName(fleet_setup)
@@ -857,6 +863,7 @@ class BattleSetup:
         self.gun_tech_2.clicked.connect(self.updateShipStats)
 
         ## Add, reset or delete current ship ##
+        self.add_ship_but.clicked.connect(self.addShip)
         self.clear_ship_but.clicked.connect(self.resetButtonClicked)
         del_ship_but.clicked.connect(self.listView.removeFromList)
 
@@ -1080,6 +1087,7 @@ class BattleSetup:
 
         if not self.clear_ship_but.isEnabled():
             self.clear_ship_but.setEnabled(True)
+            self.add_ship_but.setEnabled(True)
 
         try:
             if not self.radioButtonsEnabled:
@@ -1087,7 +1095,7 @@ class BattleSetup:
                 self.radioButtonsEnabled = True
             self.updateShipCreatorUI()
             self.updateShipStats()
-            self.addShip()
+            # self.addShip()
         except Exception as e:
             print("Could not update UI", e)
 
