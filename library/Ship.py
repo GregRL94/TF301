@@ -11,8 +11,9 @@
 
 import math
 import random
+import copy
 
-from os import error, path
+from os import path
 
 from PyQt5.QtCore import Qt, QRectF, QPointF
 from PyQt5.QtGui import QColor, QPen, QBrush, QCursor
@@ -22,6 +23,7 @@ from library import RangeCircles
 from library.GunTurret import GunTurret as turret
 from library.InGameData import TechsData as tech_dat
 from library.utils import HEAP
+from library.utils.Config import Config
 from library.utils.MathsFormulas import (
     Geometrics as geo,
     Cinematics as cin,
@@ -172,6 +174,17 @@ class Ship(QGraphicsRectItem):
             self.speed_params["speed_options"]["SLOW"], self.hull["turn_rate"]
         )
         self.currentTurret = None
+
+        p_cfg = path.join(
+            path.dirname(path.realpath(__file__)), "configs/projectileConfig.py"
+        )
+        all_p_dat, p_txt = Config._file2dict(p_cfg)
+        if self.naming["_type"] == "BB":
+            self.p_dat = copy.deepcopy(all_p_dat["large"])
+        elif self.naming["_type"] == "CA":
+            self.p_dat = copy.deepcopy(all_p_dat["medium"])
+        else:
+            self.p_dat = copy.deepcopy(all_p_dat["small"])
 
         self.setData(1, tag)
         self.setData(2, True)  # Considered an obstacle
@@ -939,14 +952,7 @@ class Ship(QGraphicsRectItem):
         print("Firing", n_shots, "shots")
         azimut_error = math.radians(self.weapons["turrets_list"][0].gun_acc)
         print("Azimut error of independant guns:", azimut_error)
-        if self.naming["_type"] == "BB":
-            errorOnD = tech_dat.shot_innac[2] * targetDistance
-        elif self.naming["_type"] == "CA":
-            errorOnD = tech_dat.shot_innac[1] * targetDistance
-        elif self.naming["_type"] == "FF" or self.naming["type"] == "PT":
-            errorOnD = tech_dat.shot_innac[0] * targetDistance
-        else:
-            print("Could not recognize ship type,", self.naming["_type"])
+        errorOnD = self.p_dat["accy"] * targetDistance
         errorOnD = round(errorOnD)
         print("Distance error of independants shots:", errorOnD)
         print("----------------------------------------------")
