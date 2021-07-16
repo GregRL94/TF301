@@ -315,7 +315,7 @@ class Projectile(QGraphicsRectItem):
         Linear degression of the speed of the projectile.
 
         """
-        self.v = round(self.v - self.decc, 4)
+        self.v = self.v - self.decc
 
     def pen_decrease(self):
         """

@@ -341,14 +341,14 @@ class Ui_TSKF301MainWindow(object):
         ##### TBD #####
         currentShip = Ship._battleShip(
             self.mainClock,
-            self.graphicsScene,
+            self.gameScene,
             self.mapGen.gameMap,
             self.mapGen.mapS,
             QPoint(15000, 15000),
             "ENNEMY",
             testConfig,
         )
-        self.graphicsScene.addShip(currentShip)
+        self.gameScene.addShip(currentShip)
         currentShip = None
         ################
         self.rComs.updateShipLists()

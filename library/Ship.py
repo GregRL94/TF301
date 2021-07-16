@@ -11,7 +11,6 @@
 
 import math
 import random
-import copy
 
 from os import path
 
@@ -174,17 +173,25 @@ class Ship(QGraphicsRectItem):
             self.speed_params["speed_options"]["SLOW"], self.hull["turn_rate"]
         )
         self.currentTurret = None
+        self.discoveredShips = []
 
         p_cfg = path.join(
             path.dirname(path.realpath(__file__)), "configs/projectileConfig.py"
         )
         all_p_dat, p_txt = Config._file2dict(p_cfg)
+        table_cfg = path.join(
+            path.dirname(path.realpath(__file__)), "configs/penetrationTable.py"
+        )
+        all_table, table_txt = Config._file2dict(table_cfg)
         if self.naming["_type"] == "BB":
-            self.p_dat = copy.deepcopy(all_p_dat["large"])
+            self.p_dat = all_p_dat["large"]
+            self.table = all_table["large"]
         elif self.naming["_type"] == "CA":
-            self.p_dat = copy.deepcopy(all_p_dat["medium"])
+            self.p_dat = all_p_dat["medium"]
+            self.table = all_table["medium"]
         else:
-            self.p_dat = copy.deepcopy(all_p_dat["small"])
+            self.p_dat = all_p_dat["small"]
+            self.table = all_table["small"]
 
         self.setData(1, tag)
         self.setData(2, True)  # Considered an obstacle
@@ -908,8 +915,6 @@ class Ship(QGraphicsRectItem):
         Computes and return the best ship to set as target.
 
         """
-        validTargets = []
-        addedShips = []
         target = None
 
         # if self.det_and_range["ships_in_range"] is not None:
@@ -919,16 +924,23 @@ class Ship(QGraphicsRectItem):
 
         if self.det_and_range["ships_in_range"]:
             for ship in self.det_and_range["ships_in_range"]:
-                if ship not in validTargets:
+                if ship.data(0) not in self.discoveredShips:
                     shipCenter = geo.parallelepiped_Center(
                         ship.pos(), ship.rect().width(), ship.rect().height()
                     )
                     if self.gameScene.isInLineOfSight(
                         self.coordinates["center"], shipCenter, 250,
                     ):
-                        self.evaluateTarget(ship)
+                        _potentialDamage, shot_type = self.evaluateTarget(ship)
+                        # _shipHeapItem = ShipHEAPItem(ship, _potentialDamage)
+                        # _shipHeapItem.targetable = True
+                        # _shipHeapItem.idealShot = shot_type
+                        # self.discoveredShips.append(ship.data(0))
+                        # self.targetList.addItem(_shipHeapItem)
 
     def evaluateTarget(self, target):
+        shot_choice = ""
+        potential = 0
         ##################### COMPUTE HIT PROBABILITY PER SALVO #####################
         #############################################################################
         print("Now Evaluating ship:", target.naming["_type"], target.data(0))
@@ -972,9 +984,31 @@ class Ship(QGraphicsRectItem):
 
         ####################### CHOOSES BEST SUITED SHOT TYPE #######################
         #############################################################################
-        ## TODO
+        print("--Damage potential calculations--")
+        penAtDist = self.table[int(targetDistance / 1000)]
+        print("Penetration at target distance:", penAtDist)
+        dmgHE = min(
+            int((self.p_dat["pen_HE"] / target.hull["armor"]) * self.p_dat["dmg_HE"]),
+            self.p_dat["dmg_HE"],
+        )
+        if penAtDist > target.hull["armor"]:
+            print("Can pierce target with AP")
+            dmgAP = self.p_dat["dmg_AP"]
+            print("Damage AP:", dmgAP, " ", "Damage HE:", dmgHE)
+            if dmgHE > dmgAP:
+                shot_choice = "HE"
+                potential = dmgHE
+            else:
+                shot_choice = "AP"
+                potential = dmgAP
+        else:
+            print("Cannot pierce target")
+            shot_choice = "HE"
+            potential = dmgHE
         #############################################################################
         #############################################################################
+        print("Selected shot:", shot_choice, "for damage potential of:", potential)
+        return (potential, shot_choice)
 
     def repair(self):
         True
@@ -1176,7 +1210,9 @@ class ShipHEAPItem(HEAP.HEAPItem):
 
         """
         self.shipInstance = ship
-        self.shipPotential = potential
+        self.targetable = False
+        self.potentialDamage = potential
+        self.idealShot = ""
 
     def compareTo(self, otherShipHEAPItem):
         """
@@ -1199,7 +1235,7 @@ class ShipHEAPItem(HEAP.HEAPItem):
 
         """
         # If the current shipHEAPItem has a lower potential than the shipHEAPItem's potential it is compared to.
-        if self.shipPotential <= otherShipHEAPItem.shipPotential:
+        if self.potentialDamage <= otherShipHEAPItem.potentialDamage:
             return -1
         # If the current shipHEAPItem has a higher potential than the shipHEAPItem's potential it is compared to
         return 1
