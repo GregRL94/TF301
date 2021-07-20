@@ -55,7 +55,7 @@ crit_components = {
 det_and_range = {
     "detected_ships": None,
     "rcom_ships": None,
-    "ships_in_range": None,
+    "fleet_detected_ships": None,
     "det_r_angles": [-33.34, 0, 33.34],
     "det_r_range": 0,
 }

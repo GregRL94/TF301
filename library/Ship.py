@@ -172,6 +172,7 @@ class Ship(QGraphicsRectItem):
         self.det_and_range["det_r_range"] = cin.rotationRadius(
             self.speed_params["speed_options"]["SLOW"], self.hull["turn_rate"]
         )
+        self.det_and_range["fleet_detected_ships"] = []
         self.currentTurret = None
         self.discoveredShips = []
 
@@ -281,7 +282,7 @@ class Ship(QGraphicsRectItem):
         # Test to launch a radar scan (gets all ships in detection range)
         if self.iterators["next_radar_scan"] <= 0:
             self.scan()
-            self.det_and_range["ships_in_range"] = self.computeShipsInRange()
+            self.addNewTargets()
             self.iterators["next_radar_scan"] = self.refresh["refresh_rate"]
         else:
             self.iterators["next_radar_scan"] -= 1
@@ -864,7 +865,33 @@ class Ship(QGraphicsRectItem):
         """
         self.det_and_range["rcom_ships"] = infosList
 
-    def computeShipsInRange(self):
+    def isInRange(self, otherShip):
+        """
+
+        Parameters
+        ----------
+        otherShip: Ship object
+            The ship to evaluate.
+
+        Returns
+        -------
+        bool.
+
+        Summary
+        -------
+        Calculate if othership is within gun range.
+        Returns true if yes, false otherwise.
+
+        """
+        otherShipPos = geo.parallelepiped_Center(
+            otherShip.pos(), otherShip.rect().width(), otherShip.rect().height()
+        )
+        distance = geo.distance_A_B(self.coordinates["center"], otherShipPos)
+        if distance <= self.weapons["guns_range"]:
+            return True
+        return False
+
+    def addNewTargets(self):
         """
 
         Returns
@@ -877,30 +904,22 @@ class Ship(QGraphicsRectItem):
         Computes and returns a list of all enney detected ships within gun range.
 
         """
-        sIR = []
+        self.det_and_range["fleet_detected_ships"].clear()
 
         if self.det_and_range["detected_ships"]:
-            if len(self.det_and_range["detected_ships"]) > 0:
-                for ship in self.det_and_range["detected_ships"]:
-                    detSCPos = geo.parallelepiped_Center(
-                        ship.pos(), ship.rect().width(), ship.rect().height()
-                    )
-                    distance = geo.distance_A_B(self.coordinates["center"], detSCPos)
-                    if distance <= self.weapons["guns_range"]:
-                        sIR.append(ship)
+            self.det_and_range["fleet_detected_ships"].extend(
+                self.det_and_range["detected_ships"]
+            )
         if self.det_and_range["rcom_ships"]:
-            if len(self.det_and_range["rcom_ships"]) > 0:
-                for ship in self.det_and_range["rcom_ships"]:
-                    if ship not in sIR:
-                        detSCPos = geo.parallelepiped_Center(
-                            ship.pos(), ship.rect().width(), ship.rect().height()
-                        )
-                        distance = geo.distance_A_B(
-                            self.coordinates["center"], detSCPos
-                        )
-                        if distance <= self.weapons["guns_range"]:
-                            sIR.append(ship)
-        return sIR
+            self.det_and_range["fleet_detected_ships"].extend(
+                self.det_and_range["rcom_ships"]
+            )
+
+        for ship in self.det_and_range["fleet_detected_ships"]:
+            if ship.data(0) not in self.discoveredShips:
+                _shipHeapItem = ShipHEAPItem(ship, 0)
+                self.targetList.addItem(_shipHeapItem)
+                self.discoveredShips.append(ship.data(0))
 
     def autoSelectTarget(self):
         """
@@ -915,28 +934,33 @@ class Ship(QGraphicsRectItem):
         Computes and return the best ship to set as target.
 
         """
-        target = None
 
-        # if self.det_and_range["ships_in_range"] is not None:
-        #     if len(self.det_and_range["ships_in_range"]) > 0:
-        #         target = self.det_and_range["ships_in_range"][0]
-        # return target
+        for shipheapitem in self.targetList.items:
+            ship = shipheapitem.shipInstance
+            shipCenter = geo.parallelepiped_Center(
+                ship.pos(), ship.rect().width(), ship.rect().height()
+            )
+            if (
+                self.gameScene.isInLineOfSight(
+                    self.coordinates["center"], shipCenter, 250,
+                )
+                and self.isInRange(ship)
+                and ship in self.det_and_range["detected_ships"]
+            ):
+                shipheapitem.isTargetable = True
+                (
+                    shipheapitem.potentialDamage,
+                    shipheapitem.idealShot,
+                ) = self.evaluateTarget(ship)
+                self.targetList.updateItem(shipheapitem)
+            else:
+                shipheapitem.isTargetable = False
 
-        if self.det_and_range["ships_in_range"]:
-            for ship in self.det_and_range["ships_in_range"]:
-                if ship.data(0) not in self.discoveredShips:
-                    shipCenter = geo.parallelepiped_Center(
-                        ship.pos(), ship.rect().width(), ship.rect().height()
-                    )
-                    if self.gameScene.isInLineOfSight(
-                        self.coordinates["center"], shipCenter, 250,
-                    ):
-                        _potentialDamage, shot_type = self.evaluateTarget(ship)
-                        # _shipHeapItem = ShipHEAPItem(ship, _potentialDamage)
-                        # _shipHeapItem.targetable = True
-                        # _shipHeapItem.idealShot = shot_type
-                        # self.discoveredShips.append(ship.data(0))
-                        # self.targetList.addItem(_shipHeapItem)
+        if len(self.targetList.items) > 0:
+            if self.targetList.items[0].isTargetable:
+                return self.targetList.items[0].shipInstance
+        else:
+            return None
 
     def evaluateTarget(self, target):
         shot_choice = ""
@@ -1210,7 +1234,7 @@ class ShipHEAPItem(HEAP.HEAPItem):
 
         """
         self.shipInstance = ship
-        self.targetable = False
+        self.isTargetable = False
         self.potentialDamage = potential
         self.idealShot = ""
 
