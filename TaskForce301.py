@@ -10,7 +10,6 @@
 """
 
 import sys
-import copy  ### Only for testing
 
 from os import path
 
@@ -200,9 +199,6 @@ class Ui_TSKF301MainWindow(object):
         ]
 
         for i, playerShipConfig in enumerate(playerShipsConfigs):
-            ######
-            testConfig = copy.deepcopy(playerShipConfig)
-            ######
             if playerShipConfig["naming"]["_type"] == "BB":
                 spawnPos = allySpawnPos[0]
                 currentShip = Ship._battleShip(
@@ -338,19 +334,6 @@ class Ui_TSKF301MainWindow(object):
                 self.gameScene.addShip(currentShip)
                 currentShip = None
 
-        ##### TBD #####
-        currentShip = Ship._battleShip(
-            self.mainClock,
-            self.gameScene,
-            self.mapGen.gameMap,
-            self.mapGen.mapS,
-            QPoint(15000, 15000),
-            "ENNEMY",
-            testConfig,
-        )
-        self.gameScene.addShip(currentShip)
-        currentShip = None
-        ################
         self.rComs.updateShipLists()
 
     def createBattle(self):
