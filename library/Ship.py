@@ -173,7 +173,6 @@ class Ship(QGraphicsRectItem):
             self.speed_params["speed_options"]["SLOW"], self.hull["turn_rate"]
         )
         self.det_and_range["fleet_detected_ships"] = []
-        self.currentTurret = None
         self.discoveredShips = []
 
         p_cfg = path.join(
@@ -193,6 +192,8 @@ class Ship(QGraphicsRectItem):
         else:
             self.p_dat = all_p_dat["small"]
             self.table = all_table["small"]
+        self.currentTurret = None
+        self.playerTarget = None
 
         self.setData(1, tag)
         self.setData(2, True)  # Considered an obstacle
@@ -290,12 +291,15 @@ class Ship(QGraphicsRectItem):
         # Test to acquire the best target
         if self.iterators["next_target_lock"] <= 0:
             for turret in self.weapons["turrets_list"]:
-                try:
-                    targetShip, shotType = self.autoSelectTarget()
-                    turret.setTarget(targetShip)
-                    turret.setShot(shotType)
-                except:
-                    pass
+                if self.playerTarget:
+                    turret.setTarget(self.playerTarget)
+                else:
+                    try:
+                        targetShip, shotType = self.autoSelectTarget()
+                        turret.setTarget(targetShip)
+                        turret.setShot(shotType)
+                    except:
+                        pass
             self.iterators["next_target_lock"] = self.refresh["refresh_rate"]
         else:
             self.iterators["next_target_lock"] -= 1
@@ -922,6 +926,27 @@ class Ship(QGraphicsRectItem):
                 _shipHeapItem = ShipHEAPItem(ship)
                 self.targetList.addItem(_shipHeapItem)
                 self.discoveredShips.append(ship.data(0))
+
+    def setTarget(self, ennemyShip=None):
+        """
+
+        Parameters
+        ----------
+        ennemyShip : Ship[None]
+            A Ship object
+
+        Returns
+        -------
+        None.
+
+        Summary
+        -------
+        Forces the current target to be ennemyShip.
+
+        """
+        if ennemyShip:
+            print(self.data(0), "RECEIVED TARGET:", ennemyShip.data(0))
+            self.playerTarget = ennemyShip
 
     def autoSelectTarget(self):
         """
