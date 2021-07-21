@@ -5,7 +5,7 @@
     Author: Grégory LARGANGE
     Date created: 12/10/2020
     Last modified by: Grégory LARGANGE
-    Date last modified: 14/07/2020
+    Date last modified: 21/07/2020
     Python version: 3.8.1
 """
 
@@ -91,7 +91,7 @@ class GunTurret(QGraphicsRectItem):
         Nota: The turret position is not taken care of by the turret itself, but
         by its parent.
 
-    setTarget(targetObject : Ship)
+    setTarget(targetShip : Ship)
         Sets the target of the turret to be the given Ship object.
 
     computeFiringSolution()
@@ -101,7 +101,7 @@ class GunTurret(QGraphicsRectItem):
     rotateToTAzimut()
         Rotates the turret towards target angle.
 
-    chooseShot(shot_t : string)
+    setShot(shot_t : string)
         Selects the type of shot to shoot depending on shot_t.
 
     gunDispersion()
@@ -201,7 +201,6 @@ class GunTurret(QGraphicsRectItem):
         self.next_fc_correction = self.fc_corr_rate
 
         self.setRect(rect)
-        self.printInfos()
 
     @classmethod
     def small(cls, clock, gameScene, parent=None):
@@ -324,12 +323,12 @@ class GunTurret(QGraphicsRectItem):
             self.t_azimut = self.parentShip.coordinates["heading"]
             self.rotateToTAzimut()
 
-    def setTarget(self, targetObject):
+    def setTarget(self, targetShip):
         """
 
         Parameters
         ----------
-        targetObject : Ship
+        targetShip : Ship
             A Ship class object.
 
         Returns
@@ -342,10 +341,10 @@ class GunTurret(QGraphicsRectItem):
         of the target if any.
 
         """
-        self.target = targetObject
+        self.target = targetShip
         if self.target:
             # If there was no target before or the target has changed
-            if (self.t_id is None) or (targetObject.data(0) != self.t_id):
+            if (self.t_id is None) or (targetShip.data(0) != self.t_id):
                 self.t_id = self.target.data(0)
                 # Stores the position of the target
                 self.t_x_1 = self.target.pos().x()
@@ -429,7 +428,7 @@ class GunTurret(QGraphicsRectItem):
         )
         self.setRotation(self.azimut)
 
-    def chooseShot(self, shot_type):
+    def setShot(self, shot_type):
         """
 
         Parameters

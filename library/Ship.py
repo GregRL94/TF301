@@ -5,7 +5,7 @@
     Author: Grégory LARGANGE
     Date created: 09/10/2020
     Last modified by: Grégory LARGANGE
-    Date last modified: 14/07/2021
+    Date last modified: 21/07/2021
     Python version: 3.8.1
 """
 
@@ -290,7 +290,12 @@ class Ship(QGraphicsRectItem):
         # Test to acquire the best target
         if self.iterators["next_target_lock"] <= 0:
             for turret in self.weapons["turrets_list"]:
-                turret.setTarget(self.autoSelectTarget())
+                try:
+                    targetShip, shotType = self.autoSelectTarget()
+                    turret.setTarget(targetShip)
+                    turret.setShot(shotType)
+                except:
+                    pass
             self.iterators["next_target_lock"] = self.refresh["refresh_rate"]
         else:
             self.iterators["next_target_lock"] -= 1
@@ -840,10 +845,7 @@ class Ship(QGraphicsRectItem):
 
         """
         self.det_and_range["detected_ships"] = self.gameScene.shipsInDetectionRange(
-            self.data(0),
-            self.data(1),
-            self.coordinates["center"],
-            self.instant_vars["detection_range"],
+            self,
         )
 
     def receiveRadioComm(self, infosList):
@@ -917,7 +919,7 @@ class Ship(QGraphicsRectItem):
 
         for ship in self.det_and_range["fleet_detected_ships"]:
             if ship.data(0) not in self.discoveredShips:
-                _shipHeapItem = ShipHEAPItem(ship, 0)
+                _shipHeapItem = ShipHEAPItem(ship)
                 self.targetList.addItem(_shipHeapItem)
                 self.discoveredShips.append(ship.data(0))
 
@@ -945,7 +947,7 @@ class Ship(QGraphicsRectItem):
                     self.coordinates["center"], shipCenter, 250,
                 )
                 and self.isInRange(ship)
-                and ship in self.det_and_range["detected_ships"]
+                and ship in self.det_and_range["fleet_detected_ships"]
             ):
                 shipheapitem.isTargetable = True
                 (
@@ -958,7 +960,10 @@ class Ship(QGraphicsRectItem):
 
         if len(self.targetList.items) > 0:
             if self.targetList.items[0].isTargetable:
-                return self.targetList.items[0].shipInstance
+                return (
+                    self.targetList.items[0].shipInstance,
+                    self.targetList.items[0].idealShot,
+                )
         else:
             return None
 
@@ -1000,7 +1005,7 @@ class Ship(QGraphicsRectItem):
         print("Computed hit area:", hitArea)
         hitChance = targetArea / hitArea
         print("Computed hit chance per shot:", hitChance)
-        hitProbability = round(1 - (1 - hitChance) ** n_shots)
+        hitProbability = round(1 - (1 - hitChance) ** n_shots, 4)
         print("Computed hit probability on salvo:", hitProbability * 100)
         print("----------------------------------------------")
         #############################################################################
@@ -1215,7 +1220,7 @@ class Ship(QGraphicsRectItem):
 
 
 class ShipHEAPItem(HEAP.HEAPItem):
-    def __init__(self, ship, potential):
+    def __init__(self, ship):
         """
         Parameters
         ----------
@@ -1235,7 +1240,7 @@ class ShipHEAPItem(HEAP.HEAPItem):
         """
         self.shipInstance = ship
         self.isTargetable = False
-        self.potentialDamage = potential
+        self.potentialDamage = 0
         self.idealShot = ""
 
     def compareTo(self, otherShipHEAPItem):
