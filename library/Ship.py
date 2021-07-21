@@ -5,7 +5,7 @@
     Author: Grégory LARGANGE
     Date created: 09/10/2020
     Last modified by: Grégory LARGANGE
-    Date last modified: 28/05/2021
+    Date last modified: 21/07/2021
     Python version: 3.8.1
 """
 
@@ -21,12 +21,13 @@ from PyQt5.QtWidgets import QGraphicsItem, QGraphicsRectItem
 from library import RangeCircles
 from library.GunTurret import GunTurret as turret
 from library.InGameData import TechsData as tech_dat
+from library.utils import HEAP
+from library.utils.Config import Config
 from library.utils.MathsFormulas import (
     Geometrics as geo,
     Cinematics as cin,
     Controllers as con,
 )
-from library.utils.Config import Config
 from library.Mapping import Astar as astar
 
 
@@ -117,8 +118,6 @@ class Ship(QGraphicsRectItem):
 
     """
 
-    configs_path = path.join(path.dirname(path.realpath(__file__)), "configs")
-
     def __init__(self, clock, gameScene, gameMap, mapSlicing):
         """
 
@@ -143,6 +142,7 @@ class Ship(QGraphicsRectItem):
         """
         super(Ship, self).__init__(QRectF(0, 0, 0, 0))
         self.astar = astar(gameMap, mapSlicing)
+        self.targetList = HEAP.HEAP()
         self.gameScene = gameScene
         self.clock = clock
 
@@ -172,7 +172,27 @@ class Ship(QGraphicsRectItem):
         self.det_and_range["det_r_range"] = cin.rotationRadius(
             self.speed_params["speed_options"]["SLOW"], self.hull["turn_rate"]
         )
+        self.det_and_range["fleet_detected_ships"] = []
         self.currentTurret = None
+        self.discoveredShips = []
+
+        p_cfg = path.join(
+            path.dirname(path.realpath(__file__)), "configs/projectileConfig.py"
+        )
+        all_p_dat, p_txt = Config._file2dict(p_cfg)
+        table_cfg = path.join(
+            path.dirname(path.realpath(__file__)), "configs/penetrationTable.py"
+        )
+        all_table, table_txt = Config._file2dict(table_cfg)
+        if self.naming["_type"] == "BB":
+            self.p_dat = all_p_dat["large"]
+            self.table = all_table["large"]
+        elif self.naming["_type"] == "CA":
+            self.p_dat = all_p_dat["medium"]
+            self.table = all_table["medium"]
+        else:
+            self.p_dat = all_p_dat["small"]
+            self.table = all_table["small"]
 
         self.setData(1, tag)
         self.setData(2, True)  # Considered an obstacle
@@ -184,44 +204,32 @@ class Ship(QGraphicsRectItem):
 
     @classmethod
     def _battleShip(cls, clock, gameScene, gameMap, mapSlicing, pos, tag, _config):
-        # bb_default, bb_txt = Config._file2dict(path.join(cls.configs_path, "battleshipConfig.py"))
-        # bb_cfg = Config._merge_a_into_b(_config, bb_default)
         bb = cls(clock, gameScene, gameMap, mapSlicing)
         bb.__dict__.update(_config)
-        # bb.__dict__.update(bb_cfg)
         bb.__init_instance__(pos, tag)
 
         return bb
 
     @classmethod
     def cruiser(cls, clock, gameScene, gameMap, mapSlicing, pos, tag, _config):
-        # ca_default, ca_txt = Config._file2dict(path.join(cls.configs_path, "cruiserConfig.py"))
-        # ca_cfg = Config._merge_a_into_b(_config, ca_default)
         ca = cls(clock, gameScene, gameMap, mapSlicing)
         ca.__dict__.update(_config)
-        # ca.__dict__.update(ca_cfg)
         ca.__init_instance__(pos, tag)
 
         return ca
 
     @classmethod
     def frigate(cls, clock, gameScene, gameMap, mapSlicing, pos, tag, _config):
-        # ff_default, ff_txt = Config._file2dict(path.join(cls.configs_path, "frigateConfig.py"))
-        # ff_cfg = Config._merge_a_into_b(_config, ff_default)
         ff = cls(clock, gameScene, gameMap, mapSlicing)
         ff.__dict__.update(_config)
-        # ff.__dict__.update(ff_cfg)
         ff.__init_instance__(pos, tag)
 
         return ff
 
     @classmethod
     def corvette(cls, clock, gameScene, gameMap, mapSlicing, pos, tag, _config):
-        # pt_default, pt_txt = Config._file2dict(path.join(cls.configs_path, "corvetteConfig.py"))
-        # pt_cfg = Config._merge_a_into_b(_config, pt_default)
         pt = cls(clock, gameScene, gameMap, mapSlicing)
         pt.__dict__.update(_config)
-        # ff.__dict__.update(pt_cfg)
         pt.__init_instance__(pos, tag)
 
         return pt
@@ -274,7 +282,7 @@ class Ship(QGraphicsRectItem):
         # Test to launch a radar scan (gets all ships in detection range)
         if self.iterators["next_radar_scan"] <= 0:
             self.scan()
-            self.det_and_range["ships_in_range"] = self.computeShipsInRange()
+            self.addNewTargets()
             self.iterators["next_radar_scan"] = self.refresh["refresh_rate"]
         else:
             self.iterators["next_radar_scan"] -= 1
@@ -282,7 +290,12 @@ class Ship(QGraphicsRectItem):
         # Test to acquire the best target
         if self.iterators["next_target_lock"] <= 0:
             for turret in self.weapons["turrets_list"]:
-                turret.setTarget(self.autoSelectTarget())
+                try:
+                    targetShip, shotType = self.autoSelectTarget()
+                    turret.setTarget(targetShip)
+                    turret.setShot(shotType)
+                except:
+                    pass
             self.iterators["next_target_lock"] = self.refresh["refresh_rate"]
         else:
             self.iterators["next_target_lock"] -= 1
@@ -832,10 +845,7 @@ class Ship(QGraphicsRectItem):
 
         """
         self.det_and_range["detected_ships"] = self.gameScene.shipsInDetectionRange(
-            self.data(0),
-            self.data(1),
-            self.coordinates["center"],
-            self.instant_vars["detection_range"],
+            self,
         )
 
     def receiveRadioComm(self, infosList):
@@ -857,7 +867,33 @@ class Ship(QGraphicsRectItem):
         """
         self.det_and_range["rcom_ships"] = infosList
 
-    def computeShipsInRange(self):
+    def isInRange(self, otherShip):
+        """
+
+        Parameters
+        ----------
+        otherShip: Ship object
+            The ship to evaluate.
+
+        Returns
+        -------
+        bool.
+
+        Summary
+        -------
+        Calculate if othership is within gun range.
+        Returns true if yes, false otherwise.
+
+        """
+        otherShipPos = geo.parallelepiped_Center(
+            otherShip.pos(), otherShip.rect().width(), otherShip.rect().height()
+        )
+        distance = geo.distance_A_B(self.coordinates["center"], otherShipPos)
+        if distance <= self.weapons["guns_range"]:
+            return True
+        return False
+
+    def addNewTargets(self):
         """
 
         Returns
@@ -870,50 +906,133 @@ class Ship(QGraphicsRectItem):
         Computes and returns a list of all enney detected ships within gun range.
 
         """
-        sIR = []
+        self.det_and_range["fleet_detected_ships"].clear()
 
         if self.det_and_range["detected_ships"]:
-            if len(self.det_and_range["detected_ships"]) > 0:
-                for ship in self.det_and_range["detected_ships"]:
-                    detSCPos = geo.parallelepiped_Center(
-                        ship.pos(), ship.rect().width(), ship.rect().height()
-                    )
-                    distance = geo.distance_A_B(self.coordinates["center"], detSCPos)
-                    if distance <= self.weapons["guns_range"]:
-                        sIR.append(ship)
+            self.det_and_range["fleet_detected_ships"].extend(
+                self.det_and_range["detected_ships"]
+            )
         if self.det_and_range["rcom_ships"]:
-            if len(self.det_and_range["rcom_ships"]) > 0:
-                for ship in self.det_and_range["rcom_ships"]:
-                    if ship not in sIR:
-                        detSCPos = geo.parallelepiped_Center(
-                            ship.pos(), ship.rect().width(), ship.rect().height()
-                        )
-                        distance = geo.distance_A_B(
-                            self.coordinates["center"], detSCPos
-                        )
-                        if distance <= self.weapons["guns_range"]:
-                            sIR.append(ship)
-        return sIR
+            self.det_and_range["fleet_detected_ships"].extend(
+                self.det_and_range["rcom_ships"]
+            )
+
+        for ship in self.det_and_range["fleet_detected_ships"]:
+            if ship.data(0) not in self.discoveredShips:
+                _shipHeapItem = ShipHEAPItem(ship)
+                self.targetList.addItem(_shipHeapItem)
+                self.discoveredShips.append(ship.data(0))
 
     def autoSelectTarget(self):
         """
 
         Returns
         -------
-        target : Ship
-            The Ship object to target.
+        tuple : (Ship, str)
+            Ship: the ship object to target.
+            str: The shot type to select.
 
         Summary
         -------
-        Computes and return the best ship to set as target.
+        Computes and return the best ship to set as target
+        and the best suited shot type.
 
         """
-        target = None
 
-        if self.det_and_range["ships_in_range"] is not None:
-            if len(self.det_and_range["ships_in_range"]) > 0:
-                target = self.det_and_range["ships_in_range"][0]
-        return target
+        for shipheapitem in self.targetList.items:
+            ship = shipheapitem.shipInstance
+            shipCenter = geo.parallelepiped_Center(
+                ship.pos(), ship.rect().width(), ship.rect().height()
+            )
+            if (
+                self.gameScene.isInLineOfSight(
+                    self.coordinates["center"], shipCenter, 250,
+                )
+                and self.isInRange(ship)
+                and ship in self.det_and_range["fleet_detected_ships"]
+            ):
+                shipheapitem.isTargetable = True
+                (
+                    shipheapitem.potentialDamage,
+                    shipheapitem.idealShot,
+                ) = self.evaluateTarget(ship)
+                self.targetList.updateItem(shipheapitem)
+            else:
+                shipheapitem.isTargetable = False
+
+        if len(self.targetList.items) > 0:
+            if self.targetList.items[0].isTargetable:
+                return (
+                    self.targetList.items[0].shipInstance,
+                    self.targetList.items[0].idealShot,
+                )
+        else:
+            return None
+
+    def evaluateTarget(self, target):
+        """
+
+        Parameters
+        ----------
+        target: Ship
+            The Ship object to evaluate.
+
+        Returns
+        -------
+        tuple : (potential: float, shot_choice: str)
+
+        Summary
+        -------
+        Computes the minimal amount of damage that can be done to target.
+
+        """
+        shot_choice = ""
+        potential = 0
+        ##################### COMPUTE HIT PROBABILITY PER SALVO #####################
+        #############################################################################
+        targetCenter = geo.parallelepiped_Center(
+            target.pos(), target.rect().width(), target.rect().height()
+        )
+        targetDistance = round(
+            geo.distance_A_B(self.coordinates["center"], targetCenter)
+        )
+        targetArea = round(target.rect().width() * target.rect().height())
+        n_shots = (
+            len(self.weapons["turrets_list"]) * self.weapons["turrets_list"][0].n_guns
+        )
+        azimut_error = math.radians(self.weapons["turrets_list"][0].gun_acc)
+        errorOnD = self.p_dat["accy"] * targetDistance
+        errorOnD = round(errorOnD)
+        hitArea = round(
+            errorOnD * math.tan(azimut_error) * (2 * targetDistance - errorOnD)
+        )
+        hitChance = targetArea / hitArea
+        hitProbability = round(1 - (1 - hitChance) ** n_shots, 4)
+        #############################################################################
+        #############################################################################
+
+        ####################### CHOOSES BEST SUITED SHOT TYPE #######################
+        #############################################################################
+        penAtDist = self.table[int(targetDistance / 1000)]
+        dmgHE = min(
+            int((self.p_dat["pen_HE"] / target.hull["armor"]) * self.p_dat["dmg_HE"]),
+            self.p_dat["dmg_HE"],
+        )
+        if penAtDist > target.hull["armor"]:
+            dmgAP = self.p_dat["dmg_AP"]
+            if dmgHE > dmgAP:
+                shot_choice = "HE"
+                potential = dmgHE
+            else:
+                shot_choice = "AP"
+                potential = dmgAP
+        else:
+            shot_choice = "HE"
+            potential = dmgHE
+        potential = round(potential * hitProbability)
+        #############################################################################
+        #############################################################################
+        return (potential, shot_choice)
 
     def repair(self):
         True
@@ -1093,3 +1212,54 @@ class Ship(QGraphicsRectItem):
                 painter.setBrush(QBrush(QColor("red")))
                 painter.setPen(QPen(QColor("darkred"), 10))
         painter.drawEllipse(self.rect())
+
+
+class ShipHEAPItem(HEAP.HEAPItem):
+    def __init__(self, ship):
+        """
+        Parameters
+        ----------
+        ship : Ship
+            An object of class Ship.
+        potential : float
+            An evaluation of the potential damage that can be evaluated on this ship.
+
+        Returns
+        -------
+        None.
+
+        Summary
+        -------
+        Constructor of the class.
+
+        """
+        self.shipInstance = ship
+        self.isTargetable = False
+        self.potentialDamage = 0
+        self.idealShot = ""
+
+    def compareTo(self, otherShipHEAPItem):
+        """
+
+        Parameters
+        ----------
+        otherShipHEAPItem : ShipHEAPItem
+            The other shipHEAPItem to compare this shipHEAPItem to.
+
+        Returns
+        -------
+        int
+            The result of the comparison.
+
+        Summary
+        -------
+        Compares the shipHEAPItems according to their potential.
+        Returns 1 if potential of this shipHEAPItem is lower, -1 if higher.
+        Special case if both potentials are equal. See function in line comments.
+
+        """
+        # If the current shipHEAPItem has a lower potential than the shipHEAPItem's potential it is compared to.
+        if self.potentialDamage <= otherShipHEAPItem.potentialDamage:
+            return -1
+        # If the current shipHEAPItem has a higher potential than the shipHEAPItem's potential it is compared to
+        return 1
