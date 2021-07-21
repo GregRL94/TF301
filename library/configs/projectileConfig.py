@@ -5,7 +5,7 @@
     Author: Grégory LARGANGE
     Date created: 27/04/2021
     Last modified by: Grégory LARGANGE
-    Date last modified: 19/05/2021
+    Date last modified: 15/07/2021
     Python version: 3.8.1
 
     THIS FILE CONTAINS DEFAULT CONFIGS
@@ -28,7 +28,7 @@ small = {
     "dmg_HE": 360,
     "pen_AP": 150,
     "pen_HE": 50,
-    "decc": 0.2,
+    "decc": 0.25,
 }
 
 medium = {
@@ -45,7 +45,7 @@ medium = {
     "dmg_HE": 720,
     "pen_AP": 300,
     "pen_HE": 75,
-    "decc": 0.2,
+    "decc": 0.25,
 }
 
 large = {
@@ -62,5 +62,5 @@ large = {
     "dmg_HE": 1200,
     "pen_AP": 400,
     "pen_HE": 100,
-    "decc": 0.2,
+    "decc": 0.25,
 }

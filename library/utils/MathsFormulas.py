@@ -1,20 +1,20 @@
 # -*- coding: utf-8 -*-
 
-'''
+"""
     File name: MathsFormulas.py
     Author: Grégory LARGANGE
     Date created: 16/10/2020
     Last modified by: Grégory LARGANGE
-    Date last modified: 10/12/2020
+    Date last modified: 13/07/2020
     Python version: 3.8.1
-'''
+"""
 
 import math
 
 from PyQt5.QtCore import QPointF
 
 
-class Geometrics():
+class Geometrics:
     """
 
     A class implementing uselful euclidian geometrics functions.
@@ -76,8 +76,7 @@ class Geometrics():
         Returns the center of the parallelepiped.
 
         """
-        p_center = QPointF(p_topLeft.x() + p_width / 2,
-                           p_topLeft.y() + p_height / 2)
+        p_center = QPointF(p_topLeft.x() + p_width / 2, p_topLeft.y() + p_height / 2)
         return p_center
 
     @staticmethod
@@ -102,8 +101,8 @@ class Geometrics():
 
         """
         distance = math.sqrt(
-            pow(pointB.x() - pointA.x(), 2) +\
-            pow(pointB.y() - pointA.y(), 2))
+            pow(pointB.x() - pointA.x(), 2) + pow(pointB.y() - pointA.y(), 2)
+        )
         return distance
 
     @staticmethod
@@ -154,7 +153,9 @@ class Geometrics():
         Returns the length of the sideA of the triangle.
 
         """
-        sideA = math.sqrt(sideB ** 2 + sideC ** 2 - 2 * sideB * sideC * math.cos(angleInRad))
+        sideA = math.sqrt(
+            sideB ** 2 + sideC ** 2 - 2 * sideB * sideC * math.cos(angleInRad)
+        )
         return sideA
 
     @staticmethod
@@ -180,7 +181,38 @@ class Geometrics():
         Returns the angle a in radians.
 
         """
-        angleInRad = math.acos(-(sideA ** 2 - (sideB ** 2 + sideC ** 2)) / (2 * sideB * sideC))
+        angleInRad = math.acos(
+            -(sideA ** 2 - (sideB ** 2 + sideC ** 2)) / (2 * sideB * sideC)
+        )
+        return angleInRad
+
+    @classmethod
+    def angle(cls, pointA, pointB):
+        """
+
+        Parameters
+        ----------
+        pointA : QPointF
+            The reference point.
+        pointB : QPointF
+            The point to get the anlge of.
+
+        Returns
+        -------
+        angle : float
+            The angle between pointA and pointB in rad.
+
+        Summary
+        -------
+        Computes the angle between pointA and pointB.
+
+        """
+        distance = cls.distance_A_B(pointA, pointB)
+        a_h = (pointB.x() - pointA.x()) / distance
+        a_h = max(min(a_h, 1), -1)
+        angleInRad = (
+            math.acos(a_h) if (pointB.y() - pointA.y() >= 0) else math.acos(a_h) * (-1)
+        )
         return angleInRad
 
     @staticmethod
@@ -242,8 +274,7 @@ class Geometrics():
         XD = segmentCD[1].x()
         YD = segmentCD[1].y()
 
-        IintX = [max(min(XA, XB), min(XC, XD)),
-                 min(max(XA, XB), max(XC, XD))]
+        IintX = [max(min(XA, XB), min(XC, XD)), min(max(XA, XB), max(XC, XD))]
 
         if (max(XA, XB) < min(XC, XD)) | (min(XA, XB) > max(XC, XD)):
             return False
@@ -272,7 +303,7 @@ class Geometrics():
         BsegCD = YD - AsegCD * XD
 
         # If both segment have same coef A then they are parallel
-        if (AsegAB == AsegCD):
+        if AsegAB == AsegCD:
             return False
 
         # Following calculation based on fact that if I is intersection point
@@ -285,7 +316,7 @@ class Geometrics():
             return False
 
 
-class Cinematics():
+class Cinematics:
     """
 
     A class implementing uselful basic cinematic functions.
@@ -367,7 +398,10 @@ class Cinematics():
         speed vinit with a deceleration deceleration.
 
         """
-        brakeD = int((deceleration / 2) * (-vinit / deceleration) ** 2 - ((vinit ** 2) / deceleration))
+        brakeD = int(
+            (deceleration / 2) * (-vinit / deceleration) ** 2
+            - ((vinit ** 2) / deceleration)
+        )
         return brakeD
 
     @staticmethod
@@ -436,7 +470,7 @@ class Cinematics():
         return [port_rc, starport_rc]
 
 
-class Controllers():
+class Controllers:
     """
 
     A class implementing controllers.

@@ -5,7 +5,7 @@
     Author: Grégory LARGANGE
     Date created: 12/10/2020
     Last modified by: Grégory LARGANGE
-    Date last modified: 13/07/2021
+    Date last modified: 21/07/2021
     Python version: 3.8.1
 """
 
@@ -84,20 +84,24 @@ class GameScene(QGraphicsScene):
             self.islandsList.append(self.currentItem)
             self.currentItem = None
 
-    def shipsInDetectionRange(self, ship0ID, ship0Tag, ship0CenterSPos, ship0ScanRange):
+    def shipsInDetectionRange(self, refShip):
         shipsInDRange = []
 
         for ship in self.shipList.values():
-            if (ship.data(0) != ship0ID) & (ship.data(1) != ship0Tag):
-                effS0ScanRange = (
-                    ship0ScanRange
-                    - (ship0ScanRange - 1000) * ship.instant_vars["concealement"]
+            if (ship.data(0) != refShip.data(0)) & (ship.data(1) != refShip.data(1)):
+                effScanRange = (
+                    refShip.instant_vars["detection_range"]
+                    - (refShip.instant_vars["detection_range"] - 1000)
+                    * ship.instant_vars["concealement"]
                 )
-                shipNCenterSPos = geo.parallelepiped_Center(
+                shipCenter = geo.parallelepiped_Center(
                     ship.pos(), ship.rect().width(), ship.rect().height()
                 )
-                dSNS0 = geo.distance_A_B(ship0CenterSPos, shipNCenterSPos)
-                if dSNS0 <= effS0ScanRange:
+                refShipCenter = geo.parallelepiped_Center(
+                    refShip.pos(), refShip.rect().width(), refShip.rect().height()
+                )
+                distance = geo.distance_A_B(refShipCenter, shipCenter)
+                if distance <= effScanRange:
                     shipsInDRange.append(ship)
         return shipsInDRange
 
@@ -112,6 +116,33 @@ class GameScene(QGraphicsScene):
                 if _item.data(2):
                     return i
         return None
+
+    def isInLineOfSight(self, origin, target, resolution):
+        currentPos = origin
+        distance = int(geo.distance_A_B(origin, target))
+        angleInrad = geo.angle(origin, target)
+
+        while int(geo.distance_A_B(origin, currentPos)) < distance:
+            currentPos = cin.movementBy(currentPos, resolution, angleInrad)
+            _item = self.itemAt(currentPos, self.attachedGView.transform())
+            if _item:
+                if _item.data(1) == "ISLAND":
+                    # self.addLine(
+                    #     origin.x(),
+                    #     origin.y(),
+                    #     currentPos.x(),
+                    #     currentPos.y(),
+                    #     QPen(QColor("red"), 4),
+                    # )
+                    return False
+        # self.addLine(
+        #     origin.x(),
+        #     origin.y(),
+        #     currentPos.x(),
+        #     currentPos.y(),
+        #     QPen(QColor("green"), 4),
+        # )
+        return True
 
     def dispGrid(self, step):
         for i in range(0, int(self.height()), step):
