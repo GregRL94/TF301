@@ -928,12 +928,14 @@ class Ship(QGraphicsRectItem):
 
         Returns
         -------
-        target : Ship
-            The Ship object to target.
+        tuple : (Ship, str)
+            Ship: the ship object to target.
+            str: The shot type to select.
 
         Summary
         -------
-        Computes and return the best ship to set as target.
+        Computes and return the best ship to set as target
+        and the best suited shot type.
 
         """
 
@@ -968,62 +970,56 @@ class Ship(QGraphicsRectItem):
             return None
 
     def evaluateTarget(self, target):
+        """
+
+        Parameters
+        ----------
+        target: Ship
+            The Ship object to evaluate.
+
+        Returns
+        -------
+        tuple : (potential: float, shot_choice: str)
+
+        Summary
+        -------
+        Computes the minimal amount of damage that can be done to target.
+
+        """
         shot_choice = ""
         potential = 0
         ##################### COMPUTE HIT PROBABILITY PER SALVO #####################
         #############################################################################
-        print("Now Evaluating ship:", target.naming["_type"], target.data(0))
-        print("...")
-        print("--Target Characteristics--")
         targetCenter = geo.parallelepiped_Center(
             target.pos(), target.rect().width(), target.rect().height()
         )
         targetDistance = round(
             geo.distance_A_B(self.coordinates["center"], targetCenter)
         )
-        print("Distance:", targetDistance)
-        targetArea = int(target.rect().width() * target.rect().height())
-        print("Target surface area:", targetArea)
-        print("---------------------------------")
-
-        print("--Firing characterisctics--")
+        targetArea = round(target.rect().width() * target.rect().height())
         n_shots = (
             len(self.weapons["turrets_list"]) * self.weapons["turrets_list"][0].n_guns
         )
-        print("Firing", n_shots, "shots")
         azimut_error = math.radians(self.weapons["turrets_list"][0].gun_acc)
-        print("Azimut error of independant guns:", azimut_error)
         errorOnD = self.p_dat["accy"] * targetDistance
         errorOnD = round(errorOnD)
-        print("Distance error of independants shots:", errorOnD)
-        print("----------------------------------------------")
-
-        print("--Hit probability calculations--")
         hitArea = round(
             errorOnD * math.tan(azimut_error) * (2 * targetDistance - errorOnD)
         )
-        print("Computed hit area:", hitArea)
         hitChance = targetArea / hitArea
-        print("Computed hit chance per shot:", hitChance)
         hitProbability = round(1 - (1 - hitChance) ** n_shots, 4)
-        print("Computed hit probability on salvo:", hitProbability * 100)
-        print("----------------------------------------------")
         #############################################################################
         #############################################################################
 
         ####################### CHOOSES BEST SUITED SHOT TYPE #######################
         #############################################################################
-        print("--Damage potential calculations--")
         penAtDist = self.table[int(targetDistance / 1000)]
-        print("Penetration at target distance:", penAtDist)
         dmgHE = min(
             int((self.p_dat["pen_HE"] / target.hull["armor"]) * self.p_dat["dmg_HE"]),
             self.p_dat["dmg_HE"],
         )
         if penAtDist > target.hull["armor"]:
-            print("Can pierce target with AP")
             dmgAP = self.p_dat["dmg_AP"]
-            print("Damage AP:", dmgAP, " ", "Damage HE:", dmgHE)
             if dmgHE > dmgAP:
                 shot_choice = "HE"
                 potential = dmgHE
@@ -1031,12 +1027,11 @@ class Ship(QGraphicsRectItem):
                 shot_choice = "AP"
                 potential = dmgAP
         else:
-            print("Cannot pierce target")
             shot_choice = "HE"
             potential = dmgHE
+        potential = round(potential * hitProbability)
         #############################################################################
         #############################################################################
-        print("Selected shot:", shot_choice, "for damage potential of:", potential)
         return (potential, shot_choice)
 
     def repair(self):
