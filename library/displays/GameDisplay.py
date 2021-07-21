@@ -9,6 +9,7 @@
     Python version: 3.8.1
 """
 
+from library.Ship import Ship
 from PyQt5.QtCore import Qt, QPointF
 from PyQt5.QtGui import QPen, QBrush, QColor
 from PyQt5.QtWidgets import QGraphicsScene, QGraphicsView
@@ -38,12 +39,8 @@ class GameScene(QGraphicsScene):
         self.islandsList = []
 
     def mousePressEvent(self, mouseDown):
-        if (
-            (int(mouseDown.scenePos().x()) >= self.innerBL)
-            & (int(mouseDown.scenePos().x()) <= self.innerBR)
-        ) & (
-            (int(mouseDown.scenePos().y()) >= self.innerBT)
-            & (int(mouseDown.scenePos().y()) <= self.innerBB)
+        if (self.innerBL <= int(mouseDown.scenePos().x()) <= self.innerBR) and (
+            self.innerBT <= int(mouseDown.scenePos().y()) <= self.innerBB
         ):
             itemSelected = self.itemAt(
                 mouseDown.scenePos(), self.attachedGView.transform()
@@ -54,7 +51,16 @@ class GameScene(QGraphicsScene):
                         int(mouseDown.scenePos().x()), int(mouseDown.scenePos().y())
                     )
                     item.updatePath(point)
+                    item.setTarget()
                 mouseDown.accept()
+            elif (mouseDown.button() == Qt.RightButton) and itemSelected:
+                if isinstance(itemSelected, Ship):
+                    for item in self.selectedItems():
+                        point = QPointF(
+                            int(mouseDown.scenePos().x()), int(mouseDown.scenePos().y())
+                        )
+                        item.setTarget(itemSelected)
+                    mouseDown.accept()
             else:
                 super(GameScene, self).mousePressEvent(mouseDown)
         else:

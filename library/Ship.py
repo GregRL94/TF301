@@ -173,6 +173,7 @@ class Ship(QGraphicsRectItem):
             self.speed_params["speed_options"]["SLOW"], self.hull["turn_rate"]
         )
         self.currentTurret = None
+        self.playerTarget = None
 
         self.setData(1, tag)
         self.setData(2, True)  # Considered an obstacle
@@ -282,7 +283,9 @@ class Ship(QGraphicsRectItem):
         # Test to acquire the best target
         if self.iterators["next_target_lock"] <= 0:
             for turret in self.weapons["turrets_list"]:
-                turret.setTarget(self.autoSelectTarget())
+                turret.setTarget(
+                    self.playerTarget
+                ) if self.playerTarget else turret.setTarget(self.autoSelectTarget())
             self.iterators["next_target_lock"] = self.refresh["refresh_rate"]
         else:
             self.iterators["next_target_lock"] -= 1
@@ -894,6 +897,27 @@ class Ship(QGraphicsRectItem):
                         if distance <= self.weapons["guns_range"]:
                             sIR.append(ship)
         return sIR
+
+    def setTarget(self, ennemyShip=None):
+        """
+
+        Parameters
+        ----------
+        ennemyShip : Ship[None]
+            A Ship object
+
+        Returns
+        -------
+        None.
+
+        Summary
+        -------
+        Forces the current target to be ennemyShip.
+
+        """
+        if ennemyShip:
+            print(self.data(0), "RECEIVED TARGET:", ennemyShip.data(0))
+            self.playerTarget = ennemyShip
 
     def autoSelectTarget(self):
         """
