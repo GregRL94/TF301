@@ -360,7 +360,6 @@ class Projectile(QGraphicsRectItem):
             dmgHE = min(int((self._pen / otherItem.hull["armor"]) * self.dmg), self.dmg)
             otherItem.receiveDamage(dmgHE)
         else:
-            print(self._pen, "against", otherItem.hull["armor"])
             if self._pen > otherItem.hull["armor"]:
                 otherItem.receiveDamage(self.dmg)
 

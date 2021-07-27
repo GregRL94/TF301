@@ -992,8 +992,7 @@ class Ship(QGraphicsRectItem):
                     self.targetList.items[0].shipInstance,
                     self.targetList.items[0].idealShot,
                 )
-        else:
-            return None
+        return (None, None)
 
     def evaluateTarget(self, target):
         """
@@ -1062,7 +1061,6 @@ class Ship(QGraphicsRectItem):
 
     def receiveDamage(self, value):
         self.instant_vars["hp"] -= value
-        print(self.naming["_type"], self.data(0), "Got hit for", value, "hp")
 
     def repair(self):
         True
