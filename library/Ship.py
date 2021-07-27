@@ -197,6 +197,7 @@ class Ship(QGraphicsRectItem):
 
         self.setData(1, tag)
         self.setData(2, True)  # Considered an obstacle
+        self.setData(3, "SHIP")
         self.setRect(rect)
         self.setPos(pos)
 
@@ -1058,6 +1059,10 @@ class Ship(QGraphicsRectItem):
         #############################################################################
         #############################################################################
         return (potential, shot_choice)
+
+    def receiveDamage(self, value):
+        self.instant_vars["hp"] -= value
+        print(self.naming["_type"], self.data(0), "Got hit for", value, "hp")
 
     def repair(self):
         True

@@ -60,7 +60,7 @@ large = {
     "colors_HE": ["yellow", "red"],
     "dmg_AP": 800,
     "dmg_HE": 1200,
-    "pen_AP": 400,
+    "pen_AP": 375,
     "pen_HE": 100,
     "decc": 0.25,
 }
