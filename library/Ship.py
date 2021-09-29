@@ -5,7 +5,7 @@
     Author: Grégory LARGANGE
     Date created: 09/10/2020
     Last modified by: Grégory LARGANGE
-    Date last modified: 21/07/2021
+    Date last modified: 29/09/2021
     Python version: 3.8.1
 """
 
@@ -1061,6 +1061,21 @@ class Ship(QGraphicsRectItem):
 
     def receiveDamage(self, value):
         self.instant_vars["hp"] -= value
+
+    def receiveCritical(self, crit_code):
+        if crit_code == 0:
+            component_index = random.randint(0, 2)
+            component_list = list(self.crit_components.keys())
+            if self.crit_components[component_list[component_index]] == "OK":
+                self.crit_components[component_list[component_index]] = "DAMAGED"
+                print(component_list[component_index], "IS DAMAGED !!")
+            elif self.crit_components[component_list[component_index]] == "DAMAGED":
+                self.crit_components[component_list[component_index]] = "DESTROYED"
+                print(component_list[component_index], "IS DESTROYED !!")
+
+        if crit_code == 1:
+            self.crit_components["fires"] += 1
+            print("FIRE ABOARD !!")
 
     def repair(self):
         True

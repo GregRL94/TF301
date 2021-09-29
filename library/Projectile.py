@@ -5,7 +5,7 @@
     Author: Grégory LARGANGE
     Date created: 07/10/2020
     Last modified by: Grégory LARGANGE
-    Date last modified: 13/07/2021
+    Date last modified: 29/09/2021
     Python version: 3.8.1
 """
 
@@ -369,11 +369,12 @@ class Projectile(QGraphicsRectItem):
         if self._type == "HE":
             dmgHE = min(int((self._pen / otherItem.hull["armor"]) * self.dmg), self.dmg)
             otherItem.receiveDamage(dmgHE)
-            _ = self.is_critical_hit()
+            if self.is_critical_hit():
+                otherItem.receiveCritical(1)
         else:
             if self._pen > otherItem.hull["armor"]:
-                otherItem.receiveDamage(self.dmg)
-                _ = self.is_critical_hit()
+                if self.is_critical_hit():
+                    otherItem.receiveCritical(0)
 
     def is_critical_hit(self):
         """
