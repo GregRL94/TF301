@@ -50,7 +50,7 @@ class Projectile(QGraphicsRectItem):
         Moves the projectile in the direction of its rotation according to its
         speed.
 
-    range_rng()
+    range_rng(_range : int)
         Returns a random distance within the target range +/- dispersion interval.
 
     v_decrease()
@@ -58,6 +58,12 @@ class Projectile(QGraphicsRectItem):
 
     pen_decrease()
         Linear degression of the penetrative power of the projectile.
+
+    onImpact(otherItem : QGraphicsItem)
+        Determines the behaviour of the projectile when its collider overlaps otherItem's collider.
+
+    is_critical_hit()
+        Determines if the hit is critical.
 
     paint(painter : QPainter, option : QOption, widget : QWidget)
         Instructions to draw the projectile on the main game scene.
@@ -126,18 +132,20 @@ class Projectile(QGraphicsRectItem):
         self._rotation = _rotation
 
         self.setData(1, tag)
-        self.setData(2, False)  # Considered an obstacle
+        self.setData(2, False)  # Not considered an obstacle
         self.setData(3, "SHOT")
 
         if self._type == "AP":
             self.v = self.v0 = self.v_AP
             self._pen = self.p0 = self.pen_AP
             self.dmg = self.dmg_AP
+            self.crit_chance = self.crit_pen_chance
             self.colors = self.colors_AP
         else:
             self.v = self.v0 = self.v_HE
             self._pen = self.p0 = self.pen_HE
             self.dmg = self.dmg_HE
+            self.crit_chance = self.fire_chance
             self.colors = self.colors_HE
 
         self.setRect(rect)
@@ -290,7 +298,9 @@ class Projectile(QGraphicsRectItem):
             if self._type == "AP":
                 self.pen_decrease()
             for item in self.collidingItems():
-                if (item.data(3) == "SHIP") and (item.data(1) != self.data(1)):
+                if item.data(3) == "TERRAIN":
+                    self.gameScene.destroyObject(self)
+                elif (item.data(3) == "SHIP") and (item.data(1) != self.data(1)):
                     self.onImpact(item)
                     self.gameScene.destroyObject(self)
 
@@ -359,9 +369,32 @@ class Projectile(QGraphicsRectItem):
         if self._type == "HE":
             dmgHE = min(int((self._pen / otherItem.hull["armor"]) * self.dmg), self.dmg)
             otherItem.receiveDamage(dmgHE)
+            _ = self.is_critical_hit()
         else:
             if self._pen > otherItem.hull["armor"]:
                 otherItem.receiveDamage(self.dmg)
+                _ = self.is_critical_hit()
+
+    def is_critical_hit(self):
+        """
+
+        Returns
+        -------
+            bool
+
+        Summary
+        -------
+        Randomly decides if the hit is critical or not.
+
+        """
+        crit_range = int(100 / self.crit_chance)
+        print(crit_range)
+        rng = random.randint(1, crit_range)
+        print(rng)
+        if rng == crit_range:
+            print("CRITICAL HIT")
+            return True
+        return False
 
     def paint(self, painter, option, widget=None):
         """
