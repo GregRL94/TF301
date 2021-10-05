@@ -947,6 +947,10 @@ class Ship(QGraphicsRectItem):
         if ennemyShip:
             print(self.data(0), "RECEIVED TARGET:", ennemyShip.data(0))
             self.playerTarget = ennemyShip
+            if self.isInRange(ennemyShip):
+                self.currentTarget = self.playerTarget
+            else:
+                print("Target out ouf range, need to move in first")
 
     def autoSelectTarget(self):
         """
