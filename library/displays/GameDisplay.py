@@ -56,10 +56,12 @@ class GameScene(QGraphicsScene):
             elif (mouseDown.button() == Qt.RightButton) and itemSelected:
                 if isinstance(itemSelected, Ship):
                     for item in self.selectedItems():
-                        point = QPointF(
-                            int(mouseDown.scenePos().x()), int(mouseDown.scenePos().y())
-                        )
-                        item.setTarget(itemSelected)
+                        if itemSelected.data(1) == "ISLAND":
+                            print("MOVEMENT NOT POSSIBLE")
+                        elif itemSelected.data(1) != item.data(1):
+                            item.setTarget(itemSelected)
+                        elif itemSelected.data(1) == item.data(1):
+                            print("Follow")
                     mouseDown.accept()
             else:
                 super(GameScene, self).mousePressEvent(mouseDown)
