@@ -292,7 +292,8 @@ class Ship(QGraphicsRectItem):
         if self.iterators["next_target_lock"] <= 0:
             for turret in self.weapons["turrets_list"]:
                 if self.playerTarget:
-                    turret.setTarget(self.playerTarget)
+                    if self.isTargetable(self.playerTarget):
+                        turret.setTarget(self.playerTarget)
                 else:
                     try:
                         targetShip, shotType = self.autoSelectTarget()
@@ -897,6 +898,36 @@ class Ship(QGraphicsRectItem):
             return True
         return False
 
+    def isTargetable(self, other_ship):
+        """
+        Parameters
+        ----------
+        other_ship : Ship Object
+            An ennemy Ship
+
+        Returns
+        -------
+        None.
+
+        Summary
+        -------
+        Returns True if the selected enemy ship is Targetable,
+        False otherwise.
+
+        """
+        ship_center = geo.parallelepiped_Center(
+            other_ship.pos(), other_ship.rect().width(), other_ship.rect().height()
+        )
+        if (
+            self.gameScene.isInLineOfSight(
+                self.coordinates["center"], ship_center, 250,
+            )
+            and self.isInRange(other_ship)
+            and other_ship in self.det_and_range["fleet_detected_ships"]
+        ):
+            return True
+        return False
+
     def addNewTargets(self):
         """
 
@@ -946,7 +977,7 @@ class Ship(QGraphicsRectItem):
         """
         if ennemyShip:
             print(self.data(0), "RECEIVED TARGET:", ennemyShip.data(0))
-            self.playerTarget = ennemyShip
+        self.playerTarget = ennemyShip
 
     def autoSelectTarget(self):
         """
