@@ -18,8 +18,7 @@ from PyQt5.QtCore import Qt, QRectF, QPointF
 from PyQt5.QtGui import QColor, QPen, QBrush, QCursor
 from PyQt5.QtWidgets import QGraphicsItem, QGraphicsRectItem
 
-from library import RangeCircles
-from library.GunTurret import GunTurret as turret
+from library.GunTurret import GunTurret as tur
 from library.InGameData import TechsData as tech_dat
 from library.utils import HEAP
 from library.utils.Config import Config
@@ -27,6 +26,11 @@ from library.utils.MathsFormulas import (
     Geometrics as geo,
     Cinematics as cin,
     Controllers as con,
+)
+from library.UnitsGizmos import (
+    RangeCirclesGizmo as c_gizmo,
+    LineGizmo as l_gizmo,
+    RectangleGizmo as r_gizmo,
 )
 from library.Mapping import Astar as astar
 
@@ -201,7 +205,7 @@ class Ship(QGraphicsRectItem):
         self.setPos(pos)
 
         self.spawnWeapons()
-        self.setRangeCirclesDisp()
+        self.setGizmos()
 
     @classmethod
     def _battleShip(cls, clock, gameScene, gameMap, mapSlicing, pos, tag, _config):
@@ -307,7 +311,8 @@ class Ship(QGraphicsRectItem):
 
         # Test to hide the range circles
         if self.isSelected() is False:
-            self.displays["rangeCirclesDisp"].hide()
+            for gizmo in self.displays.values():
+                gizmo.hide()
 
     def hoverMoveEvent(self, mousePos):
         """
@@ -354,7 +359,8 @@ class Ship(QGraphicsRectItem):
 
         """
         print(self.naming["_type"] + str(self.data(0)), "selected at:", mouseDown.pos())
-        self.displays["rangeCirclesDisp"].show()
+        for gizmo in self.displays.values():
+            gizmo.show()
 
     def updateCenter(self):
         """
@@ -670,7 +676,7 @@ class Ship(QGraphicsRectItem):
         nextPoint = cin.movementBy(self.pos(), self.instant_vars["speed"], headingInRad)
         self.setPos(nextPoint)
         self.updateTurretPos()
-        self.displays["rangeCirclesDisp"]._updatePos(self.coordinates["center"])
+        self.update_gizmos()
 
     def updateTurretPos(self):
         """
@@ -695,6 +701,27 @@ class Ship(QGraphicsRectItem):
             nextTurPosY = self.coordinates["center"].y() - 75 + r * math.sin(teta)
 
             turret.setPos(nextTurPosX, nextTurPosY)
+
+    def update_gizmos(self):
+        """
+
+        Returns
+        -------
+        None.
+
+        Summary
+        -------
+        Update this unit gizmos.
+
+        """
+        self.displays["rangeCirclesDisp"].update_pos(self.coordinates["center"])
+        self.displays["lineToDestination"].update_line(
+            self.coordinates["center"], self.pathfinding["targetPoint"]
+        )
+        self.displays["lineToTarget"].update_line(
+            self.coordinates["center"], self.playerTarget
+        )
+        self.displays["selected"].update_rect(self.pos(), self.coordinates["heading"])
 
     def rotate(self):
         """
@@ -819,7 +846,7 @@ class Ship(QGraphicsRectItem):
 
         """
         det_distances = [None, None, None]
-        range = self.det_and_range["det_r_range"]
+        _range = self.det_and_range["det_r_range"]
 
         for i, direction in enumerate(self.det_and_range["det_r_angles"]):
             det_distances[i] = self.gameScene.detectionRay(
@@ -827,7 +854,7 @@ class Ship(QGraphicsRectItem):
                     self.pos(), self.rect().width(), self.rect().height()
                 ),
                 math.radians(self.coordinates["heading"] + direction),
-                range,
+                _range,
                 250,
                 int((self.rect().width() / 2) + 50),
             )
@@ -1113,11 +1140,11 @@ class Ship(QGraphicsRectItem):
 
         for i, spawnPos in enumerate(spawnPosList):
             if self.weapons["turrets_size"] == "s":
-                currentTurret = turret.small(self.clock, self.gameScene, self)
+                currentTurret = tur.small(self.clock, self.gameScene, self)
             elif self.weapons["turrets_size"] == "m":
-                currentTurret = turret.medium(self.clock, self.gameScene, self)
+                currentTurret = tur.medium(self.clock, self.gameScene, self)
             elif self.weapons["turrets_size"] == "l":
-                currentTurret = turret.large(self.clock, self.gameScene, self)
+                currentTurret = tur.large(self.clock, self.gameScene, self)
             try:
                 currentTurret.setPos(spawnPos)
                 currentTurret.d_shipCenter = (
@@ -1196,7 +1223,7 @@ class Ship(QGraphicsRectItem):
         print("**************** END ****************")
         print("")
 
-    def setRangeCirclesDisp(self):
+    def setGizmos(self):
         """
 
         Returns
@@ -1214,7 +1241,7 @@ class Ship(QGraphicsRectItem):
         )
 
         if self.data(1) == "ALLY":
-            self.displays["rangeCirclesDisp"] = RangeCircles.RangeCircles(
+            self.displays["rangeCirclesDisp"] = c_gizmo(
                 c,
                 self.instant_vars["detection_range"],
                 self.weapons["guns_range"],
@@ -1222,7 +1249,7 @@ class Ship(QGraphicsRectItem):
                 "blue",
             )
         else:
-            self.displays["rangeCirclesDisp"] = RangeCircles.RangeCircles(
+            self.displays["rangeCirclesDisp"] = c_gizmo(
                 c,
                 self.instant_vars["detection_range"],
                 self.weapons["guns_range"],
@@ -1230,7 +1257,18 @@ class Ship(QGraphicsRectItem):
                 "red",
             )
 
-        self.gameScene.addItem(self.displays["rangeCirclesDisp"])
+        color = "blue" if self.data(1) == "ALLY" else "red"
+        self.displays["selected"] = r_gizmo(
+            self.pos(), self.rect().width(), self.rect().height(), color
+        )
+        self.displays["lineToDestination"] = l_gizmo(
+            self.rect().center(), self.rect().center(), "blue"
+        )
+        self.displays["lineToTarget"] = l_gizmo(
+            self.rect().center(), self.rect().center(), "red"
+        )
+        for gizmo in self.displays.values():
+            self.gameScene.addItem(gizmo)
 
     def paint(self, painter, option, widget=None):
         """

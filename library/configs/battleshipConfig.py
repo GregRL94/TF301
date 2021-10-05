@@ -71,7 +71,12 @@ pathfinding = {
     "t_heading": 0,
 }
 
-displays = {"rangeCirclesDisp": None}
+displays = {
+    "rangeCirclesDisp": None,
+    "lineToDestination": None,
+    "lineToTarget": None,
+    "selected": None,
+}
 
 instant_vars = {
     "hp": 0,
