@@ -978,7 +978,7 @@ class Ship(QGraphicsRectItem):
         """
         if ennemyShip:
             print(self.data(0), "RECEIVED TARGET:", ennemyShip.data(0))
-            self.playerTarget = ennemyShip
+        self.playerTarget = ennemyShip
 
     def autoSelectTarget(self):
         """
