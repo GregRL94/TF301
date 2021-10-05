@@ -198,7 +198,6 @@ class Ship(QGraphicsRectItem):
             self.table = all_table["small"]
         self.currentTurret = None
         self.playerTarget = None
-        self.currentTarget = None
 
         self.setData(1, tag)
         self.setData(2, True)  # Considered an obstacle
@@ -676,15 +675,7 @@ class Ship(QGraphicsRectItem):
         nextPoint = cin.movementBy(self.pos(), self.instant_vars["speed"], headingInRad)
         self.setPos(nextPoint)
         self.updateTurretPos()
-
-        self.displays["rangeCirclesDisp"].update_pos(self.coordinates["center"])
-        self.displays["lineToDestination"].update_line(
-            self.coordinates["center"], self.pathfinding["targetPoint"]
-        )
-        self.displays["lineToTarget"].update_line(
-            self.coordinates["center"], self.currentTarget
-        )
-        self.displays["selected"].update_rect(self.pos(), self.coordinates["heading"])
+        self.update_gizmos()
 
     def updateTurretPos(self):
         """
@@ -709,6 +700,27 @@ class Ship(QGraphicsRectItem):
             nextTurPosY = self.coordinates["center"].y() - 75 + r * math.sin(teta)
 
             turret.setPos(nextTurPosX, nextTurPosY)
+
+    def update_gizmos(self):
+        """
+
+        Returns
+        -------
+        None.
+
+        Summary
+        -------
+        Update this unit gizmos.
+
+        """
+        self.displays["rangeCirclesDisp"].update_pos(self.coordinates["center"])
+        self.displays["lineToDestination"].update_line(
+            self.coordinates["center"], self.pathfinding["targetPoint"]
+        )
+        self.displays["lineToTarget"].update_line(
+            self.coordinates["center"], self.playerTarget
+        )
+        self.displays["selected"].update_rect(self.pos(), self.coordinates["heading"])
 
     def rotate(self):
         """
@@ -962,7 +974,6 @@ class Ship(QGraphicsRectItem):
         if ennemyShip:
             print(self.data(0), "RECEIVED TARGET:", ennemyShip.data(0))
             self.playerTarget = ennemyShip
-            self.currentTarget = ennemyShip
 
     def autoSelectTarget(self):
         """
