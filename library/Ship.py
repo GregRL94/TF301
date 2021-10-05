@@ -292,8 +292,9 @@ class Ship(QGraphicsRectItem):
         # Test to acquire the best target
         if self.iterators["next_target_lock"] <= 0:
             for turret in self.weapons["turrets_list"]:
-                if self.isInRange(self.playerTarget):
-                    turret.setTarget(self.playerTarget)
+                if self.playerTarget:
+                    if self.isTargetable(self.playerTarget):
+                        turret.setTarget(self.playerTarget)
                 else:
                     try:
                         targetShip, shotType = self.autoSelectTarget()
@@ -895,6 +896,36 @@ class Ship(QGraphicsRectItem):
         )
         distance = geo.distance_A_B(self.coordinates["center"], otherShipPos)
         if distance <= self.weapons["guns_range"]:
+            return True
+        return False
+
+    def isTargetable(self, other_ship):
+        """
+        Parameters
+        ----------
+        other_ship : Ship Object
+            An ennemy Ship
+
+        Returns
+        -------
+        None.
+
+        Summary
+        -------
+        Returns True if the selected enemy ship is Targetable,
+        False otherwise.
+
+        """
+        ship_center = geo.parallelepiped_Center(
+            other_ship.pos(), other_ship.rect().width(), other_ship.rect().height()
+        )
+        if (
+            self.gameScene.isInLineOfSight(
+                self.coordinates["center"], ship_center, 250,
+            )
+            and self.isInRange(other_ship)
+            and other_ship in self.det_and_range["fleet_detected_ships"]
+        ):
             return True
         return False
 
