@@ -28,7 +28,7 @@ class InteractiveListView(QListView):
         self.isForBattleSetup = True
         self.clicked.connect(self.onClick)
 
-    def onClick(self, selection):
+    def onClick(self):
         _selectedIndexes = self.selectedIndexes()
 
         if self.isForBattleSetup:
@@ -92,6 +92,13 @@ class InteractiveListView(QListView):
         if self.isForBattleSetup:
             if keyEvent.key() == Qt.Key_Delete:
                 self.removeFromShipDict()
+
+    def mousePressEvent(self, mouse_press_event):
+        if not self.indexAt(mouse_press_event.pos()).isValid():
+            self.clearSelection()
+            if self.isForBattleSetup:
+                self.attachedObject.set_blank_ship_stats()
+        super(InteractiveListView, self).mousePressEvent(mouse_press_event)
 
     def clearList(self):
         self._model.clearModel()
