@@ -1025,24 +1025,13 @@ class Ship(QGraphicsRectItem):
 
         for shipheapitem in self.targetList.items:
             ship = shipheapitem.shipInstance
-            shipCenter = geo.parallelepiped_Center(
-                ship.pos(), ship.rect().width(), ship.rect().height()
-            )
-            if (
-                self.gameScene.isInLineOfSight(
-                    self.coordinates["center"], shipCenter, 250,
-                )
-                and self.isInRange(ship)
-                and ship in self.det_and_range["fleet_detected_ships"]
-            ):
-                shipheapitem.isTargetable = True
+            shipheapitem.isTargetable = self.isTargetable(ship)
+            if shipheapitem.isTargetable:
                 (
                     shipheapitem.potentialDamage,
                     shipheapitem.idealShot,
                 ) = self.evaluateTarget(ship)
                 self.targetList.updateItem(shipheapitem)
-            else:
-                shipheapitem.isTargetable = False
 
         if len(self.targetList.items) > 0:
             if self.targetList.items[0].isTargetable:
