@@ -109,7 +109,7 @@ class BattleSetup:
         bb_cfg = path.join(
             path.dirname(path.realpath(__file__)), "../configs/battleshipConfig.py"
         )
-        self.bb_dict, bb_txt = Config._file2dict(bb_cfg)
+        self.bb_dict, _ = Config._file2dict(bb_cfg)
 
         # ca_cfg = path.join(
         #     path.dirname(path.realpath(__file__)), "../configs/cruiserConfig.py"
@@ -129,12 +129,12 @@ class BattleSetup:
         tur_cfg = path.join(
             path.dirname(path.realpath(__file__)), "../configs/turretConfig.py"
         )
-        self.tur_dict, tur_txt = Config._file2dict(tur_cfg)
+        self.tur_dict, _ = Config._file2dict(tur_cfg)
 
         map_cfg = path.join(
             path.dirname(path.realpath(__file__)), "../configs/mapGenConfig.py"
         )
-        self.map_dict, map_txt = Config._file2dict(map_cfg)
+        self.map_dict, _ = Config._file2dict(map_cfg)
 
         self.currentMapConfig = {}
         self.currentShip = {}
@@ -1093,9 +1093,8 @@ class BattleSetup:
             if not self.radioButtonsEnabled:
                 self.setEnabledRadioButtons(True)
                 self.radioButtonsEnabled = True
-            self.updateShipCreatorUI()
+            self.resetShipStats()
             self.updateShipStats()
-            # self.addShip()
         except Exception as e:
             print("Could not update UI", e)
 
@@ -1139,6 +1138,47 @@ class BattleSetup:
         ## Vision & Concealement section ##
         self.ship_concl_lbl.setText(str(self.currentShip["hull"]["base_concealement"]))
 
+    def set_blank_ship_stats(self):
+        ## reset Tech Levels ##
+        self.rdr_tech_0.setChecked(True)
+        self.fc_tech_0.setChecked(True)
+        self.gun_tech_0.setChecked(True)
+
+        ## Deactivate current ship related buttons ##
+        self.clear_ship_but.setEnabled(False)
+        self.add_ship_but.setEnabled(False)
+
+        ## Set current_key to None ##
+        self.currentShipKey = None
+
+        ## General section ##
+        self.ship_name_label.setText("")
+        self.ship_type_label.setText("")
+        self.ship_length_lbl.setText("")
+        self.ship_width_lbl.setText("")
+
+        self.ship_w_lbl.setText("")
+        self.ship_w_range_lbl.setText("")
+
+        ## Hull section ##
+        self.ship_max_hp_lbl.setText("")
+        self.ship_armor_lbl.setText("")
+        self.ship_shield_lbl.setText("")
+
+        ## Mobility section ##
+        self.ship_v_lbl.setText("")
+        self.ship_accel_lbl.setText("")
+        self.ship_t_rate_lbl.setText("")
+
+        ## Vision & Concealement section ##
+        self.ship_concl_lbl.setText("")
+
+        ## Calculated stats ##
+        self.ship_acc_lbl.setText("")
+        self.ship_fc_lbl.setText("")
+        self.ship_vision_lbl.setText("")
+        self.ship_cost.setText("")
+
     def resetShipStats(self):
         """
 
@@ -1166,7 +1206,7 @@ class BattleSetup:
 
         Summary
         -------
-        Recalculate the current ship stats and updates the dinamic displays.
+        Recalculate the current ship stats and updates the dynamic displays.
 
         """
         a, b, c = (
@@ -1339,7 +1379,7 @@ class BattleSetup:
         Adds a reference into the list.
 
         """
-        self.allShips[self.shipCounter] = self.currentShip
+        self.allShips[self.shipCounter] = copy.deepcopy(self.currentShip)
         self.listView.addToList(self.shipCounter, self.currentShip["naming"]["_type"])
         self.shipCounter += 1
         self.currentShipKey = self.shipCounter
