@@ -5,7 +5,7 @@
     Author: Grégory LARGANGE
     Date created: 07/10/2020
     Last modified by: Grégory LARGANGE
-    Date last modified: 13/07/2021
+    Date last modified: 13/10/2021
     Python version: 3.8.1
 """
 
@@ -21,6 +21,7 @@ from library import MainClock, Mapping, InGameData
 from library.displays import GameDisplay
 from library.Ship import Ship
 from library.dialogs import BattleSetup, InGameMenus, dialogsUtils
+from library.controllers.game_controller import GameController
 
 
 class Ui_TSKF301MainWindow(object):
@@ -337,12 +338,15 @@ class Ui_TSKF301MainWindow(object):
     def createBattle(self):
         self.mainClock = MainClock.MainClock(25)  # ms
         b_setup = BattleSetup.BattleSetup()
+        _game_controller = GameController(self)
         result = b_setup.battleSetupUI()
         if result:
             result2 = b_setup.createFleetUi()
             if result2:
                 mapConfig = b_setup.currentMapConfig
                 playerFleet = b_setup.allShips
+                ennemyFleet = _game_controller.generate_ai_fleet(mapConfig["funds"])
+                ## DEBUG PRINTS ##
                 print("MAP:")
                 for key, value in mapConfig.items():
                     print(key, "\n", value)
@@ -355,6 +359,7 @@ class Ui_TSKF301MainWindow(object):
                     for statKey, statValue in ship.items():
                         print(statKey, "\n", statValue)
                     print("")
+                ###################
                 self.main_buttons_frame.setVisible(False)
                 self.playerShipsDW.setVisible(True)
                 self.newGame(
@@ -369,6 +374,7 @@ class Ui_TSKF301MainWindow(object):
                     mapConfig["extension"],
                     1500,
                     playerFleet.values(),
+                    ennemyFleet,
                 )
                 self.inBattle = True
                 self.battleState = False
