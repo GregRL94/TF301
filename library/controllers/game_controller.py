@@ -9,7 +9,7 @@
     Python version: 3.8.1
 """
 
-# import random
+import random
 import copy
 
 from os import path
@@ -78,7 +78,6 @@ class GameController:
             funds_left += fund % target_single_ship_cost[i]
         for tech_cost in tech_dat.cost_per_tech:
             buyable_techs_per_level.append(funds_left // tech_cost)
-
         for i, n_ships in enumerate(ships_per_type):
             for _ in range(n_ships):
                 if i == 0:
@@ -90,11 +89,23 @@ class GameController:
                 # else:
                 #     all_ships.append(copy.deepcopy(self.pt_dict))
 
+        j = 0
+        for i in range(buyable_techs_per_level[0]):
+            if j > len(all_ships) - 1:
+                j = 0
+            if all_ships[j]["techs"]["guns_tech"] == 0:
+                all_ships[j]["techs"]["guns_tech"] = 1
+            elif all_ships[j]["techs"]["radar_tech"] == 0:
+                all_ships[j]["techs"]["radar_tech"] = 1
+            elif all_ships[j]["techs"]["fc_tech"] == 0:
+                all_ships[j]["techs"]["fc_tech"] = 1
+            j += 1
+
         return all_ships
 
     def choose_random_doctrine(self):
-        # all_doct_list = list(self.all_doctrines.keys())
-        # _range = len(all_doct_list)
-        # rand_index = random.randint(0, _range - 1)
-        # return all_doct_list[rand_index]
-        return "test"
+        all_doct_list = list(self.all_doctrines.keys())
+        _range = len(all_doct_list)
+        rand_index = random.randint(0, _range - 1)
+        return all_doct_list[rand_index]
+        # return "test"
