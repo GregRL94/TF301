@@ -205,9 +205,9 @@ class Ui_TSKF301MainWindow(object):
                     self.gameScene,
                     self.mapGen.gameMap,
                     self.mapGen.mapS,
-                    spawnPos,
                     "ALLY",
                     playerShipConfig,
+                    spawnPos,
                 )
                 allySpawnPos[0].setY(allySpawnPos[0].y() + 1000)
 
@@ -218,9 +218,9 @@ class Ui_TSKF301MainWindow(object):
                     self.gameScene,
                     self.mapGen.gameMap,
                     self.mapGen.mapS,
-                    spawnPos,
                     "ALLY",
                     playerShipConfig,
+                    spawnPos,
                 )
                 allySpawnPos[0].setY(allySpawnPos[0].y() + 1000)
 
@@ -231,9 +231,9 @@ class Ui_TSKF301MainWindow(object):
                     self.gameScene,
                     self.mapGen.gameMap,
                     self.mapGen.mapS,
-                    spawnPos,
                     "ALLY",
                     playerShipConfig,
+                    spawnPos,
                 )
                 allySpawnPos[1].setY(allySpawnPos[1].y() + 1000)
 
@@ -244,9 +244,9 @@ class Ui_TSKF301MainWindow(object):
                     self.gameScene,
                     self.mapGen.gameMap,
                     self.mapGen.mapS,
-                    spawnPos,
                     "ALLY",
                     playerShipConfig,
+                    spawnPos,
                 )
                 allySpawnPos[2].setY(allySpawnPos[2].y() + 1000)
 
@@ -283,9 +283,10 @@ class Ui_TSKF301MainWindow(object):
                         self.gameScene,
                         self.mapGen.gameMap,
                         self.mapGen.mapS,
-                        spawnPos,
                         "ENNEMY",
                         ennemyShipConfig,
+                        spawnPos,
+                        180,
                     )
                     ennemySpawnPos[0].setY(ennemySpawnPos[0].y() + 1000)
 
@@ -296,9 +297,10 @@ class Ui_TSKF301MainWindow(object):
                         self.gameScene,
                         self.mapGen.gameMap,
                         self.mapGen.mapS,
-                        spawnPos,
                         "ENNEMY",
                         ennemyShipConfig,
+                        spawnPos,
+                        180,
                     )
                     ennemySpawnPos[0].setY(ennemySpawnPos[0].y() + 1000)
 
@@ -309,9 +311,10 @@ class Ui_TSKF301MainWindow(object):
                         self.gameScene,
                         self.mapGen.gameMap,
                         self.mapGen.mapS,
-                        spawnPos,
                         "ENNEMY",
                         ennemyShipConfig,
+                        spawnPos,
+                        180,
                     )
                     ennemySpawnPos[1].setY(ennemySpawnPos[1].y() + 1000)
 
@@ -322,9 +325,10 @@ class Ui_TSKF301MainWindow(object):
                         self.gameScene,
                         self.mapGen.gameMap,
                         self.mapGen.mapS,
-                        spawnPos,
                         "ENNEMY",
                         ennemyShipConfig,
+                        spawnPos,
+                        180,
                     )
                     ennemySpawnPos[2].setY(ennemySpawnPos[2].y() + 1000)
 

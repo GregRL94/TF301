@@ -156,7 +156,7 @@ class Ship(QGraphicsRectItem):
 
         self.clock.clockSignal.connect(self.fixedUpdate)
 
-    def __init_instance__(self, pos, tag):
+    def __init_instance__(self, tag, pos, rotation=None):
         rect = QRectF(0, 0, self.geometry["_width"], self.geometry["_height"])
         self.coordinates["center"] = QPointF()
         self.instant_vars["hp"] = self.hull["max_hp"]
@@ -182,11 +182,11 @@ class Ship(QGraphicsRectItem):
         p_cfg = path.join(
             path.dirname(path.realpath(__file__)), "configs/projectileConfig.py"
         )
-        all_p_dat, p_txt = Config._file2dict(p_cfg)
+        all_p_dat, _ = Config._file2dict(p_cfg)
         table_cfg = path.join(
             path.dirname(path.realpath(__file__)), "configs/penetrationTable.py"
         )
-        all_table, table_txt = Config._file2dict(table_cfg)
+        all_table, _ = Config._file2dict(table_cfg)
         if self.naming["_type"] == "BB":
             self.p_dat = all_p_dat["large"]
             self.table = all_table["large"]
@@ -203,39 +203,49 @@ class Ship(QGraphicsRectItem):
         self.setData(2, True)  # Considered an obstacle
         self.setRect(rect)
         self.setPos(pos)
+        if rotation:
+            self.rotate(rotation)
 
         self.spawnWeapons()
         self.setGizmos()
 
     @classmethod
-    def _battleShip(cls, clock, gameScene, gameMap, mapSlicing, pos, tag, _config):
+    def _battleShip(
+        cls, clock, gameScene, gameMap, mapSlicing, tag, _config, pos, rotation=None
+    ):
         bb = cls(clock, gameScene, gameMap, mapSlicing)
         bb.__dict__.update(_config)
-        bb.__init_instance__(pos, tag)
+        bb.__init_instance__(tag, pos, rotation)
 
         return bb
 
     @classmethod
-    def cruiser(cls, clock, gameScene, gameMap, mapSlicing, pos, tag, _config):
+    def cruiser(
+        cls, clock, gameScene, gameMap, mapSlicing, tag, _config, pos, rotation=None
+    ):
         ca = cls(clock, gameScene, gameMap, mapSlicing)
         ca.__dict__.update(_config)
-        ca.__init_instance__(pos, tag)
+        ca.__init_instance__(tag, pos, rotation)
 
         return ca
 
     @classmethod
-    def frigate(cls, clock, gameScene, gameMap, mapSlicing, pos, tag, _config):
+    def frigate(
+        cls, clock, gameScene, gameMap, mapSlicing, tag, _config, pos, rotation=None
+    ):
         ff = cls(clock, gameScene, gameMap, mapSlicing)
         ff.__dict__.update(_config)
-        ff.__init_instance__(pos, tag)
+        ff.__init_instance__(tag, pos, rotation)
 
         return ff
 
     @classmethod
-    def corvette(cls, clock, gameScene, gameMap, mapSlicing, pos, tag, _config):
+    def corvette(
+        cls, clock, gameScene, gameMap, mapSlicing, tag, _config, pos, rotation=None
+    ):
         pt = cls(clock, gameScene, gameMap, mapSlicing)
         pt.__dict__.update(_config)
-        pt.__init_instance__(pos, tag)
+        pt.__init_instance__(tag, pos, rotation)
 
         return pt
 
@@ -723,7 +733,7 @@ class Ship(QGraphicsRectItem):
         )
         self.displays["selected"].update_rect(self.pos(), self.coordinates["heading"])
 
-    def rotate(self):
+    def rotate(self, rotation=None):
         """
 
         Returns
@@ -736,7 +746,11 @@ class Ship(QGraphicsRectItem):
 
         """
         self.setTransformOriginPoint(self.rect().center())
-        self.setRotation(self.coordinates["heading"])
+        if rotation:
+            self.setRotation(rotation)
+            self.coordinates["heading"] = rotation
+        else:
+            self.setRotation(self.coordinates["heading"])
 
     def steer(self, direction, hard=False):
         """
