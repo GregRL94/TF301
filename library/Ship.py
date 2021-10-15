@@ -1134,11 +1134,11 @@ class Ship(QGraphicsRectItem):
                 print(component_list[component_index], "IS DESTROYED !!")
 
         if crit_code == 1:
-            self.crit_components["fires"] += 1
+            self.crit_components["FIRES"] += 1
             print("FIRE ABOARD !!")
 
     def repair(self):
-        True
+        pass
 
     def spawnWeapons(self):
         """
