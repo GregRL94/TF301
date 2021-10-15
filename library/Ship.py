@@ -1048,11 +1048,10 @@ class Ship(QGraphicsRectItem):
                 self.targetList.updateItem(shipheapitem)
 
         if len(self.targetList.items) > 0:
-            if self.targetList.items[0].isTargetable:
-                return (
-                    self.targetList.items[0].shipInstance,
-                    self.targetList.items[0].idealShot,
-                )
+            for shipheapitem in self.targetList.items:
+                if shipheapitem.isTargetable:
+                    return (shipheapitem.shipInstance, shipheapitem.idealShot)
+
         return (None, None)
 
     def evaluateTarget(self, target):
