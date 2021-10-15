@@ -10,7 +10,6 @@
 """
 
 import sys
-import copy  #### testing
 from os import path
 
 from PyQt5 import QtCore, QtWidgets
@@ -179,9 +178,6 @@ class Ui_TSKF301MainWindow(object):
         spawnYCenter = mapSize // 2
         a_nbBBAndCA = a_nbFF = a_nbPT = 0
         e_nbBBAndCA = e_nbFF = e_nbPT = 0
-        ######
-        testConfig = None
-        ######
         for ship in playerShipsConfigs:
             if ship["naming"]["_type"] == "BB" or ship["naming"]["_type"] == "CA":
                 a_nbBBAndCA += 1
@@ -199,9 +195,6 @@ class Ui_TSKF301MainWindow(object):
         ]
 
         for i, playerShipConfig in enumerate(playerShipsConfigs):
-            ######
-            testConfig = copy.deepcopy(playerShipConfig)
-            ######
             if playerShipConfig["naming"]["_type"] == "BB":
                 spawnPos = allySpawnPos[0]
                 currentShip = Ship._battleShip(
@@ -337,19 +330,6 @@ class Ui_TSKF301MainWindow(object):
                 self.gameScene.addShip(currentShip)
                 currentShip = None
 
-        ##### TBD #####
-        currentShip = Ship._battleShip(
-            self.mainClock,
-            self.gameScene,
-            self.mapGen.gameMap,
-            self.mapGen.mapS,
-            QPoint(15000, 15000),
-            "ENNEMY",
-            testConfig,
-        )
-        self.gameScene.addShip(currentShip)
-        currentShip = None
-        ################
         self.rComs.updateShipLists()
 
     def createBattle(self):
