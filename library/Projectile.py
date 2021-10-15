@@ -389,9 +389,7 @@ class Projectile(QGraphicsRectItem):
 
         """
         crit_range = int(100 / self.crit_chance)
-        print(crit_range)
         rng = random.randint(1, crit_range)
-        print(rng)
         if rng == crit_range:
             print("CRITICAL HIT")
             return True
