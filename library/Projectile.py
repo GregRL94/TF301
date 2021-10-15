@@ -5,7 +5,7 @@
     Author: Grégory LARGANGE
     Date created: 07/10/2020
     Last modified by: Grégory LARGANGE
-    Date last modified: 13/07/2021
+    Date last modified: 29/09/2021
     Python version: 3.8.1
 """
 
@@ -50,7 +50,7 @@ class Projectile(QGraphicsRectItem):
         Moves the projectile in the direction of its rotation according to its
         speed.
 
-    range_rng()
+    range_rng(_range : int)
         Returns a random distance within the target range +/- dispersion interval.
 
     v_decrease()
@@ -58,6 +58,12 @@ class Projectile(QGraphicsRectItem):
 
     pen_decrease()
         Linear degression of the penetrative power of the projectile.
+
+    onImpact(otherItem : QGraphicsItem)
+        Determines the behaviour of the projectile when its collider overlaps otherItem's collider.
+
+    is_critical_hit()
+        Determines if the hit is critical.
 
     paint(painter : QPainter, option : QOption, widget : QWidget)
         Instructions to draw the projectile on the main game scene.
@@ -102,7 +108,7 @@ class Projectile(QGraphicsRectItem):
 
         self.clock.clockSignal.connect(self.move)
 
-    def __init_instance__(self, _range, _rotation):
+    def __init_instance__(self, tag, _range, _rotation):
         """
 
         Parameters
@@ -125,15 +131,21 @@ class Projectile(QGraphicsRectItem):
         self.eff_range = int(self.range_rng(_range))
         self._rotation = _rotation
 
+        self.setData(1, tag)
+        self.setData(2, False)  # Not considered an obstacle
+        self.setData(3, "SHOT")
+
         if self._type == "AP":
             self.v = self.v0 = self.v_AP
             self._pen = self.p0 = self.pen_AP
             self.dmg = self.dmg_AP
+            self.crit_chance = self.crit_pen_chance
             self.colors = self.colors_AP
         else:
             self.v = self.v0 = self.v_HE
             self._pen = self.p0 = self.pen_HE
             self.dmg = self.dmg_HE
+            self.crit_chance = self.fire_chance
             self.colors = self.colors_HE
 
         self.setRect(rect)
@@ -141,7 +153,7 @@ class Projectile(QGraphicsRectItem):
             self.rotate(self._rotation)
 
     @classmethod
-    def small(cls, clock, gameScene, _range, _rotation, _type="AP"):
+    def small(cls, clock, gameScene, tag, _range, _rotation, _type="AP"):
         """
 
         Parameters
@@ -170,12 +182,12 @@ class Projectile(QGraphicsRectItem):
         cfg_s = cls.cfg_dict["small"].copy()
         s_shot = cls(clock, gameScene, _type)
         s_shot.__dict__.update(cfg_s)
-        s_shot.__init_instance__(_range, _rotation)
+        s_shot.__init_instance__(tag, _range, _rotation)
 
         return s_shot
 
     @classmethod
-    def medium(cls, clock, gameScene, _range, _rotation, _type="AP"):
+    def medium(cls, clock, gameScene, tag, _range, _rotation, _type="AP"):
         """
 
         Parameters
@@ -204,12 +216,12 @@ class Projectile(QGraphicsRectItem):
         cfg_m = cls.cfg_dict["medium"].copy()
         m_shot = cls(clock, gameScene, _type)
         m_shot.__dict__.update(cfg_m)
-        m_shot.__init_instance__(_range, _rotation)
+        m_shot.__init_instance__(tag, _range, _rotation)
 
         return m_shot
 
     @classmethod
-    def large(cls, clock, gameScene, _range, _rotation, _type="AP"):
+    def large(cls, clock, gameScene, tag, _range, _rotation, _type="AP"):
         """
 
         Parameters
@@ -238,7 +250,7 @@ class Projectile(QGraphicsRectItem):
         cfg_l = cls.cfg_dict["large"].copy()
         l_shot = cls(clock, gameScene, _type)
         l_shot.__dict__.update(cfg_l)
-        l_shot.__init_instance__(_range, _rotation)
+        l_shot.__init_instance__(tag, _range, _rotation)
 
         return l_shot
 
@@ -285,6 +297,12 @@ class Projectile(QGraphicsRectItem):
             self.v_decrease()
             if self._type == "AP":
                 self.pen_decrease()
+            for item in self.collidingItems():
+                if item.data(3) == "TERRAIN":
+                    self.gameScene.destroyObject(self)
+                elif (item.data(3) == "SHIP") and (item.data(1) != self.data(1)):
+                    self.onImpact(item)
+                    self.gameScene.destroyObject(self)
 
     def range_rng(self, _range):
         """
@@ -330,6 +348,52 @@ class Projectile(QGraphicsRectItem):
 
         """
         self._pen = int(self.p0 + self.p0 * ((self.v - self.v0) / self.v0))
+
+    def onImpact(self, otherItem):
+        """
+
+        Parameters
+        ----------
+        otherItem : Ship
+            A ship item.
+
+        Returns
+        -------
+        None.
+
+        Summary
+        -------
+        Evaluates and applies damage to the colliding ship.
+
+        """
+        if self._type == "HE":
+            dmgHE = min(int((self._pen / otherItem.hull["armor"]) * self.dmg), self.dmg)
+            otherItem.receiveDamage(dmgHE)
+            if self.is_critical_hit():
+                otherItem.receiveCritical(1)
+        else:
+            if self._pen > otherItem.hull["armor"]:
+                if self.is_critical_hit():
+                    otherItem.receiveCritical(0)
+
+    def is_critical_hit(self):
+        """
+
+        Returns
+        -------
+            bool
+
+        Summary
+        -------
+        Randomly decides if the hit is critical or not.
+
+        """
+        crit_range = int(100 / self.crit_chance)
+        rng = random.randint(1, crit_range)
+        if rng == crit_range:
+            print("CRITICAL HIT")
+            return True
+        return False
 
     def paint(self, painter, option, widget=None):
         """

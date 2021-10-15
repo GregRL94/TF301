@@ -5,7 +5,7 @@
     Author: Grégory LARGANGE
     Date created: 09/10/2020
     Last modified by: Grégory LARGANGE
-    Date last modified: 21/07/2021
+    Date last modified: 29/09/2021
     Python version: 3.8.1
 """
 
@@ -201,6 +201,7 @@ class Ship(QGraphicsRectItem):
 
         self.setData(1, tag)
         self.setData(2, True)  # Considered an obstacle
+        self.setData(3, "SHIP")
         self.setRect(rect)
         self.setPos(pos)
         if rotation:
@@ -1038,33 +1039,20 @@ class Ship(QGraphicsRectItem):
 
         for shipheapitem in self.targetList.items:
             ship = shipheapitem.shipInstance
-            shipCenter = geo.parallelepiped_Center(
-                ship.pos(), ship.rect().width(), ship.rect().height()
-            )
-            if (
-                self.gameScene.isInLineOfSight(
-                    self.coordinates["center"], shipCenter, 250,
-                )
-                and self.isInRange(ship)
-                and ship in self.det_and_range["fleet_detected_ships"]
-            ):
-                shipheapitem.isTargetable = True
+            shipheapitem.isTargetable = self.isTargetable(ship)
+            if shipheapitem.isTargetable:
                 (
                     shipheapitem.potentialDamage,
                     shipheapitem.idealShot,
                 ) = self.evaluateTarget(ship)
                 self.targetList.updateItem(shipheapitem)
-            else:
-                shipheapitem.isTargetable = False
 
         if len(self.targetList.items) > 0:
-            if self.targetList.items[0].isTargetable:
-                return (
-                    self.targetList.items[0].shipInstance,
-                    self.targetList.items[0].idealShot,
-                )
-        else:
-            return None
+            for shipheapitem in self.targetList.items:
+                if shipheapitem.isTargetable:
+                    return (shipheapitem.shipInstance, shipheapitem.idealShot)
+
+        return (None, None)
 
     def evaluateTarget(self, target):
         """
@@ -1131,8 +1119,26 @@ class Ship(QGraphicsRectItem):
         #############################################################################
         return (potential, shot_choice)
 
+    def receiveDamage(self, value):
+        self.instant_vars["hp"] -= value
+
+    def receiveCritical(self, crit_code):
+        if crit_code == 0:
+            component_index = random.randint(0, 2)
+            component_list = list(self.crit_components.keys())
+            if self.crit_components[component_list[component_index]] == "OK":
+                self.crit_components[component_list[component_index]] = "DAMAGED"
+                print(component_list[component_index], "IS DAMAGED !!")
+            elif self.crit_components[component_list[component_index]] == "DAMAGED":
+                self.crit_components[component_list[component_index]] = "DESTROYED"
+                print(component_list[component_index], "IS DESTROYED !!")
+
+        if crit_code == 1:
+            self.crit_components["FIRES"] += 1
+            print("FIRE ABOARD !!")
+
     def repair(self):
-        True
+        pass
 
     def spawnWeapons(self):
         """

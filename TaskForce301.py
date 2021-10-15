@@ -10,7 +10,6 @@
 """
 
 import sys
-
 from os import path
 
 from PyQt5 import QtCore, QtWidgets
@@ -180,7 +179,6 @@ class Ui_TSKF301MainWindow(object):
         spawnYCenter = mapSize // 2
         a_nbBBAndCA = a_nbFF = a_nbPT = 0
         e_nbBBAndCA = e_nbFF = e_nbPT = 0
-
         for ship in playerShipsConfigs:
             if ship["naming"]["_type"] == "BB" or ship["naming"]["_type"] == "CA":
                 a_nbBBAndCA += 1

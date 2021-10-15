@@ -29,6 +29,8 @@ small = {
     "pen_AP": 150,
     "pen_HE": 50,
     "decc": 0.25,
+    "crit_pen_chance": 1,  # In percent
+    "fire_chance": 2,  # In percent
 }
 
 medium = {
@@ -46,6 +48,8 @@ medium = {
     "pen_AP": 300,
     "pen_HE": 75,
     "decc": 0.25,
+    "crit_pen_chance": 4,  # In percent
+    "fire_chance": 6,  # In percent
 }
 
 large = {
@@ -60,7 +64,9 @@ large = {
     "colors_HE": ["yellow", "red"],
     "dmg_AP": 800,
     "dmg_HE": 1200,
-    "pen_AP": 400,
+    "pen_AP": 375,
     "pen_HE": 100,
     "decc": 0.25,
+    "crit_pen_chance": 6,  # In percent
+    "fire_chance": 10,  # In percent
 }
