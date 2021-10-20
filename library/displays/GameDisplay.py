@@ -51,6 +51,7 @@ class GameScene(QGraphicsScene):
                     self.attachedLView.selectInList([selected_item.data(0)])
                 else:
                     self.attachedLView.selectInList()
+                super(GameScene, self).mousePressEvent(mouseDown)
             elif mouseDown.button() == Qt.RightButton:
                 if not selected_item:
                     for item in self.selectedItems():
@@ -72,9 +73,8 @@ class GameScene(QGraphicsScene):
                         mouseDown.accept()
                 else:
                     super(GameScene, self).mousePressEvent(mouseDown)
-            else:
-                super(GameScene, self).mousePressEvent(mouseDown)
         else:
+            self.attachedLView.selectInList()
             super(GameScene, self).mousePressEvent(mouseDown)
 
     def setInnerMap(self, mapExtension, innerMap):
