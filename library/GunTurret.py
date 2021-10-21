@@ -172,7 +172,7 @@ class GunTurret(QGraphicsRectItem):
         self.gameScene = gameScene
         self.parentShip = parent
 
-        self.acceptHoverEvents(False)
+        self.setAcceptHoverEvents(False)
         self.setFlag(QGraphicsRectItem.ItemIsSelectable, False)
         self.setFlag(QGraphicsRectItem.ItemIsFocusable, False)
 

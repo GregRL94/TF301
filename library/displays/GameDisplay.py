@@ -50,14 +50,13 @@ class GameScene(QGraphicsScene):
             if mouseDown.button() == Qt.LeftButton:
                 if selected_item:
                     self.attachedLView.selectInList([selected_item.data(0)])
-                    if self.attachedGController:
+                    if self.attachedGController and isinstance(selected_item, Ship):
                         self.attachedGController.display_current_ship_stats(
                             selected_item
                         )
                 else:
                     self.attachedLView.selectInList()
-                    if self.attachedGController:
-                        self.attachedGController.display_current_ship_stats()
+                    self.attachedGController.display_current_ship_stats()
                 super(GameScene, self).mousePressEvent(mouseDown)
             elif mouseDown.button() == Qt.RightButton:
                 if not selected_item:
@@ -82,7 +81,8 @@ class GameScene(QGraphicsScene):
                     super(GameScene, self).mousePressEvent(mouseDown)
         else:
             self.attachedLView.selectInList()
-            self.attachedGController.display_current_ship_stats()
+            if self.attachedGController:
+                self.attachedGController.display_current_ship_stats()
             super(GameScene, self).mousePressEvent(mouseDown)
 
     def setInnerMap(self, mapExtension, innerMap):
