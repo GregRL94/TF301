@@ -239,6 +239,7 @@ class GameScene(QGraphicsScene):
         self.nextShipID += 1
 
     def select_unselect_items(self, item_ids_list):
+        item_to_display = None
         for item_id in item_ids_list:
             for item in self.items(
                 self.sceneRect(),
@@ -247,9 +248,11 @@ class GameScene(QGraphicsScene):
                 self.attachedGView.transform(),
             ):
                 if item.data(0) == item_id:
+                    item_to_display = item
                     item.setSelected(True)
                 else:
                     item.setSelected(False)
+        self.attachedGController.display_current_ship_stats(item_to_display)
 
     def clearMap(self):
         for item in self.islandsList:
