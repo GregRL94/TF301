@@ -5,7 +5,7 @@
     Author: Grégory LARGANGE
     Date created: 07/10/2020
     Last modified by: Grégory LARGANGE
-    Date last modified: 13/10/2021
+    Date last modified: 21/10/2021
     Python version: 3.8.1
 """
 
@@ -348,6 +348,7 @@ class Ui_TSKF301MainWindow(object):
         self.mainClock = None
         self.mapGen = None
         self.rComs = None
+        self._game_controller = None
         self.inBattle = False
         self.battleState = False
 
@@ -564,15 +565,18 @@ class Ui_TSKF301MainWindow(object):
 
     def createBattle(self):
         self.mainClock = MainClock.MainClock(25)  # ms
+        self._game_controller = GameController(self)
         b_setup = BattleSetup.BattleSetup()
-        _game_controller = GameController(self)
+        self.gameScene.attachedGController = self._game_controller
         result = b_setup.battleSetupUI()
         if result:
             result2 = b_setup.createFleetUi()
             if result2:
                 mapConfig = b_setup.currentMapConfig
                 playerFleet = b_setup.allShips
-                ennemyFleet = _game_controller.generate_ai_fleet(mapConfig["funds"])
+                ennemyFleet = self._game_controller.generate_ai_fleet(
+                    mapConfig["funds"]
+                )
                 ## DEBUG PRINTS ##
                 print("MAP:")
                 for key, value in mapConfig.items():

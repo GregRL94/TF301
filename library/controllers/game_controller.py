@@ -5,7 +5,7 @@
     Author: Grégory LARGANGE
     Date created: 13/10/2020
     Last modified by: Grégory LARGANGE
-    Date last modified: 13/10/2021
+    Date last modified: 21/10/2021
     Python version: 3.8.1
 """
 
@@ -108,4 +108,17 @@ class GameController:
         _range = len(all_doct_list)
         rand_index = random.randint(0, _range - 1)
         return all_doct_list[rand_index]
-        # return "test"
+
+    def display_current_ship_stats(self, ship=None):
+        if ship:
+            self.tf301_ref.ship_type_lbl.setText(ship.naming["_type"])
+            self.tf301_ref.ship_name_lbl.setText(ship.naming["_name"])
+            self.tf301_ref.armor_value_lbl.setText(str(ship.hull["armor"]))
+            self.tf301_ref.gun_range_value_lbl.setText(str(ship.weapons["guns_range"]))
+            self.tf301_ref.accuracy_value_lbl.setText("TBD")
+            self.tf301_ref.max_det_range_value_lbl.setText(
+                str(ship.instant_vars["detection_range"])
+            )
+            self.tf301_ref.current_ship_frame.setVisible(True)
+        else:
+            self.tf301_ref.current_ship_frame.setVisible(False)

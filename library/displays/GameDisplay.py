@@ -5,7 +5,7 @@
     Author: Grégory LARGANGE
     Date created: 12/10/2020
     Last modified by: Grégory LARGANGE
-    Date last modified: 18/10/2021
+    Date last modified: 21/10/2021
     Python version: 3.8.1
 """
 
@@ -22,7 +22,7 @@ class GameScene(QGraphicsScene):
 
     attachedGView = None
     attachedLView = None
-    attachedShipStatsDisplay = None
+    attachedGController = None
     nextShipID = 0
     nextIslandID = 0
     currentItem = None
@@ -50,8 +50,14 @@ class GameScene(QGraphicsScene):
             if mouseDown.button() == Qt.LeftButton:
                 if selected_item:
                     self.attachedLView.selectInList([selected_item.data(0)])
+                    if self.attachedGController:
+                        self.attachedGController.display_current_ship_stats(
+                            selected_item
+                        )
                 else:
                     self.attachedLView.selectInList()
+                    if self.attachedGController:
+                        self.attachedGController.display_current_ship_stats()
                 super(GameScene, self).mousePressEvent(mouseDown)
             elif mouseDown.button() == Qt.RightButton:
                 if not selected_item:
@@ -76,6 +82,7 @@ class GameScene(QGraphicsScene):
                     super(GameScene, self).mousePressEvent(mouseDown)
         else:
             self.attachedLView.selectInList()
+            self.attachedGController.display_current_ship_stats()
             super(GameScene, self).mousePressEvent(mouseDown)
 
     def setInnerMap(self, mapExtension, innerMap):
