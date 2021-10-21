@@ -17,7 +17,7 @@ from PyQt5.QtCore import Qt, QPoint
 from PyQt5.QtWidgets import QMessageBox
 
 from library import MainClock, Mapping, InGameData
-from library.displays import GameDisplay
+from library.displays import GameDisplay, InteractiveList
 from library.Ship import Ship
 from library.dialogs import BattleSetup, InGameMenus, dialogsUtils
 from library.controllers.game_controller import GameController
@@ -303,8 +303,13 @@ class Ui_TSKF301MainWindow(object):
         self.dockWidgetContents.setObjectName("dockWidgetContents")
         self.gridLayout_2 = QtWidgets.QGridLayout(self.dockWidgetContents)
         self.gridLayout_2.setObjectName("gridLayout_2")
-        self.shipsListView = QtWidgets.QListView(self.dockWidgetContents)
+        self.shipsListView = InteractiveList.InteractiveListView(
+            False, self.dockWidgetContents
+        )
         self.shipsListView.setObjectName("shipsListView")
+        self.shipsListView.isForBattleSetup = False
+        self.shipsListView.attachedObject = self.gameScene
+        self.gameScene.attachedLView = self.shipsListView
         self.gridLayout_2.addWidget(self.shipsListView, 0, 0, 1, 1)
         self.playerShipsDW.setWidget(self.dockWidgetContents)
         self.playerShipsDW.setVisible(False)
