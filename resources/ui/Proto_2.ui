@@ -16,19 +16,19 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
     <property name="leftMargin">
-     <number>3</number>
+     <number>0</number>
     </property>
     <property name="topMargin">
-     <number>3</number>
+     <number>0</number>
     </property>
     <property name="rightMargin">
-     <number>3</number>
+     <number>0</number>
     </property>
     <property name="bottomMargin">
-     <number>3</number>
+     <number>0</number>
     </property>
     <property name="spacing">
-     <number>2</number>
+     <number>0</number>
     </property>
     <item row="0" column="0">
      <widget class="QFrame" name="frame">
@@ -112,13 +112,13 @@
       <property name="minimumSize">
        <size>
         <width>899</width>
-        <height>140</height>
+        <height>135</height>
        </size>
       </property>
       <property name="maximumSize">
        <size>
         <width>16777215</width>
-        <height>140</height>
+        <height>135</height>
        </size>
       </property>
       <property name="frameShape">
@@ -128,6 +128,12 @@
        <enum>QFrame::Raised</enum>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_3">
+       <property name="topMargin">
+        <number>9</number>
+       </property>
+       <property name="bottomMargin">
+        <number>9</number>
+       </property>
        <item>
         <layout class="QHBoxLayout" name="ship_hp_h_lyt">
          <item>
@@ -317,6 +323,9 @@
              </item>
              <item>
               <layout class="QVBoxLayout" name="distance_v_lyt">
+               <property name="spacing">
+                <number>6</number>
+               </property>
                <item>
                 <widget class="QLabel" name="distance_lbl">
                  <property name="text">

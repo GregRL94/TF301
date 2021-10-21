@@ -21,6 +21,7 @@ from library.utils.MathsFormulas import Geometrics as geo, Cinematics as cin
 class GameScene(QGraphicsScene):
 
     attachedGView = None
+    attachedShipStatsDisplay = None
     nextShipID = 0
     nextIslandID = 0
     currentItem = None
