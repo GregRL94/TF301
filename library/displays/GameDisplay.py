@@ -69,7 +69,7 @@ class GameScene(QGraphicsScene):
                             elif selected_item.data(1) != item.data(1):
                                 item.setTarget(selected_item)
                             elif selected_item.data(1) == item.data(1):
-                                print("Follow")
+                                item.follow(selected_item)
                         mouseDown.accept()
                 else:
                     super(GameScene, self).mousePressEvent(mouseDown)
