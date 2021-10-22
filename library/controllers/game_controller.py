@@ -5,7 +5,7 @@
     Author: Grégory LARGANGE
     Date created: 13/10/2020
     Last modified by: Grégory LARGANGE
-    Date last modified: 13/10/2021
+    Date last modified: 21/10/2021
     Python version: 3.8.1
 """
 
@@ -23,6 +23,8 @@ from library.utils.Config import Config
 class GameController:
     def __init__(self, parent):
         self.tf301_ref = parent
+        self.clock = parent.mainClock
+        self.currently_displayed_ship = None
         self.all_doctrines = ai_fleet_configs.doctrines
         bb_cfg = path.join(
             path.dirname(path.realpath(__file__)), "../configs/battleshipConfig.py"
@@ -44,10 +46,11 @@ class GameController:
         # )
         # self.pt_dict, pt_txt = Config._file2dict(pt_cfg)
 
-        tur_cfg = path.join(
-            path.dirname(path.realpath(__file__)), "../configs/turretConfig.py"
-        )
-        self.tur_dict, _ = Config._file2dict(tur_cfg)
+        self.clock.clockSignal.connect(self.fixed_update)
+
+    def fixed_update(self):
+        if self.currently_displayed_ship:
+            self.update_ship_display()
 
     def generate_ai_fleet(self, funds):
         doctrine = self.choose_random_doctrine()
@@ -108,4 +111,43 @@ class GameController:
         _range = len(all_doct_list)
         rand_index = random.randint(0, _range - 1)
         return all_doct_list[rand_index]
-        # return "test"
+
+    def display_current_ship_stats(self, ship=None):
+        if ship:
+            self.currently_displayed_ship = ship
+            self.tf301_ref.ship_type_lbl.setText(ship.naming["_type"])
+            self.tf301_ref.ship_name_lbl.setText(ship.naming["_name"])
+            self.tf301_ref.armor_value_lbl.setText(str(ship.hull["armor"]))
+            self.tf301_ref.gun_range_value_lbl.setText(str(ship.weapons["guns_range"]))
+            self.tf301_ref.accuracy_value_lbl.setText("TBD")
+            self.tf301_ref.max_det_range_value_lbl.setText(
+                str(ship.instant_vars["detection_range"])
+            )
+            self.tf301_ref.hp_progress_bar.setMinimum(0)
+            self.tf301_ref.hp_progress_bar.setMaximum(ship.hull["max_hp"])
+            self.tf301_ref.hp_progress_bar.setValue(ship.instant_vars["hp"])
+            self.tf301_ref.bridge_state_lbl.setText(ship.crit_components["BRIDGE"])
+            self.tf301_ref.engine_state_lbl.setText(ship.crit_components["ENGINE"])
+            self.tf301_ref.radar_state_lbl.setText(ship.crit_components["RADAR"])
+            self.tf301_ref.nb_fire_lbl.setText(str(ship.crit_components["FIRES"]))
+            self.tf301_ref.current_ship_frame.setVisible(True)
+        else:
+            self.currently_displayed_ship = None
+            self.tf301_ref.current_ship_frame.setVisible(False)
+
+    def update_ship_display(self):
+        self.tf301_ref.hp_progress_bar.setValue(
+            self.currently_displayed_ship.instant_vars["hp"]
+        )
+        self.tf301_ref.bridge_state_lbl.setText(
+            self.currently_displayed_ship.crit_components["BRIDGE"]
+        )
+        self.tf301_ref.engine_state_lbl.setText(
+            self.currently_displayed_ship.crit_components["ENGINE"]
+        )
+        self.tf301_ref.radar_state_lbl.setText(
+            self.currently_displayed_ship.crit_components["RADAR"]
+        )
+        self.tf301_ref.nb_fire_lbl.setText(
+            str(self.currently_displayed_ship.crit_components["FIRES"])
+        )

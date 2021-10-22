@@ -22,6 +22,7 @@ class GameScene(QGraphicsScene):
 
     attachedGView = None
     attachedLView = None
+    attachedGController = None
     nextShipID = 0
     nextIslandID = 0
     currentItem = None
@@ -49,8 +50,13 @@ class GameScene(QGraphicsScene):
             if mouseDown.button() == Qt.LeftButton:
                 if selected_item:
                     self.attachedLView.selectInList([selected_item.data(0)])
+                    if self.attachedGController and isinstance(selected_item, Ship):
+                        self.attachedGController.display_current_ship_stats(
+                            selected_item
+                        )
                 else:
                     self.attachedLView.selectInList()
+                    self.attachedGController.display_current_ship_stats()
                 super(GameScene, self).mousePressEvent(mouseDown)
             elif mouseDown.button() == Qt.RightButton:
                 if not selected_item:
@@ -75,6 +81,8 @@ class GameScene(QGraphicsScene):
                     super(GameScene, self).mousePressEvent(mouseDown)
         else:
             self.attachedLView.selectInList()
+            if self.attachedGController:
+                self.attachedGController.display_current_ship_stats()
             super(GameScene, self).mousePressEvent(mouseDown)
 
     def setInnerMap(self, mapExtension, innerMap):
@@ -231,6 +239,7 @@ class GameScene(QGraphicsScene):
         self.nextShipID += 1
 
     def select_unselect_items(self, item_ids_list):
+        item_to_display = None
         for item_id in item_ids_list:
             for item in self.items(
                 self.sceneRect(),
@@ -239,9 +248,11 @@ class GameScene(QGraphicsScene):
                 self.attachedGView.transform(),
             ):
                 if item.data(0) == item_id:
+                    item_to_display = item
                     item.setSelected(True)
                 else:
                     item.setSelected(False)
+        self.attachedGController.display_current_ship_stats(item_to_display)
 
     def clearMap(self):
         for item in self.islandsList:

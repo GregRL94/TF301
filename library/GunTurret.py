@@ -172,6 +172,10 @@ class GunTurret(QGraphicsRectItem):
         self.gameScene = gameScene
         self.parentShip = parent
 
+        self.setAcceptHoverEvents(False)
+        self.setFlag(QGraphicsRectItem.ItemIsSelectable, False)
+        self.setFlag(QGraphicsRectItem.ItemIsFocusable, False)
+
         self.clock.clockSignal.connect(self.fixedUpdate)
 
     def __init_instance__(self):
