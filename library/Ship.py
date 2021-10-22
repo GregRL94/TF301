@@ -198,6 +198,7 @@ class Ship(QGraphicsRectItem):
             self.table = all_table["small"]
         self.currentTurret = None
         self.playerTarget = None
+        self.follow_ship = None
 
         self.setData(1, tag)
         self.setData(2, True)  # Considered an obstacle
@@ -285,6 +286,9 @@ class Ship(QGraphicsRectItem):
         else:
             self.iterators["next_point_print"] -= 1
         ##################
+        # If follow mode, update target point to new target ship pos:
+        if self.follow_ship:
+            self.pathfinding["targetPoint"] = self.follow_ship.pos()
         # Test if the target point of the pathfinding has been reached
         if self.checkpointReached(self.pathfinding["targetPoint"], True) is False:
             if (self.iterators["next_path_update"] <= 0) & (
@@ -536,6 +540,23 @@ class Ship(QGraphicsRectItem):
         )
         self.rotate()
 
+    def follow(self, ship):
+        """
+        Parameters
+        ----------
+        ship : Ship
+            The other ALLIED ship to follow.
+
+        Returns
+        -------
+        None.
+
+        Summary:
+        Sets up an other ship to follow.
+
+        """
+        self.follow_ship = ship
+
     def updatePath(self, targetPoint=None):
         """
 
@@ -556,6 +577,7 @@ class Ship(QGraphicsRectItem):
 
         if targetPoint:
             self.pathfinding["targetPoint"] = targetPoint
+            self.follow_ship = None
 
         self.pathfinding["sel_checkpoint_id"] = None
         self.astar.reset()

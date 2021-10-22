@@ -650,6 +650,7 @@ class Ui_TSKF301MainWindow(object):
             self.battleState = False
             self.gameScene.clearGameScene()
             self.gameView.resetZoom()
+            self.shipsListView.clearList()
             self.initData()
             self.main_buttons_frame.setVisible(True)
             self.playerShipsDW.setVisible(False)
