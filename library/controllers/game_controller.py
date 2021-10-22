@@ -119,6 +119,8 @@ class GameController:
             self.tf301_ref.max_det_range_value_lbl.setText(
                 str(ship.instant_vars["detection_range"])
             )
+            self.tf301_ref.hp_progress_bar.setMaximum(ship.hull["max_hp"])
+            self.tf301_ref.hp_progress_bar.setValue(ship.instant_vars["hp"])
             self.tf301_ref.current_ship_frame.setVisible(True)
         else:
             self.tf301_ref.current_ship_frame.setVisible(False)
