@@ -46,11 +46,6 @@ class GameController:
         # )
         # self.pt_dict, pt_txt = Config._file2dict(pt_cfg)
 
-        tur_cfg = path.join(
-            path.dirname(path.realpath(__file__)), "../configs/turretConfig.py"
-        )
-        self.tur_dict, _ = Config._file2dict(tur_cfg)
-
         self.clock.clockSignal.connect(self.fixed_update)
 
     def fixed_update(self):
