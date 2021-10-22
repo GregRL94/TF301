@@ -373,6 +373,7 @@ class Projectile(QGraphicsRectItem):
                 otherItem.receiveCritical(1)
         else:
             if self._pen > otherItem.hull["armor"]:
+                otherItem.receiveDamage(self.dmg)
                 if self.is_critical_hit():
                     otherItem.receiveCritical(0)
 
