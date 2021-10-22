@@ -1143,6 +1143,8 @@ class Ship(QGraphicsRectItem):
 
     def receiveDamage(self, value):
         self.instant_vars["hp"] -= value
+        if self.instant_vars["hp"] < 0:
+            self.instant_vars["hp"] = 0
 
     def receiveCritical(self, crit_code):
         if crit_code == 0:
