@@ -5,7 +5,7 @@
     Author: Grégory LARGANGE
     Date created: 12/10/2020
     Last modified by: Grégory LARGANGE
-    Date last modified: 18/10/2021
+    Date last modified: 22/10/2021
     Python version: 3.8.1
 """
 
@@ -65,7 +65,7 @@ class GameScene(QGraphicsScene):
                     if isinstance(selected_item, Ship):
                         for item in self.selectedItems():
                             if selected_item.data(1) == "ISLAND":
-                                print("MOVEMENT NOT POSSIBLE")
+                                continue
                             elif selected_item.data(1) != item.data(1):
                                 item.setTarget(selected_item)
                             elif selected_item.data(1) == item.data(1):
