@@ -163,6 +163,24 @@ class GameScene(QGraphicsScene):
         # )
         return True
 
+    def isFreeSpace(self, pos: QPointF, ennemy: bool = False):
+        pos2 = (
+            QPointF(pos.x() - 1000, pos.y())
+            if ennemy
+            else QPointF(pos.x() + 1000, pos.y())
+        )
+        _item = self.itemAt(pos, self.attachedGView.transform())
+
+        if _item:
+            if _item.data(1) == "ISLAND":
+                return False
+        else:
+            _item = self.itemAt(pos2, self.attachedGView.transform())
+            if _item:
+                if _item.data(1) == "ISLAND":
+                    return False
+        return True
+
     def dispGrid(self, step):
         for i in range(0, int(self.height()), step):
             self.addLine(0, i, int(self.width()), i, QPen(QColor("black"), 4))
