@@ -313,6 +313,12 @@ class Ship(QGraphicsRectItem):
                 if self.playerTarget:
                     if self.isTargetable(self.playerTarget):
                         turret.setTarget(self.playerTarget)
+                    elif (
+                        self.playerTarget in self.det_and_range["fleet_detected_ships"]
+                    ):
+                        self.pathfinding["targetPoint"] = self.attack_move()
+                    else:
+                        self.playerTarget = None
                 else:
                     try:
                         targetShip, shotType = self.autoSelectTarget()
@@ -867,6 +873,14 @@ class Ship(QGraphicsRectItem):
 
         if self.checkpointReached(self.pathfinding["checkpoint"]):
             self.selectNextCheckpoint()
+
+    def attack_move(self):
+        angle = geo.angle(self.pos(), self.playerTarget.pos())
+        point = QPointF(
+            self.playerTarget.pos().x() - 18000 * math.cos(angle),
+            self.playerTarget.pos().y() - 18000 * math.sin(angle),
+        )
+        return point
 
     def dynamicObjectDetection(self):
         """
