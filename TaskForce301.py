@@ -400,11 +400,16 @@ class Ui_TSKF301MainWindow(object):
         playerShipsConfigs: list,
         ennemyShipsConfigs=None,
     ):
+        ## GENERAL VARS ##
         a_spawnXOffset = mapExtension + 1000
-        e_spawnXOffset = mapExtension + mapSize - 1000
+        e_spawnXOffset = mapExtension + mapSize - 1500
         spawnYCenter = mapSize // 2
         a_nbBBAndCA = a_nbFF = a_nbPT = 0
         e_nbBBAndCA = e_nbFF = e_nbPT = 0
+        ##################
+
+        ## SPAWN ROUTINE FOR PLAYER ##
+        # Count number of each ship type
         for ship in playerShipsConfigs:
             if ship["naming"]["_type"] == "BB" or ship["naming"]["_type"] == "CA":
                 a_nbBBAndCA += 1
@@ -413,6 +418,7 @@ class Ui_TSKF301MainWindow(object):
             elif ship["naming"]["_type"] == "PT":
                 a_nbPT += 1
 
+        # Determine ally pos according to number of each ship type
         allySpawnPos = [
             QPoint(a_spawnXOffset, spawnYCenter - (a_nbBBAndCA // 2) * 1000),
             QPoint(a_spawnXOffset + distBLines, spawnYCenter - (a_nbFF // 2) * 1000),
@@ -421,9 +427,14 @@ class Ui_TSKF301MainWindow(object):
             ),
         ]
 
+        # Spawn routine
         for i, playerShipConfig in enumerate(playerShipsConfigs):
             if playerShipConfig["naming"]["_type"] == "BB":
                 spawnPos = allySpawnPos[0]
+                # Checks if space is free to spawn the ship
+                while self.gameScene.isFreeSpace(spawnPos) is False:
+                    allySpawnPos[0].setY(allySpawnPos[0].y() + 1000)
+                    spawnPos = allySpawnPos[0]
                 currentShip = Ship._battleShip(
                     self.mainClock,
                     self.gameScene,
@@ -437,6 +448,10 @@ class Ui_TSKF301MainWindow(object):
 
             elif playerShipConfig["naming"]["_type"] == "CA":
                 spawnPos = allySpawnPos[0]
+                # Checks if space is free to spawn the ship
+                while self.gameScene.isFreeSpace(spawnPos) is False:
+                    allySpawnPos[0].setY(allySpawnPos[0].y() + 1000)
+                    spawnPos = allySpawnPos[0]
                 currentShip = Ship.cruiser(
                     self.mainClock,
                     self.gameScene,
@@ -450,6 +465,10 @@ class Ui_TSKF301MainWindow(object):
 
             elif playerShipConfig["naming"]["_type"] == "FF":
                 spawnPos = allySpawnPos[1]
+                # Checks if space is free to spawn the ship
+                while self.gameScene.isFreeSpace(spawnPos) is False:
+                    allySpawnPos[1].setY(allySpawnPos[1].y() + 1000)
+                    spawnPos = allySpawnPos[1]
                 currentShip = Ship.frigate(
                     self.mainClock,
                     self.gameScene,
@@ -463,6 +482,10 @@ class Ui_TSKF301MainWindow(object):
 
             elif playerShipConfig["naming"]["_type"] == "PT":
                 spawnPos = allySpawnPos[2]
+                # Checks if space is free to spawn the ship
+                while self.gameScene.isFreeSpace(spawnPos) is False:
+                    allySpawnPos[2].setY(allySpawnPos[2].y() + 1000)
+                    spawnPos = allySpawnPos[2]
                 currentShip = Ship.corvette(
                     self.mainClock,
                     self.gameScene,
@@ -479,6 +502,8 @@ class Ui_TSKF301MainWindow(object):
             self.gameScene.addShip(currentShip)
             currentShip = None
 
+        ## SPAWN ROUTINE FOR IA ##
+        # Count number of each ship type
         if ennemyShipsConfigs:
             for ship in ennemyShipsConfigs:
                 if ship["naming"]["_type"] == "BB" or ship["naming"]["_type"] == "CA":
@@ -488,6 +513,7 @@ class Ui_TSKF301MainWindow(object):
                 elif ship["naming"]["_type"] == "PT":
                     e_nbPT += 1
 
+            # Determine ally pos according to number of each ship type
             ennemySpawnPos = [
                 QPoint(e_spawnXOffset, spawnYCenter - (e_nbBBAndCA // 2) * 1000),
                 QPoint(
@@ -499,9 +525,14 @@ class Ui_TSKF301MainWindow(object):
                 ),
             ]
 
+            # Spawn routine
             for j, ennemyShipConfig in enumerate(ennemyShipsConfigs):
                 if ennemyShipConfig["naming"]["_type"] == "BB":
                     spawnPos = ennemySpawnPos[0]
+                    # Checks if space is free to spawn the ship
+                    while self.gameScene.isFreeSpace(spawnPos, True) is False:
+                        ennemySpawnPos[0].setY(ennemySpawnPos[0].y() + 1000)
+                        spawnPos = ennemySpawnPos[0]
                     currentShip = Ship._battleShip(
                         self.mainClock,
                         self.gameScene,
@@ -516,6 +547,10 @@ class Ui_TSKF301MainWindow(object):
 
                 elif ennemyShipConfig["naming"]["_type"] == "CA":
                     spawnPos = ennemySpawnPos[0]
+                    # Checks if space is free to spawn the ship
+                    while self.gameScene.isFreeSpace(spawnPos, True) is False:
+                        ennemySpawnPos[0].setY(ennemySpawnPos[0].y() + 1000)
+                        spawnPos = ennemySpawnPos[0]
                     currentShip = Ship.cruiser(
                         self.mainClock,
                         self.gameScene,
@@ -530,6 +565,10 @@ class Ui_TSKF301MainWindow(object):
 
                 elif ennemyShipConfig["naming"]["_type"] == "FF":
                     spawnPos = ennemySpawnPos[1]
+                    # Checks if space is free to spawn the ship
+                    while self.gameScene.isFreeSpace(spawnPos, True) is False:
+                        ennemySpawnPos[1].setY(ennemySpawnPos[1].y() + 1000)
+                        spawnPos = ennemySpawnPos[1]
                     currentShip = Ship.frigate(
                         self.mainClock,
                         self.gameScene,
@@ -544,6 +583,10 @@ class Ui_TSKF301MainWindow(object):
 
                 elif ennemyShipConfig["naming"]["_type"] == "PT":
                     spawnPos = ennemySpawnPos[2]
+                    # Checks if space is free to spawn the ship
+                    while self.gameScene.isFreeSpace(spawnPos, True) is False:
+                        ennemySpawnPos[2].setY(ennemySpawnPos[2].y() + 1000)
+                        spawnPos = ennemySpawnPos[2]
                     currentShip = Ship.corvette(
                         self.mainClock,
                         self.gameScene,
