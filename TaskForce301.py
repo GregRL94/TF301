@@ -694,6 +694,7 @@ class Ui_TSKF301MainWindow(object):
             self.gameScene.clearGameScene()
             self.gameView.resetZoom()
             self.shipsListView.clearList()
+            self.current_ship_frame.setVisible(False)
             self.initData()
             self.main_buttons_frame.setVisible(True)
             self.playerShipsDW.setVisible(False)
