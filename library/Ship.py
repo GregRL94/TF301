@@ -294,7 +294,10 @@ class Ship(QGraphicsRectItem):
             if (self.iterators["next_path_update"] <= 0) & (
                 self.pathfinding["targetPoint"] is not None
             ):
-                self.updatePath()
+                try:
+                    self.updatePath()
+                except Exception as e:
+                    print("WARNING: Skipped a path update.\n", e)
                 self.iterators["next_path_update"] = self.refresh["path_update_rate"]
             else:
                 self.iterators["next_path_update"] -= 1
