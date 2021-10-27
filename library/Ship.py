@@ -876,11 +876,36 @@ class Ship(QGraphicsRectItem):
 
     def attack_move(self):
         angle = geo.angle(self.pos(), self.playerTarget.pos())
-        point = QPointF(
+        o_point = QPointF(
             self.playerTarget.pos().x() - 18000 * math.cos(angle),
             self.playerTarget.pos().y() - 18000 * math.sin(angle),
         )
-        return point
+        # Tests if the optimum point is within an obstacle
+        if self.gameScene.itemAt(o_point, self.gameScene.attachedGView.transform()):
+            print("Point in an obstacle, generating new set of points")
+            # If yes, computes new sets alternative points
+            for i in range(1000, 4000, 1000):
+                print("New set of points, at", i, " distance from original point")
+                point_matrix = [
+                    QPointF(o_point.x() + i, o_point.y() + i),
+                    QPointF(o_point.x() - i, o_point.y() + i),
+                    QPointF(o_point.x() + i, o_point.y() - i),
+                    QPointF(o_point.x() - i, o_point.y() - i),
+                ]
+                for point in point_matrix:
+                    # If a point in the new set is NOT within an obstacle, returns it
+                    if not self.gameScene.itemAt(
+                        point, self.gameScene.attachedGView.transform()
+                    ):
+                        print("Valid point found")
+                        return point
+                    print("No valid point in this set, new set")
+        else:
+            print("Point is valid")
+            return o_point
+
+        print("No valid point found! returning None !")
+        return None
 
     def dynamicObjectDetection(self):
         """
