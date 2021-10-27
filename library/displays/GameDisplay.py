@@ -24,7 +24,6 @@ class GameScene(QGraphicsScene):
     attachedLView = None
     attachedGController = None
     nextShipID = 0
-    nextIslandID = 0
     currentItem = None
     waypoints = []  # Deletable points
     trajpoints = []  # Permanent points
@@ -94,11 +93,9 @@ class GameScene(QGraphicsScene):
     def displayMap(self, obstaclesList):
         for obstacle in obstaclesList:
             self.currentItem = Island.Island(self, obstacle)
-            thisIslandId = self.nextIslandID
-            self.currentItem.setData(0, thisIslandId)
+            self.currentItem.setData(0, None)
             self.currentItem.setData(1, "ISLAND")
             self.currentItem.setZValue(1)
-            self.nextIslandID += 1
             self.addItem(self.currentItem)
             self.islandsList.append(self.currentItem)
             self.currentItem = None
@@ -276,7 +273,6 @@ class GameScene(QGraphicsScene):
         for item in self.islandsList:
             self.removeItem(item)
         self.islandsList.clear()
-        self.nextIslandID = 0
 
         self.clearWaypoints()
         for item in self.trajpoints:
