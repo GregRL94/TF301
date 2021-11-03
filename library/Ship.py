@@ -319,7 +319,7 @@ class Ship(QGraphicsRectItem):
                     elif (
                         self.playerTarget in self.det_and_range["fleet_detected_ships"]
                     ):
-                        self.pathfinding["targetPoint"] = self.attack_move()
+                        self.updatePath(self.attack_move())
                     else:
                         self.playerTarget = None
                 else:
