@@ -304,6 +304,60 @@
           </layout>
          </item>
          <item>
+          <layout class="QVBoxLayout" name="speed_v_lyt">
+           <item>
+            <widget class="QLabel" name="speed_label">
+             <property name="text">
+              <string>SPEED</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout">
+             <item>
+              <widget class="QRadioButton" name="auto_speed_rbutt">
+               <property name="text">
+                <string>AUTO</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <layout class="QVBoxLayout" name="verticalLayout_2">
+               <item>
+                <widget class="QRadioButton" name="ahead_full_r_butt">
+                 <property name="text">
+                  <string>Ahead Full</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QRadioButton" name="Fast_r_butt">
+                 <property name="text">
+                  <string>Fast</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QRadioButton" name="slow_r_butt">
+                 <property name="text">
+                  <string>Medium</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QRadioButton" name="stop_r_butt">
+                 <property name="text">
+                  <string>stop</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </item>
+         <item>
           <layout class="QVBoxLayout" name="eng_policy_v_lyt">
            <item>
             <widget class="QLabel" name="eng_policy_lbl">
