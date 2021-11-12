@@ -388,7 +388,7 @@ class Ui_TSKF301MainWindow(object):
         )
         self.mapGen.setMapParameters(mapObstruction, obsParameters)
         self.gameScene.displayMap(self.mapGen.generateMap())
-        self.debugDisp(mapResolution, True, False)
+        self.debugDisp(mapResolution, False, False)
 
         self.rComs = InGameData.RadioCommunications(self.mainClock, self.gameScene)
 

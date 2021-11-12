@@ -99,6 +99,7 @@ class GameScene(QGraphicsScene):
             self.addItem(self.currentItem)
             self.islandsList.append(self.currentItem)
             self.currentItem = None
+        self.disp_Map_Borders()
 
     def shipsInDetectionRange(self, refShip):
         shipsInDRange = []
@@ -185,33 +186,34 @@ class GameScene(QGraphicsScene):
         for i in range(0, int(self.width()), step):
             self.addLine(i, 0, i, self.height(), QPen(QColor("black"), 4))
 
+    def disp_Map_Borders(self):
         self.addLine(
             self.innerBL,
             self.innerBT,
             self.innerBR,
             self.innerBT,
-            QPen(QColor("black"), 20),
+            QPen(QColor("red"), 60),
         )
         self.addLine(
             self.innerBL,
             self.innerBT,
             self.innerBL,
             self.innerBB,
-            QPen(QColor("black"), 20),
+            QPen(QColor("red"), 60),
         )
         self.addLine(
             self.innerBR,
             self.innerBT,
             self.innerBR,
             self.innerBB,
-            QPen(QColor("black"), 20),
+            QPen(QColor("red"), 60),
         )
         self.addLine(
             self.innerBL,
             self.innerBB,
             self.innerBR,
             self.innerBB,
-            QPen(QColor("black"), 20),
+            QPen(QColor("red"), 60),
         )
 
     def dispPenalties(self, penaltyMap, step):

@@ -373,7 +373,6 @@ class Ship(QGraphicsRectItem):
         Prints the postion of the item. Displays the range circles.
 
         """
-        print(self.naming["_type"] + str(self.data(0)), "selected at:", mouseDown.pos())
         for gizmo in self.displays.values():
             gizmo.show()
 
@@ -1039,8 +1038,6 @@ class Ship(QGraphicsRectItem):
         Forces the current target to be ennemyShip.
 
         """
-        if ennemyShip:
-            print(self.data(0), "RECEIVED TARGET:", ennemyShip.data(0))
         self.playerTarget = ennemyShip
 
     def autoSelectTarget(self):
@@ -1152,14 +1149,11 @@ class Ship(QGraphicsRectItem):
             component_list = list(self.crit_components.keys())
             if self.crit_components[component_list[component_index]] == "OK":
                 self.crit_components[component_list[component_index]] = "DAMAGED"
-                print(component_list[component_index], "IS DAMAGED !!")
             elif self.crit_components[component_list[component_index]] == "DAMAGED":
                 self.crit_components[component_list[component_index]] = "DESTROYED"
-                print(component_list[component_index], "IS DESTROYED !!")
 
         if crit_code == 1:
             self.crit_components["FIRES"] += 1
-            print("FIRE ABOARD !!")
 
     def repair(self):
         pass
