@@ -10,7 +10,7 @@
 """
 
 from library.Ship import Ship
-from PyQt5.QtCore import Qt, QPointF
+from PyQt5.QtCore import QRectF, Qt, QPointF
 from PyQt5.QtGui import QPen, QBrush, QColor
 from PyQt5.QtWidgets import QGraphicsScene, QGraphicsView
 
@@ -161,21 +161,21 @@ class GameScene(QGraphicsScene):
         return True
 
     def isFreeSpace(self, pos: QPointF, ennemy: bool = False):
-        pos2 = (
-            QPointF(pos.x() - 1000, pos.y())
+        rect = (
+            QRectF(pos.x() - 2000, pos.y() - 500, 3500, 1000)
             if ennemy
-            else QPointF(pos.x() + 1000, pos.y())
+            else QRectF(pos.x() - 500, pos.y() - 500, 3500, 1000)
         )
-        _item = self.itemAt(pos, self.attachedGView.transform())
+        _items = self.items(
+            rect,
+            Qt.IntersectsItemShape,
+            Qt.DescendingOrder,
+            self.attachedGView.transform(),
+        )
 
-        if _item:
+        for _item in _items:
             if _item.data(1) == "ISLAND":
                 return False
-        else:
-            _item = self.itemAt(pos2, self.attachedGView.transform())
-            if _item:
-                if _item.data(1) == "ISLAND":
-                    return False
         return True
 
     def dispGrid(self, step):
