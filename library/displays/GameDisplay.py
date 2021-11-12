@@ -5,12 +5,12 @@
     Author: Grégory LARGANGE
     Date created: 12/10/2020
     Last modified by: Grégory LARGANGE
-    Date last modified: 21/07/2021
+    Date last modified: 22/10/2021
     Python version: 3.8.1
 """
 
 from library.Ship import Ship
-from PyQt5.QtCore import Qt, QPointF
+from PyQt5.QtCore import QRectF, Qt, QPointF
 from PyQt5.QtGui import QPen, QBrush, QColor
 from PyQt5.QtWidgets import QGraphicsScene, QGraphicsView
 
@@ -21,8 +21,9 @@ from library.utils.MathsFormulas import Geometrics as geo, Cinematics as cin
 class GameScene(QGraphicsScene):
 
     attachedGView = None
+    attachedLView = None
+    attachedGController = None
     nextShipID = 0
-    nextIslandID = 0
     currentItem = None
     waypoints = []  # Deletable points
     trajpoints = []  # Permanent points
@@ -42,28 +43,45 @@ class GameScene(QGraphicsScene):
         if (self.innerBL <= int(mouseDown.scenePos().x()) <= self.innerBR) and (
             self.innerBT <= int(mouseDown.scenePos().y()) <= self.innerBB
         ):
-            itemSelected = self.itemAt(
+            selected_item = self.itemAt(
                 mouseDown.scenePos(), self.attachedGView.transform()
             )
-            if (mouseDown.button() == Qt.RightButton) and not itemSelected:
-                for item in self.selectedItems():
-                    point = QPointF(
-                        int(mouseDown.scenePos().x()), int(mouseDown.scenePos().y())
-                    )
-                    item.updatePath(point)
-                    item.setTarget()
-                mouseDown.accept()
-            elif (mouseDown.button() == Qt.RightButton) and itemSelected:
-                if isinstance(itemSelected, Ship):
+            if mouseDown.button() == Qt.LeftButton:
+                if selected_item:
+                    self.attachedLView.selectInList([selected_item.data(0)])
+                    if self.attachedGController and isinstance(selected_item, Ship):
+                        self.attachedGController.display_current_ship_stats(
+                            selected_item
+                        )
+                else:
+                    self.attachedLView.selectInList()
+                    self.attachedGController.display_current_ship_stats()
+                super(GameScene, self).mousePressEvent(mouseDown)
+            elif mouseDown.button() == Qt.RightButton:
+                if not selected_item:
                     for item in self.selectedItems():
                         point = QPointF(
                             int(mouseDown.scenePos().x()), int(mouseDown.scenePos().y())
                         )
-                        item.setTarget(itemSelected)
+                        item.updatePath(point)
+                        item.setTarget()
                     mouseDown.accept()
-            else:
-                super(GameScene, self).mousePressEvent(mouseDown)
+                elif selected_item:
+                    if isinstance(selected_item, Ship):
+                        for item in self.selectedItems():
+                            if selected_item.data(1) == "ISLAND":
+                                continue
+                            elif selected_item.data(1) != item.data(1):
+                                item.setTarget(selected_item)
+                            elif selected_item.data(1) == item.data(1):
+                                item.follow(selected_item)
+                        mouseDown.accept()
+                else:
+                    super(GameScene, self).mousePressEvent(mouseDown)
         else:
+            self.attachedLView.selectInList()
+            if self.attachedGController:
+                self.attachedGController.display_current_ship_stats()
             super(GameScene, self).mousePressEvent(mouseDown)
 
     def setInnerMap(self, mapExtension, innerMap):
@@ -75,14 +93,13 @@ class GameScene(QGraphicsScene):
     def displayMap(self, obstaclesList):
         for obstacle in obstaclesList:
             self.currentItem = Island.Island(self, obstacle)
-            thisIslandId = self.nextIslandID
-            self.currentItem.setData(0, thisIslandId)
+            self.currentItem.setData(0, None)
             self.currentItem.setData(1, "ISLAND")
             self.currentItem.setZValue(1)
-            self.nextIslandID += 1
             self.addItem(self.currentItem)
             self.islandsList.append(self.currentItem)
             self.currentItem = None
+        self.disp_Map_Borders()
 
     def shipsInDetectionRange(self, refShip):
         shipsInDRange = []
@@ -144,6 +161,24 @@ class GameScene(QGraphicsScene):
         # )
         return True
 
+    def isFreeSpace(self, pos: QPointF, ennemy: bool = False):
+        rect = (
+            QRectF(pos.x() - 2000, pos.y() - 500, 3500, 1000)
+            if ennemy
+            else QRectF(pos.x() - 500, pos.y() - 500, 3500, 1000)
+        )
+        _items = self.items(
+            rect,
+            Qt.IntersectsItemShape,
+            Qt.DescendingOrder,
+            self.attachedGView.transform(),
+        )
+
+        for _item in _items:
+            if _item.data(1) == "ISLAND":
+                return False
+        return True
+
     def dispGrid(self, step):
         for i in range(0, int(self.height()), step):
             self.addLine(0, i, int(self.width()), i, QPen(QColor("black"), 4))
@@ -151,33 +186,34 @@ class GameScene(QGraphicsScene):
         for i in range(0, int(self.width()), step):
             self.addLine(i, 0, i, self.height(), QPen(QColor("black"), 4))
 
+    def disp_Map_Borders(self):
         self.addLine(
             self.innerBL,
             self.innerBT,
             self.innerBR,
             self.innerBT,
-            QPen(QColor("black"), 20),
+            QPen(QColor("red"), 60),
         )
         self.addLine(
             self.innerBL,
             self.innerBT,
             self.innerBL,
             self.innerBB,
-            QPen(QColor("black"), 20),
+            QPen(QColor("red"), 60),
         )
         self.addLine(
             self.innerBR,
             self.innerBT,
             self.innerBR,
             self.innerBB,
-            QPen(QColor("black"), 20),
+            QPen(QColor("red"), 60),
         )
         self.addLine(
             self.innerBL,
             self.innerBB,
             self.innerBR,
             self.innerBB,
-            QPen(QColor("black"), 20),
+            QPen(QColor("red"), 60),
         )
 
     def dispPenalties(self, penaltyMap, step):
@@ -214,14 +250,31 @@ class GameScene(QGraphicsScene):
         shipObject.setData(0, thisShipId)
         shipObject.setZValue(2)
         self.shipList[thisShipId] = shipObject
-        self.nextShipID += 1
         self.addItem(shipObject)
+        if shipObject.data(1) == "ALLY":
+            self.attachedLView.addToList(thisShipId, shipObject.naming["_type"])
+        self.nextShipID += 1
+
+    def select_unselect_items(self, item_ids_list):
+        item_to_display = None
+        for item_id in item_ids_list:
+            for item in self.items(
+                self.sceneRect(),
+                Qt.IntersectsItemShape,
+                Qt.DescendingOrder,
+                self.attachedGView.transform(),
+            ):
+                if item.data(0) == item_id:
+                    item_to_display = item
+                    item.setSelected(True)
+                else:
+                    item.setSelected(False)
+        self.attachedGController.display_current_ship_stats(item_to_display)
 
     def clearMap(self):
         for item in self.islandsList:
             self.removeItem(item)
         self.islandsList.clear()
-        self.nextIslandID = 0
 
         self.clearWaypoints()
         for item in self.trajpoints:

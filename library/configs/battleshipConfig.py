@@ -5,7 +5,7 @@
     Author: Grégory LARGANGE
     Date created: 07/04/2021
     Last modified by: Grégory LARGANGE
-    Date last modified: 28/05/2021
+    Date last modified: 29/09/2021
     Python version: 3.8.1
 
     THIS FILE IS THE DEFAULT CONFIGURATION
@@ -46,10 +46,11 @@ techs = {"guns_tech": 0, "fc_tech": 0, "pc_tech": 0, "radar_tech": 0}
 refresh = {"refresh_rate": 9, "path_update_rate": 99, "print_point_rate": 74}
 
 crit_components = {
-    "bridge_state": "OK",
-    "engine_state": "OK",
-    "radar_state": "OK",
-    "shield_generator_state": "OK",
+    "BRIDGE": "OK",
+    "ENGINE": "OK",
+    "RADAR": "OK",
+    "SHIELD_GENERATOR": "OK",
+    "FIRES": 0,
 }
 
 det_and_range = {
@@ -71,7 +72,12 @@ pathfinding = {
     "t_heading": 0,
 }
 
-displays = {"rangeCirclesDisp": None}
+displays = {
+    "rangeCirclesDisp": None,
+    "lineToDestination": None,
+    "lineToTarget": None,
+    "selected": None,
+}
 
 instant_vars = {
     "hp": 0,

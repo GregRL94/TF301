@@ -634,7 +634,6 @@ class Astar:
         The construtor of the class.
 
         """
-        sTime = time.time()
         self.gridS = mapSlicing
         self.allNodes = []
         self.openList = HEAP.HEAP()  # A special set to optimize the sorting of nodes
@@ -648,8 +647,6 @@ class Astar:
                 self.allNodes[i].append(
                     Node(i, j, self.gridS, traversible, gameMap[i][j])
                 )
-
-        print("***** INITIALIZED A* IN %s SECONDS *****" % (time.time() - sTime))
 
     def reset(self):
         """

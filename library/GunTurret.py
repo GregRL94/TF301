@@ -172,6 +172,10 @@ class GunTurret(QGraphicsRectItem):
         self.gameScene = gameScene
         self.parentShip = parent
 
+        self.setAcceptHoverEvents(False)
+        self.setFlag(QGraphicsRectItem.ItemIsSelectable, False)
+        self.setFlag(QGraphicsRectItem.ItemIsFocusable, False)
+
         self.clock.clockSignal.connect(self.fixedUpdate)
 
     def __init_instance__(self):
@@ -544,21 +548,22 @@ class GunTurret(QGraphicsRectItem):
 
         """
         az_rad = math.radians(self.azimut)
+        tag = self.parentShip.data(1)
 
         for pos in self.guns_pos:
             a = self.gunDispersion()
 
             if self.shot_s == "s":
                 shot = Projectile.small(
-                    self.clock, self.gameScene, self.t_range, a, self.shot_t
+                    self.clock, self.gameScene, tag, self.t_range, a, self.shot_t
                 )
             elif self.shot_s == "m":
                 shot = Projectile.medium(
-                    self.clock, self.gameScene, self.t_range, a, self.shot_t
+                    self.clock, self.gameScene, tag, self.t_range, a, self.shot_t
                 )
             elif self.shot_s == "l":
                 shot = Projectile.large(
-                    self.clock, self.gameScene, self.t_range, a, self.shot_t
+                    self.clock, self.gameScene, tag, self.t_range, a, self.shot_t
                 )
 
             spawnPos = self.computeSpawnPos(pos, az_rad)

@@ -5,7 +5,7 @@
     Author: Grégory LARGANGE
     Date created: 29/06/2021
     Last modified by: Grégory LARGANGE
-    Date last modified: 05/07/2021
+    Date last modified: 18/10/2021
     Python version: 3.8.1
 """
 
@@ -28,28 +28,31 @@ class InteractiveListView(QListView):
         self.isForBattleSetup = True
         self.clicked.connect(self.onClick)
 
-    def onClick(self, selection):
+    def onClick(self):
         _selectedIndexes = self.selectedIndexes()
 
         if self.isForBattleSetup:
             item = self._model.itemFromIndex(_selectedIndexes[0])
             self.attachedObject.setStatsFomList(item.itemId)
         else:
+            ids_list = []
             for index in self.selectedIndexes():
                 item = self._model.itemFromIndex(index)
-                self.attachedObject.setItemSelected(item.itemId)
+                ids_list.append(item.itemId)
+            self.attachedObject.select_unselect_items(ids_list)
 
-    def addToList(self, itemId, itemTag):
+    def addToList(self, itemId: int, itemTag: str):
         self._model.appendItem(itemId, itemTag)
 
-    def selectInList(self, selectedItemsId=None):
+    def selectInList(self, selectedItemsId: list = None):
         if not selectedItemsId:
             self.clearSelection()
         else:
-            for itemId in selectedItemsId:
+            for item_id in selectedItemsId:
                 for item in self._model.allItems:
-                    if item.itemId == itemId:
-                        item.setSelected(True)
+                    if item.itemId == item_id:
+                        item_index = item.index()
+                        self.setCurrentIndex(item_index)
 
     def removeFromList(self, itemIdList=None):
         if itemIdList:
@@ -92,6 +95,13 @@ class InteractiveListView(QListView):
         if self.isForBattleSetup:
             if keyEvent.key() == Qt.Key_Delete:
                 self.removeFromShipDict()
+
+    def mousePressEvent(self, mouse_press_event):
+        if not self.indexAt(mouse_press_event.pos()).isValid():
+            self.clearSelection()
+            if self.isForBattleSetup:
+                self.attachedObject.set_blank_ship_stats()
+        super(InteractiveListView, self).mousePressEvent(mouse_press_event)
 
     def clearList(self):
         self._model.clearModel()
