@@ -9,14 +9,23 @@
     Python version: 3.8.1
 """
 
+import math
 import random
 
 from PyQt5.QtCore import QPointF
 from library.configs import battleshipConfig as bb_config
+from library.utils.MathsFormulas import Geometrics as geo, Cinematics as cin
 
 
 class FleetAI:
-    def __init__(self, ship_list, behavior, difficulty):
+    def __init__(
+        self, game_clock, game_scene, ship_list, behavior, difficulty, map_height
+    ):
+        self.clock = game_clock
+        self.game_scene = game_scene
+        self.screen_rate = 199
+        self.refresh_rate = 49
+
         self.fleet = []
         self.battleships = []
         self.cruisers = []
@@ -24,8 +33,13 @@ class FleetAI:
         self.submarines = []
         self.ships_coef = [12, 8, 4, 2]
 
+        self.c_fleet_heading = None
+        self.c_fleet_cog = None
+        self.screening_angle = 60  # degrees, angle from creening direction. total screening area is the disc arc covered by 2 * screening angle centered on direction
+        self.c_screening_dir = None
+
         self.detected_ennemy_ships = []
-        self.last_known_ennemy_position = None
+        self.ennemy_cog = QPointF(0, map_height / 2)
 
         for ship in ship_list:
             self.fleet.append(ship)
@@ -38,7 +52,7 @@ class FleetAI:
             else:
                 self.submarines.append(ship)
 
-    def fleet_center_of_mass(self):
+    def fleet_center_of_gravity(self):
         ship_momentums_x = 0
         ship_momentums_y = 0
 
@@ -70,10 +84,10 @@ class FleetAI:
         #     ship_momentums_x += momentum_x
         #     ship_momentums_y += momentum_y
 
-        center_of_mass_x = int(ship_momentums_x / total_mass)
-        center_of_mass_y = int(ship_momentums_y / total_mass)
+        cog_x = int(ship_momentums_x / total_mass)
+        cog_y = int(ship_momentums_y / total_mass)
 
-        return QPointF(center_of_mass_x, center_of_mass_y)
+        return QPointF(cog_x, cog_y)
 
     def random_starting_direction(self):
         _sin = (
@@ -84,12 +98,65 @@ class FleetAI:
 
         return sin * v_direction
 
+    def screen_direction(self):
+        self.c_screening_dir = geo.angle(
+            self.fleet_center_of_gravity(), self.ennemy_cog
+        )
+
     def screen(self):
+        cog = self.fleet_center_of_gravity()
+
         if len(self.frigates) == 0:
             return
         else:
-            screening_direction = -1
-            screening_angle = 120  # degrees
-            effective_screen_dist = bb_config.weapons[
+            screening_points = []
+            screen_dist = bb_config.weapons[
                 "guns_range"
             ]  # + ff_config.hull["base_detection_range"]
+            step = int(self.screening_angle / (len(self.frigates) // 2))
+            if len(self.frigates) % 2 == 0:
+                screening_points.append(None)
+            else:
+                screening_points.append(
+                    cin.movementBy(cog, screen_dist, self.c_screening_dir)
+                )
+
+            for angle in range(step // 2, self.screening_angle, step):
+                screening_points.append(
+                    cin.movementBy(
+                        cog, screen_dist, self.c_screening_dir + math.radians(angle),
+                    )
+                )
+                screening_points.append(
+                    cin.movementBy(
+                        cog, screen_dist, self.c_screening_dir - math.radians(angle),
+                    )
+                )
+
+        screening_points = sorted(
+            screening_points, key=lambda point: point.y(), reverse=True
+        )
+        frigates = sorted(self.frigates, key=lambda point: point.y(), reverse=True)
+
+        for i, frigate in enumerate(frigates):
+            if not self.game_scene.isFreeSpace(screening_points[i], True):
+                for i in range(1000, 4000, 1000):
+                    print("New set of points, at", i, " distance from original point")
+                    point_matrix = [
+                        QPointF(
+                            screening_points[i].x() + i, screening_points[i].y() + i
+                        ),
+                        QPointF(
+                            screening_points[i].x() - i, screening_points[i].y() + i
+                        ),
+                        QPointF(
+                            screening_points[i].x() + i, screening_points[i].y() - i
+                        ),
+                        QPointF(
+                            screening_points[i].x() - i, screening_points[i].y() - i
+                        ),
+                    ]
+                    for point in point_matrix:
+                        # If a point in the new set is NOT within an obstacle, returns it
+                        if self.game_scene.isFreeSpace(point, True):
+                            frigate.updatePath(point)

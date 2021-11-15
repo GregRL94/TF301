@@ -161,11 +161,19 @@ class GameScene(QGraphicsScene):
         # )
         return True
 
-    def isFreeSpace(self, pos: QPointF, ennemy: bool = False):
+    def isFreeSpace(
+        self,
+        pos: QPointF,
+        ennemy: bool = False,
+        x_offset: int = 1000,
+        y_offset: int = 1000,
+        w: int = 2000,
+        h: int = 2000,
+    ):
         rect = (
-            QRectF(pos.x() - 2000, pos.y() - 500, 3500, 1000)
+            QRectF(pos.x() - (x_offset + 1500), pos.y() - y_offset, w, h)
             if ennemy
-            else QRectF(pos.x() - 500, pos.y() - 500, 3500, 1000)
+            else QRectF(pos.x() - x_offset, pos.y() - y_offset, w, h)
         )
         _items = self.items(
             rect,
