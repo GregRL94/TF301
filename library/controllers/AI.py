@@ -19,10 +19,13 @@ from library.utils.MathsFormulas import Geometrics as geo, Cinematics as cin
 
 class FleetAI:
     def __init__(
-        self, game_clock, game_scene, ship_list, behavior, difficulty, map_height
+        self, game_clock, game_scene, ship_list, behavior, difficulty, map_w, map_h
     ):
         self.clock = game_clock
         self.game_scene = game_scene
+        self.map_w = map_w
+        self.map_h = map_h
+
         self.screen_rate = 199
         self.refresh_rate = 49
 
@@ -33,13 +36,14 @@ class FleetAI:
         self.submarines = []
         self.ships_coef = [12, 8, 4, 2]
 
-        self.c_fleet_heading = None
+        self.lead_ship = None
+        self.c_fleet_destination = None
         self.c_fleet_cog = None
         self.screening_angle = 60  # degrees, angle from creening direction. total screening area is the disc arc covered by 2 * screening angle centered on direction
         self.c_screening_dir = None
 
         self.detected_ennemy_ships = []
-        self.ennemy_cog = QPointF(0, map_height / 2)
+        self.ennemy_cog = QPointF(0, map_h / 2)
 
         for ship in ship_list:
             self.fleet.append(ship)
@@ -51,6 +55,18 @@ class FleetAI:
                 self.frigates.append(ship)
             else:
                 self.submarines.append(ship)
+
+        self.lead_ship = (
+            self.battleships[0] if random.random() <= 0.4 else self.battleships[-1]
+        )
+
+    def on_start(self):
+        self.c_fleet_cog = self.fleet_center_of_gravity()
+        self.screen_direction()
+        self.set_fleet_destination(self.random_first_heading())
+
+    def fixed_update(self):
+        pass
 
     def fleet_center_of_gravity(self):
         ship_momentums_x = 0
@@ -89,14 +105,18 @@ class FleetAI:
 
         return QPointF(cog_x, cog_y)
 
-    def random_starting_direction(self):
-        _sin = (
-            0.7  # the sinus value of a 45° angle. This value has been choosen at random
-        )
-        v_direction = -1 if random.random() <= 0.5 else 1
-        sin = 0 if random.random() <= 0.3 else 0.7
+    def random_first_heading(self):
+        points = [
+            QPointF(self.map_w / 2, self.map_h / 2),
+            QPointF(self.map_w / 2, 2000),
+            QPointF(self.map_w / 2, self.map_h - 2000),
+        ]
+        _index = random.randint(0, 2)
 
-        return sin * v_direction
+        return points[_index]
+
+    def select_lead_ship(self):
+        pass
 
     def screen_direction(self):
         self.c_screening_dir = geo.angle(
@@ -160,3 +180,24 @@ class FleetAI:
                         # If a point in the new set is NOT within an obstacle, returns it
                         if self.game_scene.isFreeSpace(point, True):
                             frigate.updatePath(point)
+
+    def double_line_formation(self):
+        dist_to_lead = {}
+        for ship in self.battleships:
+            if ship == self.lead_ship:
+                continue
+            else:
+                dist_to_lead[ship] = geo.distance_A_B(ship.pos(), self.lead_ship.pos())
+        sorted_dist_to_lead = {
+            k: v for k, v in sorted(dist_to_lead.items(), key=lambda item: item[1])
+        }
+        sorted_ships_by_dist_to_lead = list(sorted_dist_to_lead.keys())
+        for i, ship in enumerate(sorted_ships_by_dist_to_lead):
+            if i == 0:
+                ship.follow(self.lead_ship)
+            else:
+                ship.follow(sorted_ships_by_dist_to_lead[i - 1])
+
+    def set_fleet_destination(self, point):
+        self.lead_ship.updatePath(point)
+        self.c_fleet_destination = point
