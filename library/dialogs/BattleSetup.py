@@ -17,6 +17,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 from library.InGameData import TechsData as tech_dat
 from library.utils.Config import Config
+from library.utils.Imports import Imports
 from library.displays import InteractiveList
 from . import dialogsUtils
 
@@ -1379,8 +1380,33 @@ class BattleSetup:
         Adds a reference into the list.
 
         """
+        if self.currentShip["naming"]["_type"] == "BB":
+            name_file = path.join(
+                path.dirname(path.realpath(__file__)),
+                "../../resources/names/names_battleships.txt",
+            )
+        elif self.currentShip["naming"]["_type"] == "CA":
+            name_file = path.join(
+                path.dirname(path.realpath(__file__)),
+                "../../resources/names/names_cruisers.txt",
+            )
+        elif self.currentShip["naming"]["_type"] == "DD":
+            name_file = path.join(
+                path.dirname(path.realpath(__file__)),
+                "../../resources/names/names_destroyers.txt",
+            )
+        elif self.currentShip["naming"]["_type"] == "PT":
+            name_file = path.join(
+                path.dirname(path.realpath(__file__)),
+                "../../resources/names/names_submarine.txt",
+            )
+        self.currentShip["naming"]["_name"] = Imports.random_name(name_file)
         self.allShips[self.shipCounter] = copy.deepcopy(self.currentShip)
-        self.listView.addToList(self.shipCounter, self.currentShip["naming"]["_type"])
+        self.listView.addToList(
+            self.shipCounter,
+            self.currentShip["naming"]["_type"],
+            self.currentShip["naming"]["_name"],
+        )
         self.shipCounter += 1
         self.currentShipKey = self.shipCounter
         self.updateFleetCost()
