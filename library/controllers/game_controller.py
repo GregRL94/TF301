@@ -5,7 +5,7 @@
     Author: Grégory LARGANGE
     Date created: 13/10/2020
     Last modified by: Grégory LARGANGE
-    Date last modified: 21/10/2021
+    Date last modified: 17/11/2021
     Python version: 3.8.1
 """
 
@@ -31,10 +31,10 @@ class GameController:
         )
         self.bb_dict, _ = Config._file2dict(bb_cfg)
 
-        # ca_cfg = path.join(
-        #     path.dirname(path.realpath(__file__)), "../configs/cruiserConfig.py"
-        # )
-        # self.ca_dict, ca_txt = Config._file2dict(ca_cfg)
+        ca_cfg = path.join(
+            path.dirname(path.realpath(__file__)), "../configs/cruiserConfig.py"
+        )
+        self.ca_dict, _ = Config._file2dict(ca_cfg)
 
         # ff_cfg = path.join(
         #     path.dirname(path.realpath(__file__)), "../configs/frigateConfig.py"
@@ -55,7 +55,7 @@ class GameController:
     def generate_ai_fleet(self, funds):
         doctrine = self.choose_random_doctrine()
         doctrine_ship_prios = self.all_doctrines[doctrine][0]
-        doctrine_tech_prios = self.all_doctrines[doctrine][1]
+        # doctrine_tech_prios = self.all_doctrines[doctrine][1]
         target_single_ship_cost = [
             battleshipConfig.naming["base_cost"],
             4000,
@@ -85,8 +85,8 @@ class GameController:
             for _ in range(n_ships):
                 if i == 0:
                     all_ships.append(copy.deepcopy(self.bb_dict))
-                # elif i == 1:
-                #     all_ships.append(copy.deepcopy(self.ca_dict))
+                elif i == 1:
+                    all_ships.append(copy.deepcopy(self.ca_dict))
                 # elif i == 2:
                 #     all_ships.append(copy.deepcopy(self.ff_dict))
                 # else:
