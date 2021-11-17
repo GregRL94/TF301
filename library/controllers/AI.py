@@ -19,7 +19,14 @@ from library.utils.MathsFormulas import Geometrics as geo, Cinematics as cin
 
 class FleetAI:
     def __init__(
-        self, game_clock, game_scene, ship_list, behavior, difficulty, map_w, map_h
+        self,
+        game_clock,
+        game_scene,
+        ship_list,
+        map_w,
+        map_h,
+        behavior=None,
+        difficulty=None,
     ):
         self.clock = game_clock
         self.game_scene = game_scene
@@ -36,9 +43,9 @@ class FleetAI:
         self.submarines = []
         self.ships_coef = [12, 8, 4, 2]
 
-        self.lead_ship = None
+        self.lead_bb = None
+        self.lead_ca = None
         self.c_fleet_destination = None
-        self.c_fleet_cog = None
         self.screening_angle = 60  # degrees, angle from creening direction. total screening area is the disc arc covered by 2 * screening angle centered on direction
         self.c_screening_dir = None
 
@@ -56,14 +63,14 @@ class FleetAI:
             else:
                 self.submarines.append(ship)
 
-        self.lead_ship = (
-            self.battleships[0] if random.random() <= 0.4 else self.battleships[-1]
-        )
+        _rand = random.random()
+        self.lead_bb = self.battleships[0] if _rand <= 0.4 else self.battleships[-1]
+        self.lead_ca = self.cruisers[0] if _rand <= 0.4 else self.cruisers[-1]
 
     def on_start(self):
-        self.c_fleet_cog = self.fleet_center_of_gravity()
         self.screen_direction()
         self.set_fleet_destination(self.random_first_heading())
+        self.screen()
 
     def fixed_update(self):
         pass
@@ -106,14 +113,16 @@ class FleetAI:
         return QPointF(cog_x, cog_y)
 
     def random_first_heading(self):
-        points = [
-            QPointF(self.map_w / 2, self.map_h / 2),
-            QPointF(self.map_w / 2, 2000),
-            QPointF(self.map_w / 2, self.map_h - 2000),
-        ]
-        _index = random.randint(0, 2)
+        s_point = QPointF(
+            random.randint(0, self.map_w // 2), random.randint(0, self.map_h // 2)
+        )
 
-        return points[_index]
+        while not self.game_scene.isFreeSpace(s_point):
+            s_point = QPointF(
+                random.randint(0, self.map_w // 2), random.randint(0, self.map_h // 2)
+            )
+
+        return s_point
 
     def select_lead_ship(self):
         pass
@@ -160,44 +169,47 @@ class FleetAI:
 
         for i, frigate in enumerate(frigates):
             if not self.game_scene.isFreeSpace(screening_points[i], True):
-                for i in range(1000, 4000, 1000):
-                    print("New set of points, at", i, " distance from original point")
-                    point_matrix = [
-                        QPointF(
-                            screening_points[i].x() + i, screening_points[i].y() + i
-                        ),
-                        QPointF(
-                            screening_points[i].x() - i, screening_points[i].y() + i
-                        ),
-                        QPointF(
-                            screening_points[i].x() + i, screening_points[i].y() - i
-                        ),
-                        QPointF(
-                            screening_points[i].x() - i, screening_points[i].y() - i
-                        ),
-                    ]
-                    for point in point_matrix:
-                        # If a point in the new set is NOT within an obstacle, returns it
-                        if self.game_scene.isFreeSpace(point, True):
-                            frigate.updatePath(point)
+                frigate.updatePath(
+                    self.game_scene.alternative_point(screening_points[i])
+                )
 
     def double_line_formation(self):
         dist_to_lead = {}
         for ship in self.battleships:
-            if ship == self.lead_ship:
+            if ship == self.lead_bb:
                 continue
             else:
-                dist_to_lead[ship] = geo.distance_A_B(ship.pos(), self.lead_ship.pos())
+                dist_to_lead[ship] = geo.distance_A_B(ship.pos(), self.lead_bb.pos())
         sorted_dist_to_lead = {
             k: v for k, v in sorted(dist_to_lead.items(), key=lambda item: item[1])
         }
         sorted_ships_by_dist_to_lead = list(sorted_dist_to_lead.keys())
         for i, ship in enumerate(sorted_ships_by_dist_to_lead):
             if i == 0:
-                ship.follow(self.lead_ship)
+                ship.follow(self.lead_bb)
             else:
                 ship.follow(sorted_ships_by_dist_to_lead[i - 1])
 
-    def set_fleet_destination(self, point):
-        self.lead_ship.updatePath(point)
-        self.c_fleet_destination = point
+        dist_to_lead = {}
+        for ship in self.cruisers:
+            if ship == self.lead_ca:
+                continue
+            else:
+                dist_to_lead[ship] = geo.distance_A_B(ship.pos(), self.lead_ca.pos())
+        sorted_dist_to_lead = {
+            k: v for k, v in sorted(dist_to_lead.items(), key=lambda item: item[1])
+        }
+        sorted_ships_by_dist_to_lead = list(sorted_dist_to_lead.keys())
+        for i, ship in enumerate(sorted_ships_by_dist_to_lead):
+            if i == 0:
+                ship.follow(self.lead_ca)
+            else:
+                ship.follow(sorted_ships_by_dist_to_lead[i - 1])
+
+    def set_fleet_destination(self, point: QPointF = None):
+        if point:
+            self.c_fleet_destination = point
+            self.lead_bb.updatePath(self.c_fleet_destination)
+            self.lead_ca.updatePath(self.c_fleet_destination)
+        else:
+            pass

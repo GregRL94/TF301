@@ -164,17 +164,13 @@ class GameScene(QGraphicsScene):
     def isFreeSpace(
         self,
         pos: QPointF,
-        ennemy: bool = False,
         x_offset: int = 1000,
         y_offset: int = 1000,
         w: int = 2000,
         h: int = 2000,
     ):
-        rect = (
-            QRectF(pos.x() - (x_offset + 1500), pos.y() - y_offset, w, h)
-            if ennemy
-            else QRectF(pos.x() - x_offset, pos.y() - y_offset, w, h)
-        )
+        rect = QRectF(pos.x() - x_offset, pos.y() - y_offset, w, h)
+
         _items = self.items(
             rect,
             Qt.IntersectsItemShape,
@@ -186,6 +182,26 @@ class GameScene(QGraphicsScene):
             if _item.data(1) == "ISLAND":
                 return False
         return True
+
+    def alternative_point(
+        self,
+        original_point: QPointF,
+        min_d: int = 1000,
+        max_d: int = 4000,
+        step: int = 1000,
+    ):
+        for i in range(min_d, max_d, step):
+            print("New set of points, at", i, " distance from original point")
+            point_matrix = [
+                QPointF(original_point.x() + i, original_point.y() + i),
+                QPointF(original_point.x() - i, original_point.y() + i),
+                QPointF(original_point.x() + i, original_point.y() - i),
+                QPointF(original_point.x() - i, original_point.y() - i),
+            ]
+            for point in point_matrix:
+                # If a point in the new set is NOT within an obstacle, returns it
+                if self.isFreeSpace(point):
+                    return point
 
     def dispGrid(self, step):
         for i in range(0, int(self.height()), step):
