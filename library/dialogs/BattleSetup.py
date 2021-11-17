@@ -5,7 +5,7 @@
     Author: Grégory LARGANGE
     Date created: 10/06/2021
     Last modified by: Grégory LARGANGE
-    Date last modified: 05/07/2021
+    Date last modified: 17/11/2021
     Python version: 3.8.1
 """
 
@@ -111,10 +111,10 @@ class BattleSetup:
         )
         self.bb_dict, _ = Config._file2dict(bb_cfg)
 
-        # ca_cfg = path.join(
-        #     path.dirname(path.realpath(__file__)), "../configs/cruiserConfig.py"
-        # )
-        # self.ca_dict, ca_txt = Config._file2dict(ca_cfg)
+        ca_cfg = path.join(
+            path.dirname(path.realpath(__file__)), "../configs/cruiserConfig.py"
+        )
+        self.ca_dict, _ = Config._file2dict(ca_cfg)
 
         # ff_cfg = path.join(
         #     path.dirname(path.realpath(__file__)), "../configs/frigateConfig.py"
@@ -1073,9 +1073,9 @@ class BattleSetup:
         if _type == "BB":
             self.currentShip = copy.deepcopy(self.bb_dict)
             self.currentTurDict = copy.deepcopy(self.tur_dict["large"])
-        # elif _type == "CA":
-        #     self.currentShip = copy.deepcopy(self.ca_dict)
-        #     self.currentTurDict = self.tur_dict["medium"]
+        elif _type == "CA":
+            self.currentShip = copy.deepcopy(self.ca_dict)
+            self.currentTurDict = self.tur_dict["medium"]
         # elif _type == "FF":
         #     self.currentShip = copy.deepcopy(self.ff_dict)
         #     self.currentTurDict = self.tur_dict["small"]

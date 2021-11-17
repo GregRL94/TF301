@@ -5,7 +5,7 @@
     Author: Grégory LARGANGE
     Date created: 07/10/2020
     Last modified by: Grégory LARGANGE
-    Date last modified: 21/10/2021
+    Date last modified: 17/11/2021
     Python version: 3.8.1
 """
 
@@ -621,18 +621,18 @@ class Ui_TSKF301MainWindow(object):
                     mapConfig["funds"]
                 )
                 ## DEBUG PRINTS ##
-                print("MAP:")
-                for key, value in mapConfig.items():
-                    print(key, "\n", value)
-                print("")
-                print("")
+                # print("MAP:")
+                # for key, value in mapConfig.items():
+                #     print(key, "\n", value)
+                # print("")
+                # print("")
 
-                print("ALL SHIPS IN FLEET")
-                for shipKey, ship in playerFleet.items():
-                    print(shipKey)
-                    for statKey, statValue in ship.items():
-                        print(statKey, "\n", statValue)
-                    print("")
+                # print("ALL SHIPS IN FLEET")
+                # for shipKey, ship in playerFleet.items():
+                #     print(shipKey)
+                #     for statKey, statValue in ship.items():
+                #         print(statKey, "\n", statValue)
+                #     print("")
                 ###################
                 self.main_buttons_frame.setVisible(False)
                 self.playerShipsDW.setVisible(True)
