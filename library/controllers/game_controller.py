@@ -36,10 +36,10 @@ class GameController:
         )
         self.ca_dict, _ = Config._file2dict(ca_cfg)
 
-        # ff_cfg = path.join(
-        #     path.dirname(path.realpath(__file__)), "../configs/frigateConfig.py"
-        # )
-        # self.ff_dict, ff_txt = Config._file2dict(ff_cfg)
+        dd_cfg = path.join(
+            path.dirname(path.realpath(__file__)), "../configs/destroyerConfig.py"
+        )
+        self.dd_dict, _ = Config._file2dict(dd_cfg)
 
         # pt_cfg = path.join(
         #     path.dirname(path.realpath(__file__)), "../configs/corvetteConfig.py"
@@ -87,8 +87,8 @@ class GameController:
                     all_ships.append(copy.deepcopy(self.bb_dict))
                 elif i == 1:
                     all_ships.append(copy.deepcopy(self.ca_dict))
-                # elif i == 2:
-                #     all_ships.append(copy.deepcopy(self.ff_dict))
+                elif i == 2:
+                    all_ships.append(copy.deepcopy(self.dd_dict))
                 # else:
                 #     all_ships.append(copy.deepcopy(self.pt_dict))
 

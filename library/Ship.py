@@ -232,14 +232,14 @@ class Ship(QGraphicsRectItem):
         return ca
 
     @classmethod
-    def frigate(
+    def destroyer(
         cls, clock, gameScene, gameMap, mapSlicing, tag, _config, pos, rotation=None
     ):
-        ff = cls(clock, gameScene, gameMap, mapSlicing)
-        ff.__dict__.update(_config)
-        ff.__init_instance__(tag, pos, rotation)
+        dd = cls(clock, gameScene, gameMap, mapSlicing)
+        dd.__dict__.update(_config)
+        dd.__init_instance__(tag, pos, rotation)
 
-        return ff
+        return dd
 
     @classmethod
     def corvette(
@@ -1218,8 +1218,8 @@ class Ship(QGraphicsRectItem):
             txt = "Battleship"
         elif self.naming["_type"] == "CA":
             txt = "Cruiser"
-        elif self.naming["_type"] == "FF":
-            txt = "Frigate"
+        elif self.naming["_type"] == "DD":
+            txt = "Destroyer"
         elif self.naming["_type"] == "PT":
             txt = "Torpedo Corvette"
         print("TYPE:", txt)

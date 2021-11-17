@@ -20,7 +20,7 @@
 # battleships. The corresponding pair in the dictionary should be read as follows:
 # "juggernaut_big_guns": [[3, 0, 1, 0], [0, 0, 0]]
 # The 3 at index 0 indicates that Battleships have highest priority when ai buy ships.
-# The 1 at index 2 indicates that ai should buy a few frigates.
+# The 1 at index 2 indicates that ai should buy a few destroyers.
 # The 0s indicates that ai should not consider buying the concerned ships.
 # The second list indicates the importance of getting technologies level.
 # The higher the value the harder the ai will try to reach the highest possible technology level.
