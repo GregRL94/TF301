@@ -20,6 +20,7 @@ from library import MainClock, Mapping, InGameData
 from library.displays import GameDisplay, InteractiveList
 from library.Ship import Ship
 from library.dialogs import BattleSetup, InGameMenus, dialogsUtils
+from library.controllers import AI
 from library.controllers.game_controller import GameController
 
 
@@ -406,6 +407,7 @@ class Ui_TSKF301MainWindow(object):
         spawnYCenter = mapSize // 2
         a_nbBBAndCA = a_nbDD = a_nbPT = 0
         e_nbBBAndCA = e_nbDD = e_nbPT = 0
+        ai_fleet = []
         ##################
 
         ## SPAWN ROUTINE FOR PLAYER ##
@@ -543,6 +545,7 @@ class Ui_TSKF301MainWindow(object):
                         spawnPos,
                         180,
                     )
+                    ai_fleet.append(currentShip)
                     ennemySpawnPos[0].setY(ennemySpawnPos[0].y() + 1000)
 
                 elif ennemyShipConfig["naming"]["_type"] == "CA":
@@ -561,6 +564,7 @@ class Ui_TSKF301MainWindow(object):
                         spawnPos,
                         180,
                     )
+                    ai_fleet.append(currentShip)
                     ennemySpawnPos[0].setY(ennemySpawnPos[0].y() + 1000)
 
                 elif ennemyShipConfig["naming"]["_type"] == "DD":
@@ -579,6 +583,7 @@ class Ui_TSKF301MainWindow(object):
                         spawnPos,
                         180,
                     )
+                    ai_fleet.append(currentShip)
                     ennemySpawnPos[1].setY(ennemySpawnPos[1].y() + 1000)
 
                 elif ennemyShipConfig["naming"]["_type"] == "PT":
@@ -597,6 +602,7 @@ class Ui_TSKF301MainWindow(object):
                         spawnPos,
                         180,
                     )
+                    ai_fleet.append(currentShip)
                     ennemySpawnPos[2].setY(ennemySpawnPos[2].y() + 1000)
 
                 else:
@@ -605,6 +611,7 @@ class Ui_TSKF301MainWindow(object):
                 currentShip = None
 
         self.rComs.updateShipLists()
+        return ai_fleet
 
     def createBattle(self):
         self.mainClock = MainClock.MainClock(25)  # ms
@@ -643,12 +650,19 @@ class Ui_TSKF301MainWindow(object):
                     mapConfig["obstruction"],
                     mapConfig["obstaclesSetup"],
                 )
-                self.spawnShips(
+                ai_fleet = self.spawnShips(
                     mapConfig["size"],
                     mapConfig["extension"],
                     1500,
                     playerFleet.values(),
                     ennemyFleet,
+                )
+                ai = AI.FleetAI(
+                    self.mainClock,
+                    self.gameScene,
+                    ai_fleet,
+                    mapConfig["size"],
+                    mapConfig["size"],
                 )
                 self.inBattle = True
                 self.battleState = False

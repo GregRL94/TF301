@@ -14,8 +14,12 @@ import copy
 
 from os import path
 
-from library.configs import ai_fleet_configs
-from library.configs import battleshipConfig
+from library.configs import (
+    ai_fleet_configs,
+    battleshipConfig,
+    cruiserConfig,
+    destroyerConfig,
+)
 from library.InGameData import TechsData as tech_dat
 from library.utils.Config import Config
 
@@ -58,8 +62,8 @@ class GameController:
         # doctrine_tech_prios = self.all_doctrines[doctrine][1]
         target_single_ship_cost = [
             battleshipConfig.naming["base_cost"],
-            4000,
-            2500,
+            cruiserConfig.naming["base_cost"],
+            destroyerConfig.naming["base_cost"],
             2000,
         ]
         _sum = 0

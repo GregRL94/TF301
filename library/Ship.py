@@ -646,8 +646,14 @@ class Ship(QGraphicsRectItem):
             self.pathfinding["sel_checkpoint_id"] = None
         else:
             if self.pathfinding["sel_checkpoint_id"] is None:
-                self.pathfinding["checkpoint"] = self.pathfinding["trajectory"][0]
-                self.pathfinding["sel_checkpoint_id"] = 0
+                try:
+                    self.pathfinding["checkpoint"] = self.pathfinding["trajectory"][0]
+                except IndexError as ie:
+                    print("WARNING, Failed to update trajectory:", ie)
+                    self.pathfinding["trajectory"] = None
+                    self.pathfinding["checkpoint"] = None
+                finally:
+                    self.pathfinding["sel_checkpoint_id"] = 0
             else:
                 if (
                     self.pathfinding["sel_checkpoint_id"] + 1
