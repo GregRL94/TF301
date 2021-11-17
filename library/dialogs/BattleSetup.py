@@ -116,10 +116,10 @@ class BattleSetup:
         )
         self.ca_dict, _ = Config._file2dict(ca_cfg)
 
-        # ff_cfg = path.join(
-        #     path.dirname(path.realpath(__file__)), "../configs/frigateConfig.py"
-        # )
-        # self.ff_dict, ff_txt = Config._file2dict(ff_cfg)
+        dd_cfg = path.join(
+            path.dirname(path.realpath(__file__)), "../configs/destroyerConfig.py"
+        )
+        self.dd_dict, _ = Config._file2dict(dd_cfg)
 
         # pt_cfg = path.join(
         #     path.dirname(path.realpath(__file__)), "../configs/corvetteConfig.py"
@@ -303,10 +303,10 @@ class BattleSetup:
         pt_but.setText("CORVETTE")
         type_buttons_lyt.addWidget(pt_but)
 
-        ff_but = QtWidgets.QPushButton(verticalLayoutWidget_2)
-        ff_but.setObjectName("ff_but")
-        ff_but.setText("FRIGATE")
-        type_buttons_lyt.addWidget(ff_but)
+        dd_but = QtWidgets.QPushButton(verticalLayoutWidget_2)
+        dd_but.setObjectName("dd_but")
+        dd_but.setText("DESTROYER")
+        type_buttons_lyt.addWidget(dd_but)
 
         ca_but = QtWidgets.QPushButton(verticalLayoutWidget_2)
         ca_but.setObjectName("ca_but")
@@ -846,7 +846,7 @@ class BattleSetup:
         ## Ship type selection button ##
         bb_but.clicked.connect(lambda: self.shipButtonClicked("BB"))
         ca_but.clicked.connect(lambda: self.shipButtonClicked("CA"))
-        ff_but.clicked.connect(lambda: self.shipButtonClicked("FF"))
+        dd_but.clicked.connect(lambda: self.shipButtonClicked("DD"))
         pt_but.clicked.connect(lambda: self.shipButtonClicked("PT"))
 
         ## Updates stats when another tech is selected ##
@@ -1076,9 +1076,9 @@ class BattleSetup:
         elif _type == "CA":
             self.currentShip = copy.deepcopy(self.ca_dict)
             self.currentTurDict = self.tur_dict["medium"]
-        # elif _type == "FF":
-        #     self.currentShip = copy.deepcopy(self.ff_dict)
-        #     self.currentTurDict = self.tur_dict["small"]
+        elif _type == "DD":
+            self.currentShip = copy.deepcopy(self.dd_dict)
+            self.currentTurDict = self.tur_dict["small"]
         # elif _type == "PT":
         #     self.currentShip = copy.deepcopy(self.pt_dict)
         #     self.currentTurDict = self.tur_dict["small"]
@@ -1326,7 +1326,7 @@ class BattleSetup:
             self.currentTurDict = copy.deepcopy(self.tur_dict["large"])
         elif self.currentShip["naming"]["_type"] == "CA":
             self.currentTurDict = copy.deepcopy(self.tur_dict["medium"])
-        elif self.currentShip["naming"]["_type"] == "FF":
+        elif self.currentShip["naming"]["_type"] == "DD":
             self.currentTurDict = copy.deepcopy(self.tur_dict["small"])
         elif self.currentShip["naming"]["_type"] == "PT":
             self.currentTurDict = copy.deepcopy(self.tur_dict["small"])
