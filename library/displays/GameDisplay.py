@@ -276,7 +276,9 @@ class GameScene(QGraphicsScene):
         self.shipList[thisShipId] = shipObject
         self.addItem(shipObject)
         if shipObject.data(1) == "ALLY":
-            self.attachedLView.addToList(thisShipId, shipObject.naming["_type"])
+            self.attachedLView.addToList(
+                thisShipId, shipObject.naming["_type"], shipObject.naming["_name"]
+            )
         self.nextShipID += 1
 
     def select_unselect_items(self, item_ids_list):

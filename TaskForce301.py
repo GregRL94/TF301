@@ -5,7 +5,7 @@
     Author: Grégory LARGANGE
     Date created: 07/10/2020
     Last modified by: Grégory LARGANGE
-    Date last modified: 21/10/2021
+    Date last modified: 17/11/2021
     Python version: 3.8.1
 """
 
@@ -404,8 +404,8 @@ class Ui_TSKF301MainWindow(object):
         a_spawnXOffset = mapExtension + 1000
         e_spawnXOffset = mapExtension + mapSize - 1500
         spawnYCenter = mapSize // 2
-        a_nbBBAndCA = a_nbFF = a_nbPT = 0
-        e_nbBBAndCA = e_nbFF = e_nbPT = 0
+        a_nbBBAndCA = a_nbDD = a_nbPT = 0
+        e_nbBBAndCA = e_nbDD = e_nbPT = 0
         ##################
 
         ## SPAWN ROUTINE FOR PLAYER ##
@@ -413,15 +413,15 @@ class Ui_TSKF301MainWindow(object):
         for ship in playerShipsConfigs:
             if ship["naming"]["_type"] == "BB" or ship["naming"]["_type"] == "CA":
                 a_nbBBAndCA += 1
-            elif ship["naming"]["_type"] == "FF":
-                a_nbFF += 1
+            elif ship["naming"]["_type"] == "DD":
+                a_nbDD += 1
             elif ship["naming"]["_type"] == "PT":
                 a_nbPT += 1
 
         # Determine ally pos according to number of each ship type
         allySpawnPos = [
             QPoint(a_spawnXOffset, spawnYCenter - (a_nbBBAndCA // 2) * 1000),
-            QPoint(a_spawnXOffset + distBLines, spawnYCenter - (a_nbFF // 2) * 1000),
+            QPoint(a_spawnXOffset + distBLines, spawnYCenter - (a_nbDD // 2) * 1000),
             QPoint(
                 a_spawnXOffset + 2 * distBLines, spawnYCenter - (a_nbPT // 2) * 1000
             ),
@@ -463,13 +463,13 @@ class Ui_TSKF301MainWindow(object):
                 )
                 allySpawnPos[0].setY(allySpawnPos[0].y() + 1000)
 
-            elif playerShipConfig["naming"]["_type"] == "FF":
+            elif playerShipConfig["naming"]["_type"] == "DD":
                 spawnPos = allySpawnPos[1]
                 # Checks if space is free to spawn the ship
                 while self.gameScene.isFreeSpace(spawnPos) is False:
                     allySpawnPos[1].setY(allySpawnPos[1].y() + 1000)
                     spawnPos = allySpawnPos[1]
-                currentShip = Ship.frigate(
+                currentShip = Ship.destroyer(
                     self.mainClock,
                     self.gameScene,
                     self.mapGen.gameMap,
@@ -508,8 +508,8 @@ class Ui_TSKF301MainWindow(object):
             for ship in ennemyShipsConfigs:
                 if ship["naming"]["_type"] == "BB" or ship["naming"]["_type"] == "CA":
                     e_nbBBAndCA += 1
-                elif ship["naming"]["_type"] == "FF":
-                    e_nbFF += 1
+                elif ship["naming"]["_type"] == "DD":
+                    e_nbDD += 1
                 elif ship["naming"]["_type"] == "PT":
                     e_nbPT += 1
 
@@ -517,7 +517,7 @@ class Ui_TSKF301MainWindow(object):
             ennemySpawnPos = [
                 QPoint(e_spawnXOffset, spawnYCenter - (e_nbBBAndCA // 2) * 1000),
                 QPoint(
-                    e_spawnXOffset - distBLines, spawnYCenter - (e_nbFF // 2) * 1000
+                    e_spawnXOffset - distBLines, spawnYCenter - (e_nbDD // 2) * 1000
                 ),
                 QPoint(
                     e_spawnXOffset - 2 * distBLines,
@@ -563,13 +563,13 @@ class Ui_TSKF301MainWindow(object):
                     )
                     ennemySpawnPos[0].setY(ennemySpawnPos[0].y() + 1000)
 
-                elif ennemyShipConfig["naming"]["_type"] == "FF":
+                elif ennemyShipConfig["naming"]["_type"] == "DD":
                     spawnPos = ennemySpawnPos[1]
                     # Checks if space is free to spawn the ship
                     while self.gameScene.isFreeSpace(spawnPos, True) is False:
                         ennemySpawnPos[1].setY(ennemySpawnPos[1].y() + 1000)
                         spawnPos = ennemySpawnPos[1]
-                    currentShip = Ship.frigate(
+                    currentShip = Ship.destroyer(
                         self.mainClock,
                         self.gameScene,
                         self.mapGen.gameMap,
@@ -621,18 +621,18 @@ class Ui_TSKF301MainWindow(object):
                     mapConfig["funds"]
                 )
                 ## DEBUG PRINTS ##
-                print("MAP:")
-                for key, value in mapConfig.items():
-                    print(key, "\n", value)
-                print("")
-                print("")
+                # print("MAP:")
+                # for key, value in mapConfig.items():
+                #     print(key, "\n", value)
+                # print("")
+                # print("")
 
-                print("ALL SHIPS IN FLEET")
-                for shipKey, ship in playerFleet.items():
-                    print(shipKey)
-                    for statKey, statValue in ship.items():
-                        print(statKey, "\n", statValue)
-                    print("")
+                # print("ALL SHIPS IN FLEET")
+                # for shipKey, ship in playerFleet.items():
+                #     print(shipKey)
+                #     for statKey, statValue in ship.items():
+                #         print(statKey, "\n", statValue)
+                #     print("")
                 ###################
                 self.main_buttons_frame.setVisible(False)
                 self.playerShipsDW.setVisible(True)

@@ -5,7 +5,7 @@
     Author: Grégory LARGANGE
     Date created: 27/04/2021
     Last modified by: Grégory LARGANGE
-    Date last modified: 15/07/2021
+    Date last modified: 17/11/2021
     Python version: 3.8.1
 
     THIS FILE CONTAINS DEFAULT CONFIGS
@@ -18,7 +18,7 @@ small = {
     "_width": 30,
     "_height": 15,
     "thk": 3,
-    "m_range": 7500,
+    "m_range": 10000,
     "accy": 0.0667,
     "v_AP": 150,
     "v_HE": 125,
@@ -37,7 +37,7 @@ medium = {
     "_width": 50,
     "_height": 25,
     "thk": 5,
-    "m_range": 15000,
+    "m_range": 14000,
     "accy": 0.0834,
     "v_AP": 150,
     "v_HE": 125,

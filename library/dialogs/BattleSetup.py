@@ -5,7 +5,7 @@
     Author: Grégory LARGANGE
     Date created: 10/06/2021
     Last modified by: Grégory LARGANGE
-    Date last modified: 05/07/2021
+    Date last modified: 17/11/2021
     Python version: 3.8.1
 """
 
@@ -17,6 +17,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 from library.InGameData import TechsData as tech_dat
 from library.utils.Config import Config
+from library.utils.Imports import Imports
 from library.displays import InteractiveList
 from . import dialogsUtils
 
@@ -111,15 +112,15 @@ class BattleSetup:
         )
         self.bb_dict, _ = Config._file2dict(bb_cfg)
 
-        # ca_cfg = path.join(
-        #     path.dirname(path.realpath(__file__)), "../configs/cruiserConfig.py"
-        # )
-        # self.ca_dict, ca_txt = Config._file2dict(ca_cfg)
+        ca_cfg = path.join(
+            path.dirname(path.realpath(__file__)), "../configs/cruiserConfig.py"
+        )
+        self.ca_dict, _ = Config._file2dict(ca_cfg)
 
-        # ff_cfg = path.join(
-        #     path.dirname(path.realpath(__file__)), "../configs/frigateConfig.py"
-        # )
-        # self.ff_dict, ff_txt = Config._file2dict(ff_cfg)
+        dd_cfg = path.join(
+            path.dirname(path.realpath(__file__)), "../configs/destroyerConfig.py"
+        )
+        self.dd_dict, _ = Config._file2dict(dd_cfg)
 
         # pt_cfg = path.join(
         #     path.dirname(path.realpath(__file__)), "../configs/corvetteConfig.py"
@@ -303,10 +304,10 @@ class BattleSetup:
         pt_but.setText("CORVETTE")
         type_buttons_lyt.addWidget(pt_but)
 
-        ff_but = QtWidgets.QPushButton(verticalLayoutWidget_2)
-        ff_but.setObjectName("ff_but")
-        ff_but.setText("FRIGATE")
-        type_buttons_lyt.addWidget(ff_but)
+        dd_but = QtWidgets.QPushButton(verticalLayoutWidget_2)
+        dd_but.setObjectName("dd_but")
+        dd_but.setText("DESTROYER")
+        type_buttons_lyt.addWidget(dd_but)
 
         ca_but = QtWidgets.QPushButton(verticalLayoutWidget_2)
         ca_but.setObjectName("ca_but")
@@ -846,7 +847,7 @@ class BattleSetup:
         ## Ship type selection button ##
         bb_but.clicked.connect(lambda: self.shipButtonClicked("BB"))
         ca_but.clicked.connect(lambda: self.shipButtonClicked("CA"))
-        ff_but.clicked.connect(lambda: self.shipButtonClicked("FF"))
+        dd_but.clicked.connect(lambda: self.shipButtonClicked("DD"))
         pt_but.clicked.connect(lambda: self.shipButtonClicked("PT"))
 
         ## Updates stats when another tech is selected ##
@@ -1073,12 +1074,12 @@ class BattleSetup:
         if _type == "BB":
             self.currentShip = copy.deepcopy(self.bb_dict)
             self.currentTurDict = copy.deepcopy(self.tur_dict["large"])
-        # elif _type == "CA":
-        #     self.currentShip = copy.deepcopy(self.ca_dict)
-        #     self.currentTurDict = self.tur_dict["medium"]
-        # elif _type == "FF":
-        #     self.currentShip = copy.deepcopy(self.ff_dict)
-        #     self.currentTurDict = self.tur_dict["small"]
+        elif _type == "CA":
+            self.currentShip = copy.deepcopy(self.ca_dict)
+            self.currentTurDict = self.tur_dict["medium"]
+        elif _type == "DD":
+            self.currentShip = copy.deepcopy(self.dd_dict)
+            self.currentTurDict = self.tur_dict["small"]
         # elif _type == "PT":
         #     self.currentShip = copy.deepcopy(self.pt_dict)
         #     self.currentTurDict = self.tur_dict["small"]
@@ -1326,7 +1327,7 @@ class BattleSetup:
             self.currentTurDict = copy.deepcopy(self.tur_dict["large"])
         elif self.currentShip["naming"]["_type"] == "CA":
             self.currentTurDict = copy.deepcopy(self.tur_dict["medium"])
-        elif self.currentShip["naming"]["_type"] == "FF":
+        elif self.currentShip["naming"]["_type"] == "DD":
             self.currentTurDict = copy.deepcopy(self.tur_dict["small"])
         elif self.currentShip["naming"]["_type"] == "PT":
             self.currentTurDict = copy.deepcopy(self.tur_dict["small"])
@@ -1379,8 +1380,33 @@ class BattleSetup:
         Adds a reference into the list.
 
         """
+        if self.currentShip["naming"]["_type"] == "BB":
+            name_file = path.join(
+                path.dirname(path.realpath(__file__)),
+                "../../resources/names/names_battleships.txt",
+            )
+        elif self.currentShip["naming"]["_type"] == "CA":
+            name_file = path.join(
+                path.dirname(path.realpath(__file__)),
+                "../../resources/names/names_cruisers.txt",
+            )
+        elif self.currentShip["naming"]["_type"] == "DD":
+            name_file = path.join(
+                path.dirname(path.realpath(__file__)),
+                "../../resources/names/names_destroyers.txt",
+            )
+        elif self.currentShip["naming"]["_type"] == "PT":
+            name_file = path.join(
+                path.dirname(path.realpath(__file__)),
+                "../../resources/names/names_submarine.txt",
+            )
+        self.currentShip["naming"]["_name"] = Imports.random_name(name_file)
         self.allShips[self.shipCounter] = copy.deepcopy(self.currentShip)
-        self.listView.addToList(self.shipCounter, self.currentShip["naming"]["_type"])
+        self.listView.addToList(
+            self.shipCounter,
+            self.currentShip["naming"]["_type"],
+            self.currentShip["naming"]["_name"],
+        )
         self.shipCounter += 1
         self.currentShipKey = self.shipCounter
         self.updateFleetCost()

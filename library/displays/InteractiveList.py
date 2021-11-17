@@ -41,8 +41,8 @@ class InteractiveListView(QListView):
                 ids_list.append(item.itemId)
             self.attachedObject.select_unselect_items(ids_list)
 
-    def addToList(self, itemId: int, itemTag: str):
-        self._model.appendItem(itemId, itemTag)
+    def addToList(self, itemId: int, itemTag: str, text: str = None):
+        self._model.appendItem(itemId, itemTag, text)
 
     def selectInList(self, selectedItemsId: list = None):
         if not selectedItemsId:
@@ -112,8 +112,11 @@ class InteractiveListModel(QStandardItemModel):
         super(InteractiveListModel, self).__init__(parent)
         self.allItems = []
 
-    def appendItem(self, itemId, itemTag):
-        itemText = itemTag  # itemText = itemTag + "_" + Names.randomName(itemTag)
+    def appendItem(self, itemId, itemTag, text=None):
+        if text:
+            itemText = itemTag + "_" + text
+        else:
+            itemText = itemTag
         item = CustomItem(itemText, itemId, itemTag)
         item.setData(QBrush(QColor(162, 231, 253)), Qt.BackgroundColorRole)
         self.allItems.append(item)

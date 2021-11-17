@@ -8,6 +8,7 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
+
 class Ui_FleetSetUp(object):
     def setupUi(self, FleetSetUp):
         FleetSetUp.setObjectName("FleetSetUp")
@@ -41,7 +42,9 @@ class Ui_FleetSetUp(object):
         self.ships_in_fleet_lbl.setObjectName("ships_in_fleet_lbl")
         self.horizontalLayout_7.addWidget(self.ships_in_fleet_lbl)
         self.cur_fleet_cost_lbl = QtWidgets.QLabel(self.verticalLayoutWidget)
-        self.cur_fleet_cost_lbl.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.cur_fleet_cost_lbl.setAlignment(
+            QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter
+        )
         self.cur_fleet_cost_lbl.setObjectName("cur_fleet_cost_lbl")
         self.horizontalLayout_7.addWidget(self.cur_fleet_cost_lbl)
         self.fleet_lyt.addLayout(self.horizontalLayout_7)
@@ -50,12 +53,16 @@ class Ui_FleetSetUp(object):
         self.fleet_lyt.addWidget(self.listView)
         self.del_ship_lyt = QtWidgets.QHBoxLayout()
         self.del_ship_lyt.setObjectName("del_ship_lyt")
-        spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        spacerItem = QtWidgets.QSpacerItem(
+            40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum
+        )
         self.del_ship_lyt.addItem(spacerItem)
         self.del_ship_but = QtWidgets.QPushButton(self.verticalLayoutWidget)
         self.del_ship_but.setObjectName("del_ship_but")
         self.del_ship_lyt.addWidget(self.del_ship_but)
-        spacerItem1 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        spacerItem1 = QtWidgets.QSpacerItem(
+            40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum
+        )
         self.del_ship_lyt.addItem(spacerItem1)
         self.fleet_lyt.addLayout(self.del_ship_lyt)
         self.horizontalLayoutWidget_2 = QtWidgets.QWidget(FleetSetUp)
@@ -64,7 +71,9 @@ class Ui_FleetSetUp(object):
         self.main_choices_lyt = QtWidgets.QHBoxLayout(self.horizontalLayoutWidget_2)
         self.main_choices_lyt.setContentsMargins(0, 0, 0, 0)
         self.main_choices_lyt.setObjectName("main_choices_lyt")
-        spacerItem2 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        spacerItem2 = QtWidgets.QSpacerItem(
+            40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum
+        )
         self.main_choices_lyt.addItem(spacerItem2)
         self.clear_fleet_but = QtWidgets.QPushButton(self.horizontalLayoutWidget_2)
         self.clear_fleet_but.setObjectName("clear_fleet_but")
@@ -111,9 +120,9 @@ class Ui_FleetSetUp(object):
         self.pt_but = QtWidgets.QPushButton(self.verticalLayoutWidget_2)
         self.pt_but.setObjectName("pt_but")
         self.type_buttons_lyt.addWidget(self.pt_but)
-        self.ff_but = QtWidgets.QPushButton(self.verticalLayoutWidget_2)
-        self.ff_but.setObjectName("ff_but")
-        self.type_buttons_lyt.addWidget(self.ff_but)
+        self.dd_but = QtWidgets.QPushButton(self.verticalLayoutWidget_2)
+        self.dd_but.setObjectName("dd_but")
+        self.type_buttons_lyt.addWidget(self.dd_but)
         self.ca_but = QtWidgets.QPushButton(self.verticalLayoutWidget_2)
         self.ca_but.setObjectName("ca_but")
         self.type_buttons_lyt.addWidget(self.ca_but)
@@ -128,7 +137,9 @@ class Ui_FleetSetUp(object):
         self.cur_type_lbl.setObjectName("cur_type_lbl")
         self.type_select_lyt.addWidget(self.cur_type_lbl)
         self.ship_creator_lyt.addLayout(self.type_select_lyt)
-        spacerItem3 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        spacerItem3 = QtWidgets.QSpacerItem(
+            20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding
+        )
         self.ship_creator_lyt.addItem(spacerItem3)
         self.tech_lyt = QtWidgets.QVBoxLayout()
         self.tech_lyt.setObjectName("tech_lyt")
@@ -192,7 +203,9 @@ class Ui_FleetSetUp(object):
         self.gridLayout.addWidget(self.rdr_tech_2, 2, 3, 1, 1)
         self.tech_lyt.addLayout(self.gridLayout)
         self.ship_creator_lyt.addLayout(self.tech_lyt)
-        spacerItem4 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        spacerItem4 = QtWidgets.QSpacerItem(
+            20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding
+        )
         self.ship_creator_lyt.addItem(spacerItem4)
         self.ship_stats_lyt = QtWidgets.QVBoxLayout()
         self.ship_stats_lyt.setObjectName("ship_stats_lyt")
@@ -221,7 +234,9 @@ class Ui_FleetSetUp(object):
         self.type_label.setObjectName("type_label")
         self.type_lyt.addWidget(self.type_label)
         self.ship_type_label = QtWidgets.QLabel(self.verticalLayoutWidget_2)
-        self.ship_type_label.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.ship_type_label.setAlignment(
+            QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter
+        )
         self.ship_type_label.setObjectName("ship_type_label")
         self.type_lyt.addWidget(self.ship_type_label)
         self.ship_stats_lyt_3.addLayout(self.type_lyt)
@@ -231,7 +246,9 @@ class Ui_FleetSetUp(object):
         self.name_label.setObjectName("name_label")
         self.name_lyt.addWidget(self.name_label)
         self.ship_name_label = QtWidgets.QLabel(self.verticalLayoutWidget_2)
-        self.ship_name_label.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.ship_name_label.setAlignment(
+            QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter
+        )
         self.ship_name_label.setObjectName("ship_name_label")
         self.name_lyt.addWidget(self.ship_name_label)
         self.ship_stats_lyt_3.addLayout(self.name_lyt)
@@ -241,7 +258,9 @@ class Ui_FleetSetUp(object):
         self.length_lbl.setObjectName("length_lbl")
         self.len_lyt.addWidget(self.length_lbl)
         self.ship_length_lbl = QtWidgets.QLabel(self.verticalLayoutWidget_2)
-        self.ship_length_lbl.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.ship_length_lbl.setAlignment(
+            QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter
+        )
         self.ship_length_lbl.setObjectName("ship_length_lbl")
         self.len_lyt.addWidget(self.ship_length_lbl)
         self.ship_stats_lyt_3.addLayout(self.len_lyt)
@@ -251,7 +270,9 @@ class Ui_FleetSetUp(object):
         self.width_lbl.setObjectName("width_lbl")
         self.widht_layout.addWidget(self.width_lbl)
         self.ship_width_lbl = QtWidgets.QLabel(self.verticalLayoutWidget_2)
-        self.ship_width_lbl.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.ship_width_lbl.setAlignment(
+            QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter
+        )
         self.ship_width_lbl.setObjectName("ship_width_lbl")
         self.widht_layout.addWidget(self.ship_width_lbl)
         self.ship_stats_lyt_3.addLayout(self.widht_layout)
@@ -273,7 +294,9 @@ class Ui_FleetSetUp(object):
         self.ship_mg_lbl.setObjectName("ship_mg_lbl")
         self.main_guns_lyt.addWidget(self.ship_mg_lbl)
         self.ship_w_lbl = QtWidgets.QLabel(self.verticalLayoutWidget_2)
-        self.ship_w_lbl.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.ship_w_lbl.setAlignment(
+            QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter
+        )
         self.ship_w_lbl.setObjectName("ship_w_lbl")
         self.main_guns_lyt.addWidget(self.ship_w_lbl)
         self.ship_stats_lyt_3.addLayout(self.main_guns_lyt)
@@ -283,7 +306,9 @@ class Ui_FleetSetUp(object):
         self.acc_lbl.setObjectName("acc_lbl")
         self.acc_lyt.addWidget(self.acc_lbl)
         self.ship_acc_lbl = QtWidgets.QLabel(self.verticalLayoutWidget_2)
-        self.ship_acc_lbl.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.ship_acc_lbl.setAlignment(
+            QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter
+        )
         self.ship_acc_lbl.setObjectName("ship_acc_lbl")
         self.acc_lyt.addWidget(self.ship_acc_lbl)
         self.ship_stats_lyt_3.addLayout(self.acc_lyt)
@@ -293,7 +318,9 @@ class Ui_FleetSetUp(object):
         self.fc_lbl.setObjectName("fc_lbl")
         self.fc_lyt.addWidget(self.fc_lbl)
         self.ship_fc_lbl = QtWidgets.QLabel(self.verticalLayoutWidget_2)
-        self.ship_fc_lbl.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.ship_fc_lbl.setAlignment(
+            QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter
+        )
         self.ship_fc_lbl.setObjectName("ship_fc_lbl")
         self.fc_lyt.addWidget(self.ship_fc_lbl)
         self.ship_stats_lyt_3.addLayout(self.fc_lyt)
@@ -303,7 +330,9 @@ class Ui_FleetSetUp(object):
         self.err_reduc_lbl.setObjectName("err_reduc_lbl")
         self.err_reduc_lyt.addWidget(self.err_reduc_lbl)
         self.ship_errreduc_lbl = QtWidgets.QLabel(self.verticalLayoutWidget_2)
-        self.ship_errreduc_lbl.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.ship_errreduc_lbl.setAlignment(
+            QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter
+        )
         self.ship_errreduc_lbl.setObjectName("ship_errreduc_lbl")
         self.err_reduc_lyt.addWidget(self.ship_errreduc_lbl)
         self.ship_stats_lyt_3.addLayout(self.err_reduc_lyt)
@@ -328,7 +357,9 @@ class Ui_FleetSetUp(object):
         self.max_hp_lbl.setObjectName("max_hp_lbl")
         self.hp_lyt.addWidget(self.max_hp_lbl)
         self.ship_max_hp_lbl = QtWidgets.QLabel(self.verticalLayoutWidget_2)
-        self.ship_max_hp_lbl.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.ship_max_hp_lbl.setAlignment(
+            QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter
+        )
         self.ship_max_hp_lbl.setObjectName("ship_max_hp_lbl")
         self.hp_lyt.addWidget(self.ship_max_hp_lbl)
         self.hull_stats_lyt.addLayout(self.hp_lyt)
@@ -338,7 +369,9 @@ class Ui_FleetSetUp(object):
         self.armor_lbl.setObjectName("armor_lbl")
         self.armor_lyt.addWidget(self.armor_lbl)
         self.ship_armor_lbl = QtWidgets.QLabel(self.verticalLayoutWidget_2)
-        self.ship_armor_lbl.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.ship_armor_lbl.setAlignment(
+            QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter
+        )
         self.ship_armor_lbl.setObjectName("ship_armor_lbl")
         self.armor_lyt.addWidget(self.ship_armor_lbl)
         self.hull_stats_lyt.addLayout(self.armor_lyt)
@@ -348,7 +381,9 @@ class Ui_FleetSetUp(object):
         self.shield_lbl.setObjectName("shield_lbl")
         self.shield_lyt.addWidget(self.shield_lbl)
         self.ship_shield_lbl = QtWidgets.QLabel(self.verticalLayoutWidget_2)
-        self.ship_shield_lbl.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.ship_shield_lbl.setAlignment(
+            QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter
+        )
         self.ship_shield_lbl.setObjectName("ship_shield_lbl")
         self.shield_lyt.addWidget(self.ship_shield_lbl)
         self.hull_stats_lyt.addLayout(self.shield_lyt)
@@ -370,7 +405,9 @@ class Ui_FleetSetUp(object):
         self.v_lbl.setObjectName("v_lbl")
         self.speed_lyt.addWidget(self.v_lbl)
         self.ship_v_lbl = QtWidgets.QLabel(self.verticalLayoutWidget_2)
-        self.ship_v_lbl.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.ship_v_lbl.setAlignment(
+            QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter
+        )
         self.ship_v_lbl.setObjectName("ship_v_lbl")
         self.speed_lyt.addWidget(self.ship_v_lbl)
         self.hull_stats_lyt.addLayout(self.speed_lyt)
@@ -380,7 +417,9 @@ class Ui_FleetSetUp(object):
         self.accel_lbl.setObjectName("accel_lbl")
         self.accel_lyt.addWidget(self.accel_lbl)
         self.ship_accel_lbl = QtWidgets.QLabel(self.verticalLayoutWidget_2)
-        self.ship_accel_lbl.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.ship_accel_lbl.setAlignment(
+            QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter
+        )
         self.ship_accel_lbl.setObjectName("ship_accel_lbl")
         self.accel_lyt.addWidget(self.ship_accel_lbl)
         self.hull_stats_lyt.addLayout(self.accel_lyt)
@@ -390,7 +429,9 @@ class Ui_FleetSetUp(object):
         self.t_rate_lbl.setObjectName("t_rate_lbl")
         self.t_rate_lyt.addWidget(self.t_rate_lbl)
         self.ship_t_rate_lbl = QtWidgets.QLabel(self.verticalLayoutWidget_2)
-        self.ship_t_rate_lbl.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.ship_t_rate_lbl.setAlignment(
+            QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter
+        )
         self.ship_t_rate_lbl.setObjectName("ship_t_rate_lbl")
         self.t_rate_lyt.addWidget(self.ship_t_rate_lbl)
         self.hull_stats_lyt.addLayout(self.t_rate_lyt)
@@ -412,7 +453,9 @@ class Ui_FleetSetUp(object):
         self.vision_lbl.setObjectName("vision_lbl")
         self.vision_lyt.addWidget(self.vision_lbl)
         self.ship_vision_lbl = QtWidgets.QLabel(self.verticalLayoutWidget_2)
-        self.ship_vision_lbl.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.ship_vision_lbl.setAlignment(
+            QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter
+        )
         self.ship_vision_lbl.setObjectName("ship_vision_lbl")
         self.vision_lyt.addWidget(self.ship_vision_lbl)
         self.hull_stats_lyt.addLayout(self.vision_lyt)
@@ -422,14 +465,18 @@ class Ui_FleetSetUp(object):
         self.concl_lbl.setObjectName("concl_lbl")
         self.concl_lyt.addWidget(self.concl_lbl)
         self.ship_concl_lbl = QtWidgets.QLabel(self.verticalLayoutWidget_2)
-        self.ship_concl_lbl.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.ship_concl_lbl.setAlignment(
+            QtCore.Qt.AlignRight | QtCore.Qt.AlignTrailing | QtCore.Qt.AlignVCenter
+        )
         self.ship_concl_lbl.setObjectName("ship_concl_lbl")
         self.concl_lyt.addWidget(self.ship_concl_lbl)
         self.hull_stats_lyt.addLayout(self.concl_lyt)
         self.ship_stats_lyt_2.addLayout(self.hull_stats_lyt)
         self.ship_stats_lyt.addLayout(self.ship_stats_lyt_2)
         self.ship_creator_lyt.addLayout(self.ship_stats_lyt)
-        spacerItem5 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
+        spacerItem5 = QtWidgets.QSpacerItem(
+            20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding
+        )
         self.ship_creator_lyt.addItem(spacerItem5)
         self.clear_add_but_lyt = QtWidgets.QHBoxLayout()
         self.clear_add_but_lyt.setObjectName("clear_add_but_lyt")
@@ -439,7 +486,9 @@ class Ui_FleetSetUp(object):
         self.ship_cost = QtWidgets.QLabel(self.verticalLayoutWidget_2)
         self.ship_cost.setObjectName("ship_cost")
         self.clear_add_but_lyt.addWidget(self.ship_cost)
-        spacerItem6 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        spacerItem6 = QtWidgets.QSpacerItem(
+            40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum
+        )
         self.clear_add_but_lyt.addItem(spacerItem6)
         self.clear_ship_but = QtWidgets.QPushButton(self.verticalLayoutWidget_2)
         self.clear_ship_but.setObjectName("clear_ship_but")
@@ -466,7 +515,7 @@ class Ui_FleetSetUp(object):
         self.ship_creator_lbl.setText(_translate("FleetSetUp", "SHIP CREATOR"))
         self.type_lbl.setText(_translate("FleetSetUp", "SHIP TYPE:"))
         self.pt_but.setText(_translate("FleetSetUp", "CORVETTE"))
-        self.ff_but.setText(_translate("FleetSetUp", "FRIGATE"))
+        self.dd_but.setText(_translate("FleetSetUp", "DESTROYER"))
         self.ca_but.setText(_translate("FleetSetUp", "CRUISER"))
         self.bb_but.setText(_translate("FleetSetUp", "BATTLESHIP"))
         self.cur_type_lbl.setText(_translate("FleetSetUp", "Type:"))
@@ -529,6 +578,7 @@ class Ui_FleetSetUp(object):
 
 if __name__ == "__main__":
     import sys
+
     app = QtWidgets.QApplication(sys.argv)
     FleetSetUp = QtWidgets.QDialog()
     ui = Ui_FleetSetUp()
