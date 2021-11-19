@@ -25,4 +25,4 @@
 # The second list indicates the importance of getting technologies level.
 # The higher the value the harder the ai will try to reach the highest possible technology level.
 
-doctrines = {"test": [[3, 0, 0, 0], [2, 2, 2]], "test2": [[2, 1, 1, 0], [0, 0, 0]]}
+doctrines = {"test": [[3, 0, 0, 0], [2, 2, 2]], "test2": [[2, 1, 1, 0], [0, 0, 0]], "test3": [[0, 0, 3, 0], [2, 2, 2]]}

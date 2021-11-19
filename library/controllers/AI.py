@@ -45,7 +45,6 @@ class FleetAI:
 
         self.lead_bb = None
         self.lead_ca = None
-        self.c_fleet_destination = None
         self.screening_angle = 60  # degrees, angle from creening direction. total screening area is the disc arc covered by 2 * screening angle centered on direction
         self.c_screening_dir = None
 
@@ -64,9 +63,9 @@ class FleetAI:
                 self.submarines.append(ship)
 
         if len(self.battleships) > 0:
-            _rand = random.random()
-            self.lead_bb = self.battleships[0] if _rand <= 0.4 else self.battleships[-1]
-            # self.lead_ca = self.cruisers[0] if _rand <= 0.4 else self.cruisers[-1]
+            self.lead_bb = self.battleships[0] if random.random() <= 0.4 else self.battleships[-1]
+        if len(self.cruisers) > 0:
+            self.lead_ca = self.cruisers[0] if random.random() <= 0.4 else self.cruisers[-1]
 
         self.on_start()
 
@@ -114,6 +113,7 @@ class FleetAI:
         cog_x = int(ship_momentums_x / total_mass)
         cog_y = int(ship_momentums_y / total_mass)
 
+        self.game_scene.printPoint(QPointF(cog_x, cog_y), 1000, "black", True)
         return QPointF(cog_x, cog_y)
 
     def random_first_heading(self):
@@ -172,14 +172,15 @@ class FleetAI:
         )
         destroyers = sorted(self.destroyers, key=lambda point: point.y(), reverse=True)
         for point in screening_points:
+            print(point.x(), point.y())
             self.game_scene.printPoint(point, 1000, "black", True)
-        for i, destroyer in enumerate(destroyers):
-            if self.game_scene.isFreeSpace(screening_points[i]):
-                destroyer.updatePath(screening_points[i])
-            else:
-                destroyer.updatePath(
-                    self.game_scene.alternative_point(screening_points[i])
-                )
+        # for i, destroyer in enumerate(destroyers):
+        #     if self.game_scene.isFreeSpace(screening_points[i]):
+        #         destroyer.updatePath(screening_points[i])
+        #     else:
+        #         destroyer.updatePath(
+        #             self.game_scene.alternative_point(screening_points[i])
+        #         )
 
     def double_line_formation(self):
         if self.lead_bb:

@@ -350,6 +350,7 @@ class Ui_TSKF301MainWindow(object):
         self.mapGen = None
         self.rComs = None
         self._game_controller = None
+        self.ai = None
         self.inBattle = False
         self.battleState = False
 
@@ -657,7 +658,7 @@ class Ui_TSKF301MainWindow(object):
                     playerFleet.values(),
                     ennemyFleet,
                 )
-                ai = AI.FleetAI(
+                self.ai = AI.FleetAI(
                     self.mainClock,
                     self.gameScene,
                     ai_fleet,
