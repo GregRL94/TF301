@@ -662,8 +662,7 @@ class Ui_TSKF301MainWindow(object):
                     self.mainClock,
                     self.gameScene,
                     ai_fleet,
-                    mapConfig["size"],
-                    mapConfig["size"],
+                    self.gameScene.getInnerMap(),
                 )
                 self.inBattle = True
                 self.battleState = False

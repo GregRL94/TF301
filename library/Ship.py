@@ -271,20 +271,20 @@ class Ship(QGraphicsRectItem):
         else:
             self.move()
 
-        # Debug display #
-        if self.iterators["next_point_print"] <= 0:
-            self.gameScene.printPoint(self.coordinates["center"], 100, "blue", True)
-            if self.coordinates["rot_direction"] < 0:
-                self.gameScene.printPoint(
-                    self.coordinates["r_centers"][0], 100, "blue", True
-                )
-            elif self.coordinates["rot_direction"] > 0:
-                self.gameScene.printPoint(
-                    self.coordinates["r_centers"][1], 100, "blue", True
-                )
-            self.iterators["next_point_print"] = self.refresh["print_point_rate"]
-        else:
-            self.iterators["next_point_print"] -= 1
+        # # Debug display #
+        # if self.iterators["next_point_print"] <= 0:
+        #     self.gameScene.printPoint(self.coordinates["center"], 100, "blue", True)
+        #     if self.coordinates["rot_direction"] < 0:
+        #         self.gameScene.printPoint(
+        #             self.coordinates["r_centers"][0], 100, "blue", True
+        #         )
+        #     elif self.coordinates["rot_direction"] > 0:
+        #         self.gameScene.printPoint(
+        #             self.coordinates["r_centers"][1], 100, "blue", True
+        #         )
+        #     self.iterators["next_point_print"] = self.refresh["print_point_rate"]
+        # else:
+        #     self.iterators["next_point_print"] -= 1
         ##################
         # If follow mode, update target point to new target ship pos:
         if self.follow_ship:
@@ -586,8 +586,8 @@ class Ship(QGraphicsRectItem):
             self.pathfinding["trajectory"].append(QPointF(node.xPos, node.yPos))
         self.selectNextCheckpoint()
         # Debug display
-        for point in self.pathfinding["trajectory"]:
-            self.gameScene.printPoint(point, 1000, "black")
+        # for point in self.pathfinding["trajectory"]:
+        #     self.gameScene.printPoint(point, 1000, "black")
 
     def checkpointReached(self, checkpoint, targetPoint=False):
         """

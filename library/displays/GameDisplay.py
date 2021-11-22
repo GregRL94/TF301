@@ -90,6 +90,9 @@ class GameScene(QGraphicsScene):
         self.innerBT = int(mapExtension)
         self.innerBB = int(innerMap + mapExtension)
 
+    def getInnerMap(self):
+        return [self.innerBL, self.innerBR, self.innerBT, self.innerBB]
+
     def displayMap(self, obstaclesList):
         for obstacle in obstaclesList:
             self.currentItem = Island.Island(self, obstacle)
