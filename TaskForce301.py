@@ -661,6 +661,7 @@ class Ui_TSKF301MainWindow(object):
                 self.ai = AI.FleetAI(
                     self.mainClock,
                     self.gameScene,
+                    self.rComs,
                     ai_fleet,
                     self.gameScene.getInnerMap(),
                 )
