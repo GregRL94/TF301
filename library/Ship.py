@@ -294,7 +294,10 @@ class Ship(QGraphicsRectItem):
             if (self.iterators["next_path_update"] <= 0) & (
                 self.pathfinding["targetPoint"] is not None
             ):
-                self.updatePath()
+                try:
+                    self.updatePath()
+                except Exception as e:
+                    print("WARNING: Skipped a path update.\n", e)
                 self.iterators["next_path_update"] = self.refresh["path_update_rate"]
             else:
                 self.iterators["next_path_update"] -= 1
@@ -313,6 +316,12 @@ class Ship(QGraphicsRectItem):
                 if self.playerTarget:
                     if self.isTargetable(self.playerTarget):
                         turret.setTarget(self.playerTarget)
+                    elif (
+                        self.playerTarget in self.det_and_range["fleet_detected_ships"]
+                    ):
+                        self.updatePath(self.attack_move())
+                    else:
+                        self.playerTarget = None
                 else:
                     try:
                         targetShip, shotType = self.autoSelectTarget()
@@ -866,6 +875,39 @@ class Ship(QGraphicsRectItem):
 
         if self.checkpointReached(self.pathfinding["checkpoint"]):
             self.selectNextCheckpoint()
+
+    def attack_move(self):
+        angle = geo.angle(self.pos(), self.playerTarget.pos())
+        o_point = QPointF(
+            self.playerTarget.pos().x() - 18000 * math.cos(angle),
+            self.playerTarget.pos().y() - 18000 * math.sin(angle),
+        )
+        # Tests if the optimum point is within an obstacle
+        if self.gameScene.itemAt(o_point, self.gameScene.attachedGView.transform()):
+            print("Point in an obstacle, generating new set of points")
+            # If yes, computes new sets alternative points
+            for i in range(1000, 4000, 1000):
+                print("New set of points, at", i, " distance from original point")
+                point_matrix = [
+                    QPointF(o_point.x() + i, o_point.y() + i),
+                    QPointF(o_point.x() - i, o_point.y() + i),
+                    QPointF(o_point.x() + i, o_point.y() - i),
+                    QPointF(o_point.x() - i, o_point.y() - i),
+                ]
+                for point in point_matrix:
+                    # If a point in the new set is NOT within an obstacle, returns it
+                    if not self.gameScene.itemAt(
+                        point, self.gameScene.attachedGView.transform()
+                    ):
+                        print("Valid point found")
+                        return point
+                    print("No valid point in this set, new set")
+        else:
+            print("Point is valid")
+            return o_point
+
+        print("No valid point found! returning None !")
+        return None
 
     def dynamicObjectDetection(self):
         """
