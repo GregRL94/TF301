@@ -254,16 +254,24 @@ class FleetAI:
 
             if len(self.destroyers) % 2 != 0:
                 point = cin.movementBy(ego_cog, screen_dist, screen_dir)
-                point.setX(max(min(point.x(), self.map_borders[1]), 0))
-                point.setY(max(min(point.y(), self.map_borders[3]), 0))
+                point.setX(
+                    max(min(point.x(), self.map_borders[1]), self.map_borders[0])
+                )
+                point.setY(
+                    max(min(point.y(), self.map_borders[3]), self.map_borders[2])
+                )
                 screening_points.append(point)
 
             for angle in range(step // 2, self.screening_angle, step):
                 point = cin.movementBy(
                     ego_cog, screen_dist, screen_dir + math.radians(angle)
                 )
-                point.setX(max(min(point.x(), self.map_borders[1]), 0))
-                point.setY(max(min(point.y(), self.map_borders[3]), 0))
+                point.setX(
+                    max(min(point.x(), self.map_borders[1]), self.map_borders[0])
+                )
+                point.setY(
+                    max(min(point.y(), self.map_borders[3]), self.map_borders[2])
+                )
                 screening_points.append(point)
 
                 point_2 = cin.movementBy(
@@ -370,14 +378,18 @@ class FleetAI:
 
         if self.lead_bb:
             bb_pos = self.lead_bb.pos()
+            dist = geo.distance_A_B(bb_pos, ennemy_cog)
             t_range_bb = int(0.8 * bb_config.weapons["guns_range"])
+            dist_to_move = int(dist - t_range_bb)
             t_dir_bb = geo.angle(bb_pos, ennemy_cog)
-            t_point_bb = cin.movementBy(bb_pos, t_range_bb, t_dir_bb)
+            t_point_bb = cin.movementBy(bb_pos, dist_to_move, t_dir_bb)
             self.lead_bb.updatePath(t_point_bb)
 
         if self.lead_ca:
             ca_pos = self.lead_ca.pos()
+            dist = geo.distance_A_B(ca_pos, ennemy_cog)
             t_range_ca = int(0.8 * ca_config.weapons["guns_range"])
+            dist_to_move = int(dist - t_range_ca)
             t_dir_ca = geo.angle(ca_pos, ennemy_cog)
-            t_point_ca = cin.movementBy(ca_pos, t_range_ca, t_dir_ca)
+            t_point_ca = cin.movementBy(ca_pos, dist_to_move, t_dir_ca)
             self.lead_ca.updatePath(t_point_ca)
