@@ -21,7 +21,7 @@ Then let's see how your fleet holds up against the AI !
 # Requirements and Installation
 Please use the following command to install all required librairies:
 
-`pip installal -r requirements.txt`
+`pip install -r requirements.txt`
 
 # How To Play
 A tutorial is on the way !
